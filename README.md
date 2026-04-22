@@ -1,4 +1,4 @@
-# Uni-threaded-rod for Blender
+# Uni-Threaded-rod for Blender
 
 ## 🇩🇪 Deutsch
 
@@ -24,8 +24,8 @@ Roadmap-Status:
 
 ---
 
-### Was ist UTG?
-Der **Universal Thread Generator** erstellt parametrisierte Gewindegeometrie in Blender:
+### Was ist Uni-Threaded-rod?
+Das Add-on **Uni-Threaded-rod** erstellt parametrisierte Gewindegeometrie in Blender:
 - Außengewinde
 - Innengewinde via Negativ-/Boolean-Modus
 - Mehrgängige Gewinde
@@ -105,8 +105,8 @@ Roadmap status:
 
 ---
 
-### What is UTG?
-The **Universal Thread Generator** creates parametric thread geometry in Blender:
+### What is Uni-Threaded-rod?
+The **Uni-Threaded-rod** add-on creates parametric thread geometry in Blender:
 - External threads
 - Internal threads via negative/boolean mode
 - Multi-start threads
