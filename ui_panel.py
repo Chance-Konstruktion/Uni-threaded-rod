@@ -55,11 +55,11 @@ class UTG_Properties(bpy.types.PropertyGroup):
 
 
 class THREADFORGE_PT_main(bpy.types.Panel):
-    bl_label = "Universal Thread Generator"
+    bl_label = "Uni-threaded-rod"
     bl_idname = "THREADFORGE_PT_main"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "ThreadForge"
+    bl_category = "Uni-threaded-rod"
 
     def draw(self, context):
         layout = self.layout

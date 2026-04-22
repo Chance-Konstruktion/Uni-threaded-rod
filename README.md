@@ -1,4 +1,4 @@
-# Universal Thread Generator (UTG) for Blender
+# Uni-threaded-rod for Blender
 
 ## 🇩🇪 Deutsch
 
@@ -33,8 +33,8 @@ Der **Universal Thread Generator** erstellt parametrisierte Gewindegeometrie in 
 1. Repository als ZIP verpacken (oder Ordner lokal bereitstellen).
 2. Blender öffnen → **Edit > Preferences > Add-ons**.
 3. **Install...** wählen und ZIP/Ordner installieren.
-4. Add-on aktivieren: **Universal Thread Generator**.
-5. Im 3D-Viewport: **Sidebar (N) > ThreadForge**.
+4. Add-on aktivieren: **Uni-threaded-rod**.
+5. Im 3D-Viewport: **Sidebar (N) > Uni-threaded-rod**.
 
 ---
 
@@ -95,8 +95,8 @@ The **Universal Thread Generator** creates parametric thread geometry in Blender
 1. Package this repository as a ZIP (or keep as a local addon folder).
 2. Open Blender → **Edit > Preferences > Add-ons**.
 3. Click **Install...** and select ZIP/folder.
-4. Enable the add-on: **Universal Thread Generator**.
-5. In 3D Viewport: **Sidebar (N) > ThreadForge**.
+4. Enable the add-on: **Uni-threaded-rod**.
+5. In 3D Viewport: **Sidebar (N) > Uni-threaded-rod**.
 
 ---
 

@@ -6,11 +6,11 @@ from .mesh_builder import apply_boolean_cutter, apply_material, create_thread_me
 from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
 
 bl_info = {
-    "name": "Universal Thread Generator",
+    "name": "Uni-threaded-rod",
     "author": "Ihr Name",
     "version": (1, 0, 0),
     "blender": (4, 0, 0),
-    "location": "View3D > Sidebar > ThreadForge",
+    "location": "View3D > Sidebar > Uni-threaded-rod",
     "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
     "category": "Mesh",
 }
