@@ -39,19 +39,17 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] Optionale LOD-Stufen (Preview/Final)
 
 ## Phase 6 – Qualitätssicherung
-- [ ] Blender-API Runtime-Tests (Headless)
-- [ ] Referenzvergleich zu Sollmaßen pro Standard
-- [ ] Regressionstests für Boolean/Manifold-Fälle
-- [ ] CI-Workflow (Lint + Unit + Blender smoke test)
+- [x] Blender-API Runtime-Tests (Headless) ✅
+- [x] Referenzvergleich zu Sollmaßen pro Standard ✅
+- [x] Regressionstests für Boolean/Manifold-Fälle ✅
+- [x] CI-Workflow (Lint + Unit + Blender smoke test) ✅
 
 ## Definition of Done (v1.0)
 - [ ] Alle Kernstandards mit plausiblen Normmaßen erzeugbar 🟡
 - [ ] Innen-/Außengewinde robust und manifold in typischen Parameterräumen 🟡
 - [x] KGT-Basisworkflow nutzbar ✅
-- [ ] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben 🟡
+- [x] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben ✅
 
 ## Nächste priorisierte Arbeitspakete
 1. Profilparameter pro Standard weiter normtreu differenzieren (insb. Rundungen/Abflachungen).
 2. Echte GOTHIC-Profilkette stärker normnah ausarbeiten (DIN 69051 / ISO 3408).
-3. Blender-API Runtime-Tests (Headless) und CI-Smoke-Tests ergänzen.
-4. Referenzvergleich gegen Sollmaße (Regressionstest-Suite) implementieren.

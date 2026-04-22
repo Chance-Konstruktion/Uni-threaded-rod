@@ -1,7 +1,19 @@
 import math
-from mathutils import Vector
+from dataclasses import dataclass
 
 from .database import THREAD_STANDARDS
+
+
+@dataclass(frozen=True)
+class ProfilePoint:
+    """2D-Profilpunkt (x=radial, y=axial).
+
+    Eigenes Datenobjekt statt mathutils.Vector, damit Profilberechnung und
+    Regressionstests auch außerhalb von Blender-Interpreter laufen können.
+    """
+
+    x: float
+    y: float
 
 
 def _tolerance_offset_mm(tolerance_class):
@@ -63,12 +75,12 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         y_crest = crest_flat / 2.0
         y_root = pitch / 2.0 - root_flat / 2.0
         pts = [
-            Vector((r, 0.0)),
-            Vector((r - h + root_flat * 0.5, y_root)),
-            Vector((r3, pitch / 2.0)),
-            Vector((r - h + root_flat * 0.5, pitch - y_root)),
-            Vector((r, pitch - y_crest)),
-            Vector((r, pitch)),
+            ProfilePoint(r, 0.0),
+            ProfilePoint(r - h + root_flat * 0.5, y_root),
+            ProfilePoint(r3, pitch / 2.0),
+            ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
+            ProfilePoint(r, pitch - y_crest),
+            ProfilePoint(r, pitch),
         ]
 
     elif profile_type == "TRAPEZOID":
@@ -77,12 +89,12 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         y_crest = crest_width / 2.0
         y_root = pitch / 2.0 - root_width / 2.0
         pts = [
-            Vector((r, 0.0)),
-            Vector((r, y_crest)),
-            Vector((r3, y_root)),
-            Vector((r3, y_root + root_width)),
-            Vector((r, pitch - y_crest)),
-            Vector((r, pitch)),
+            ProfilePoint(r, 0.0),
+            ProfilePoint(r, y_crest),
+            ProfilePoint(r3, y_root),
+            ProfilePoint(r3, y_root + root_width),
+            ProfilePoint(r, pitch - y_crest),
+            ProfilePoint(r, pitch),
         ]
 
     elif profile_type == "ROUND":
@@ -91,11 +103,11 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         pts = []
         for i in range(steps + 1):
             ang = math.pi * i / steps
-            pts.append(Vector((r - radius + radius * math.cos(ang), radius * math.sin(ang))))
+            pts.append(ProfilePoint(r - radius + radius * math.cos(ang), radius * math.sin(ang)))
         for i in range(1, steps + 1):
             ang = math.pi * i / steps
-            pts.append(Vector((r3 + radius - radius * math.cos(ang), pitch / 2.0 + radius * math.sin(ang))))
-        pts.extend(Vector((p.x, pitch - p.y)) for p in reversed(pts[:-1]))
+            pts.append(ProfilePoint(r3 + radius - radius * math.cos(ang), pitch / 2.0 + radius * math.sin(ang)))
+        pts.extend(ProfilePoint(p.x, pitch - p.y) for p in reversed(pts[:-1]))
 
     elif profile_type == "BUTTRESS":
         h = r - r3
@@ -104,13 +116,13 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         crest_width = 0.2 * pitch
         root_width = 0.2 * pitch
         pts = [
-            Vector((r, 0.0)),
-            Vector((r, crest_width)),
-            Vector((r - dx_press, pitch / 2.0 - root_width / 2.0)),
-            Vector((r3, pitch / 2.0)),
-            Vector((r3 + dx_clear, pitch / 2.0 + root_width / 2.0)),
-            Vector((r, pitch - crest_width)),
-            Vector((r, pitch)),
+            ProfilePoint(r, 0.0),
+            ProfilePoint(r, crest_width),
+            ProfilePoint(r - dx_press, pitch / 2.0 - root_width / 2.0),
+            ProfilePoint(r3, pitch / 2.0),
+            ProfilePoint(r3 + dx_clear, pitch / 2.0 + root_width / 2.0),
+            ProfilePoint(r, pitch - crest_width),
+            ProfilePoint(r, pitch),
         ]
 
     elif profile_type == "GOTHIC":
@@ -120,19 +132,20 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         steps = 16
         pts = []
 
-        center_a = Vector((r2 - ball_radius, pitch / 2.0 - center_offset))
+        center_a = ProfilePoint(r2 - ball_radius, pitch / 2.0 - center_offset)
         for i in range(steps + 1):
             ang = -math.pi / 2 + contact_angle + (math.pi - 2 * contact_angle) * i / steps
-            pts.append(Vector((center_a.x + ball_radius * math.cos(ang), center_a.y + ball_radius * math.sin(ang))))
+            pts.append(ProfilePoint(center_a.x + ball_radius * math.cos(ang), center_a.y + ball_radius * math.sin(ang)))
 
-        center_b = Vector((r2 - ball_radius, pitch / 2.0 + center_offset))
+        center_b = ProfilePoint(r2 - ball_radius, pitch / 2.0 + center_offset)
         for i in range(1, steps + 1):
             ang = math.pi / 2 + contact_angle + (math.pi - 2 * contact_angle) * i / steps
-            pts.append(Vector((center_b.x + ball_radius * math.cos(ang), center_b.y + ball_radius * math.sin(ang))))
+            pts.append(ProfilePoint(center_b.x + ball_radius * math.cos(ang), center_b.y + ball_radius * math.sin(ang)))
 
-        pts.append(Vector((r, pitch)))
+        # Normnähere KGT-Ausprägung: Abschluss sauber an Crest-Radius anbinden.
+        pts.append(ProfilePoint(r, pitch))
 
     else:
-        pts = [Vector((r, 0.0)), Vector((r3, pitch / 2.0)), Vector((r, pitch))]
+        pts = [ProfilePoint(r, 0.0), ProfilePoint(r3, pitch / 2.0), ProfilePoint(r, pitch)]
 
     return pts
