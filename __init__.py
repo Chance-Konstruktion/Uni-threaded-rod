@@ -1,6 +1,6 @@
 import bpy
 
-from .database import THREAD_STANDARDS, resolve_thread_parameters
+from .database import THREAD_PRESETS, THREAD_STANDARDS, resolve_thread_parameters
 from .geometry_engine import generate_profile
 from .mesh_builder import apply_boolean_cutter, apply_material, create_thread_mesh
 from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
@@ -89,6 +89,9 @@ class UTG_OT_create_thread(bpy.types.Operator):
             starts=props.starts,
             handedness=props.handedness,
             end_type=props.end_type,
+            taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
+            lod_level=props.lod_level,
+            segment_override=props.segment_override,
         )
 
         mesh = bpy.data.meshes.new("UTG_Thread")
@@ -145,6 +148,8 @@ class UTG_OT_create_ball_screw(bpy.types.Operator):
             starts=max(1, props.starts),
             handedness=props.handedness,
             end_type=props.end_type,
+            lod_level=props.lod_level,
+            segment_override=props.segment_override,
         )
 
         mesh = bpy.data.meshes.new("UTG_BallScrew")
@@ -157,11 +162,39 @@ class UTG_OT_create_ball_screw(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class UTG_OT_apply_preset(bpy.types.Operator):
+    bl_idname = "utg.apply_preset"
+    bl_label = "Preset anwenden"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        props = context.scene.utg_props
+        if props.preset_key == "NONE":
+            self.report({"INFO"}, "Kein Preset ausgewählt.")
+            return {"CANCELLED"}
+
+        preset = THREAD_PRESETS.get(props.preset_key)
+        if not preset:
+            self.report({"ERROR"}, "Preset nicht gefunden.")
+            return {"CANCELLED"}
+
+        props.standard = preset["standard"]
+        props.diameter_enum = preset["diameter_token"]
+        props.material = preset["material"]
+        props.surface = preset["surface"]
+        props.tolerance_class = preset["tolerance_class"]
+        props.clearance = preset["clearance"]
+        props.starts = preset["starts"]
+        self.report({"INFO"}, f"Preset '{preset['name']}' angewendet.")
+        return {"FINISHED"}
+
+
 classes = [
     UTG_Properties,
     THREADFORGE_PT_main,
     UTG_OT_create_thread,
     UTG_OT_create_ball_screw,
+    UTG_OT_apply_preset,
 ]
 
 

@@ -17,7 +17,7 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 
 ## Phase 2 – Geometriequalität (kurz- bis mittelfristig)
 - [ ] Normtreue Profilparameter je Standard (Flanken, Kopf-/Fußrundung, Abflachungen) 🟡
-- [ ] Taper-Logik für NPT über Länge korrekt einarbeiten ⬜
+- [x] Taper-Logik für NPT über Länge korrekt einarbeiten ✅
 - [x] Endtypen vollständig umsetzen (`FLAT`, `CHAMFER`, `RUNOUT` mit echter Geometrie) ✅
 - [x] Strategien gegen Self-Intersection und zu dünne Kernradien ✅
 
@@ -33,10 +33,10 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] Separate Operatoren und UI für KGT-Komponenten 🟡
 
 ## Phase 5 – UX & Performance
-- [ ] Dynamische UI-Optionen pro Standard (nur gültige Felder anzeigen)
-- [ ] Preset-System (z. B. "M10x1.5 8.8 verzinkt")
-- [ ] Performance-Tuning für lange Gewinde und hohe Segmentierung
-- [ ] Optionale LOD-Stufen (Preview/Final)
+- [x] Dynamische UI-Optionen pro Standard (nur gültige Felder anzeigen)
+- [x] Preset-System (z. B. "M10x1.5 8.8 verzinkt")
+- [x] Performance-Tuning für lange Gewinde und hohe Segmentierung
+- [x] Optionale LOD-Stufen (Preview/Final)
 
 ## Phase 6 – Qualitätssicherung
 - [ ] Blender-API Runtime-Tests (Headless)
