@@ -1,7 +1,11 @@
 import math
 from dataclasses import dataclass
 
-from .database import THREAD_STANDARDS
+from .database import (
+    ISO_965_TOLERANCE_RADIAL_OFFSETS,
+    THREAD_STANDARDS,
+    resolve_iso_metric_coarse_row,
+)
 
 
 @dataclass(frozen=True)
@@ -45,12 +49,22 @@ def _safe_ratio(value, default):
     return default
 
 
-def _tolerance_offset_mm(tolerance_class):
+def _tolerance_offset_mm(tolerance_class, standard_key=None, diameter=None, pitch=None, internal=False):
     """Grobe radiale Toleranzverschiebung in mm (positiv = größer, negativ = kleiner)."""
     if not tolerance_class:
         return 0.0
 
     tc = str(tolerance_class).strip().upper()
+    if standard_key in {"METRIC_ISO", "METRIC_FINE"} and tc in {"6G", "6H"} and diameter and pitch:
+        row = resolve_iso_metric_coarse_row(diameter, pitch)
+        key = (row["diameter"], row["pitch"]) if row else (diameter, pitch)
+        table_entry = ISO_965_TOLERANCE_RADIAL_OFFSETS.get(key)
+        if table_entry:
+            if tc == "6G" and not internal:
+                return table_entry["6g_external"]
+            if tc == "6H" and internal:
+                return table_entry["6H_internal"]
+
     tolerance_map = {
         "4G": -0.02,
         "6G": -0.01,
@@ -112,7 +126,13 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
     r2 = d2 / 2.0
     r3 = d3 / 2.0
 
-    tol_offset = _tolerance_offset_mm(tolerance_class)
+    tol_offset = _tolerance_offset_mm(
+        tolerance_class,
+        standard_key=standard_key,
+        diameter=diameter,
+        pitch=pitch,
+        internal=internal,
+    )
     offset = (clearance / 2.0 + tol_offset) if internal else (-clearance / 2.0 + tol_offset)
     r += offset
     r2 += offset

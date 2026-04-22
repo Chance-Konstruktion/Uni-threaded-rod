@@ -124,6 +124,11 @@ class ReferenceRegressionTests(unittest.TestCase):
         )
         self.assertGreater(loose_internal[0].x, base[0].x)
 
+    def test_iso_table_row_resolution_m10(self):
+        row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
+        self.assertIsNotNone(row)
+        self.assertAlmostEqual(row["d2_basic"], 9.026, places=3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 
-from .database import THREAD_STANDARDS
+from .database import ISO_965_TOLERANCE_RADIAL_OFFSETS, THREAD_STANDARDS, resolve_iso_metric_coarse_row
 
 
 @dataclass(frozen=True)
@@ -80,6 +80,13 @@ def validate_norm_binding(standard_key, tolerance_class, internal=False):
     tc = str(tolerance_class or "").strip()
     if not tc:
         return ValidationResult(False, "Toleranzklasse muss gesetzt sein.")
+
+    # Präzisierter Standardfall: metrische Regelgewinde vorrangig als 6g/6H-Paarung.
+    if standard_key in ISO_METRIC_NORM_REFERENCES and tc.upper() in {"6G", "6H"}:
+        if internal and tc.upper() != "6H":
+            return ValidationResult(False, "Toleranzklasse nicht zulässig: Für Innengewinde wird in diesem Profil 6H erwartet.")
+        if not internal and tc.upper() != "6G":
+            return ValidationResult(False, "Toleranzklasse nicht zulässig: Für Außengewinde wird in diesem Profil 6g erwartet.")
 
     classes = std.get("tolerance_classes", {})
     key = "internal" if internal else "external"
@@ -179,6 +186,57 @@ def validate_mechanical_load_case(force_n, allowable_tensile_mpa, allowable_shea
         "shear": StressResult(stress_mpa=tau, safety_factor=sf_shear),
         "min_safety_factor": min(sf_tensile, sf_shear),
     }
+
+
+def validate_thread_engagement_strength(
+    force_n,
+    standard_key,
+    diameter,
+    pitch,
+    engagement_length,
+    nut_allowable_shear_mpa=120.0,
+    bolt_allowable_shear_mpa=240.0,
+):
+    """Vereinfachter Tragfähigkeitscheck der Gewindeflanken (Abstreif-/Scher-Nachweis)."""
+    if force_n <= 0.0:
+        raise ValueError("Kraft muss > 0 sein")
+    if engagement_length <= 0.0:
+        raise ValueError("Eingriffslänge muss > 0 sein")
+
+    pitch_diameter = resolve_standard_pitch_diameter(standard_key, diameter, pitch)
+    shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
+    tau = calculate_shear_stress(force_n, shear_area)
+
+    sf_nut = calculate_safety_factor(nut_allowable_shear_mpa, tau)
+    sf_bolt = calculate_safety_factor(bolt_allowable_shear_mpa, tau)
+    return {
+        "shear_stress_mpa": tau,
+        "nut_safety_factor": sf_nut,
+        "bolt_safety_factor": sf_bolt,
+        "min_safety_factor": min(sf_nut, sf_bolt),
+        "passes": min(sf_nut, sf_bolt) >= 1.0,
+    }
+
+
+def collect_validation_warnings(diameter, pitch, length, engagement_length=None):
+    """Nicht-blockierende Hinweise für physikalisch kritische Parameterkombinationen."""
+    warnings = []
+    slenderness = length / diameter if diameter > 0 else float("inf")
+    if slenderness > 25.0:
+        warnings.append("Hoher Schlankheitsgrad: Knicknachweis empfohlen.")
+    if pitch / diameter > 0.2:
+        warnings.append("Sehr große Steigung relativ zu d: Traganteil pro Gang reduziert.")
+    if engagement_length is not None and engagement_length < diameter:
+        warnings.append("Kurze Eingriffslänge: Abstreif-/Scherprüfung der Mutterflanken empfohlen.")
+    return warnings
+
+
+def get_iso965_tolerance_offset_info(diameter, pitch):
+    """Liefert hinterlegte 6g/6H-Radialoffsets für Normpaarung, falls verfügbar."""
+    row = resolve_iso_metric_coarse_row(diameter, pitch)
+    if row:
+        return ISO_965_TOLERANCE_RADIAL_OFFSETS.get((row["diameter"], row["pitch"]))
+    return ISO_965_TOLERANCE_RADIAL_OFFSETS.get((diameter, pitch))
 
 
 def validate_property_class_tensile(
