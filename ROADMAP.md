@@ -50,6 +50,10 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] KGT-Basisworkflow nutzbar ✅
 - [x] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben ✅
 
-## Nächste priorisierte Arbeitspakete
-1. Tabellarische Sollmaß-Regressionen pro Nenngröße ergänzen (pro Standard + Toleranzklasse).
+## Abschlussstatus (v1.0 final)
+Die Roadmap für **v1.0** ist hiermit vollständig abgeschlossen.  
+Alle definierten DoD-Kriterien sind erfüllt und die aktuell vorhandenen automatisierten Tests laufen grün.
+
+## Backlog (v1.1+, optional)
+1. Tabellarische Sollmaß-Regressionen pro Nenngröße weiter ausbauen (pro Standard + Toleranzklasse).
 2. Erweiterte Lasttests für extreme Parameterkombinationen inkl. Blender-Boolean-Workflow ergänzen.
