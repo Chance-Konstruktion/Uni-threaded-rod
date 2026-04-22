@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- Neues Modul `mechanical_validation.py` für mechanische Validierung (Zug-/Scherungsberechnung, Sicherheitsfaktor, Mutter-Passung, Pitch-Abgleich, FEM-Hinweis).
+- Unit-Tests für mechanische Validierung und Parametervalidierung (`tests/test_mechanical_validation.py`).
+
+### Changed
+- Operator-Parametervalidierung in `__init__.py` über separates Validierungsmodul gekapselt (SRP-orientierte Trennung).
+
 ## [1.0.0] - 2026-04-22
 
 ### Added
