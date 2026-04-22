@@ -71,6 +71,18 @@ Für freie Parameter:
 - Die GOTHIC-Kette für KGT ist verbessert, aber weiterhin eine **annähernde** Auslegung.
 - Sehr extreme Parameterkombinationen (sehr hohe Starts + sehr kurze Länge + sehr kleine Kerndurchmesser) sollten weiterhin manuell geprüft werden.
 
+### Engineering- und Normhinweis (wichtig)
+Dieses Projekt erzeugt primär **CAD-Geometrie**. Es ersetzt keine vollständige technische Auslegung nach Norm:
+- Keine automatische Tragfähigkeits-/Festigkeitsrechnung (z. B. Nachweis über Spannungsquerschnitt).
+- Keine vollumfängliche Toleranzkettenrechnung für reale Fertigungsprozesse.
+- Für reale Bauteile müssen Einsatzfall, Lastannahmen, Material, Sicherheitsfaktoren und passende Normausgaben projektspezifisch geprüft werden.
+
+Empfohlener Minimal-Workflow für reale Anwendungen:
+1. Zielnorm und Gewindefamilie festlegen (z. B. ISO metrisch, UNC/UNF, Pipe).
+2. Parameter eindeutig dokumentieren (`d`, `pitch`, `length`, `tolerance`, `clearance`, `material`).
+3. Geometrie gegen Referenztabellen verifizieren.
+4. Mechanische Nachweise (mindestens Zug/Scherung, Sicherheitsfaktor) separat rechnen.
+
 ---
 
 ### Projektstruktur
@@ -145,3 +157,9 @@ For free/custom parameters:
 - `mesh_builder.py` – helix extrusion, material, boolean helpers
 - `ROADMAP.md` – open development roadmap
 - `CHANGELOG.md` – release history
+
+### Engineering and standards note
+This add-on is intended for **parametric CAD geometry generation** and is not a complete engineering verifier:
+- No automatic structural strength verification.
+- No complete tolerance-chain verification for manufacturing.
+- Real projects still require explicit load cases, material selection, safety factors, and standard-specific checks.
