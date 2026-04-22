@@ -43,7 +43,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.640327 * p,
         "d3_formula": lambda d, p: d - 1.280654 * p,
         "tolerance_classes": {"external": ["Close", "Medium", "Free"]},
-        "special_params": {"rounded_radius": "0.137329*P"},
+        "special_params": {"rounded_radius": "0.137329*P", "crest_flat": "P/12", "root_flat": "P/6"},
     },
     "UNC": {
         "name": "Unified National Coarse",
@@ -79,6 +79,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.640327 * p,
         "d3_formula": lambda d, p: d - 1.280654 * p,
         "tolerance_classes": {"external": ["A", "B"]},
+        "special_params": {"crest_flat": "P/12", "root_flat": "P/6"},
     },
     "TRAPEZOIDAL": {
         "name": "Trapezgewinde",
@@ -170,7 +171,7 @@ THREAD_STANDARDS = {
         "diam_pitch_map": {12: 5.0, 16: 5.0, 20: 5.0, 25: 5.0, 32: 10.0, 40: 10.0},
         "d2_formula": lambda d, p: d - 0.5 * p,
         "d3_formula": lambda d, p: d - 0.9 * p,
-        "special_params": {"contact_angle": 45.0},
+        "special_params": {"contact_angle": 45.0, "ball_radius_ratio": 0.52, "center_offset_ratio": 0.72},
     },
 }
 

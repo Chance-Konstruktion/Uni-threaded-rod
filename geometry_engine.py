@@ -16,6 +16,35 @@ class ProfilePoint:
     y: float
 
 
+def _safe_ratio(value, default):
+    """Akzeptiert numerische Werte oder einfache P-Ausdrücke (z. B. 'P/8')."""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    text = str(value).strip().upper().replace(" ", "")
+    if text == "P":
+        return 1.0
+    if text.startswith("P/"):
+        try:
+            return 1.0 / float(text[2:])
+        except ValueError:
+            return default
+    if text.endswith("*P"):
+        try:
+            return float(text[:-2])
+        except ValueError:
+            return default
+    if "*P/" in text:
+        try:
+            num, den = text.split("*P/")
+            return float(num) / float(den)
+        except ValueError:
+            return default
+    return default
+
+
 def _tolerance_offset_mm(tolerance_class):
     """Grobe radiale Toleranzverschiebung in mm (positiv = größer, negativ = kleiner)."""
     if not tolerance_class:
@@ -59,18 +88,23 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
 
     if profile_type == "V":
         h = r - r3
+        sp = std.get("special_params", {})
         if standard_key.startswith("METRIC"):
-            crest_flat = pitch / 8.0
-            root_flat = pitch / 4.0
+            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 4.0)
         elif standard_key in {"UNC", "UNF"}:
-            crest_flat = pitch / 8.0
-            root_flat = pitch / 8.0
-        elif standard_key.startswith("WHITWORTH"):
-            crest_flat = pitch / 6.0
-            root_flat = pitch / 6.0
+            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 8.0)
+        elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G"}:
+            # Vereinfachte Rundungs-Ersatzgeometrie: kürzere Flats bei 55°-Profilen.
+            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 12.0)
+            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 6.0)
         else:
-            crest_flat = 0.05 * pitch
-            root_flat = 0.10 * pitch
+            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 0.05)
+            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 0.10)
+
+        crest_flat = max(0.0, min(crest_flat, pitch * 0.45))
+        root_flat = max(0.0, min(root_flat, pitch * 0.45))
 
         y_crest = crest_flat / 2.0
         y_root = pitch / 2.0 - root_flat / 2.0
@@ -126,9 +160,10 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         ]
 
     elif profile_type == "GOTHIC":
-        ball_radius = pitch * 0.60
+        sp = std.get("special_params", {})
+        ball_radius = pitch * _safe_ratio(sp.get("ball_radius_ratio"), 0.60)
         contact_angle = math.radians(std.get("special_params", {}).get("contact_angle", 45.0))
-        center_offset = ball_radius * math.sin(contact_angle)
+        center_offset = ball_radius * _safe_ratio(sp.get("center_offset_ratio"), math.sin(contact_angle))
         steps = 16
         pts = []
 
