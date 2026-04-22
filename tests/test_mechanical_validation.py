@@ -88,6 +88,40 @@ class MechanicalValidationTests(unittest.TestCase):
         self.assertIn("core_area_mm2", result)
         self.assertGreater(result["safety_factor"], 1.0)
 
+    def test_norm_binding_for_metric_external_6g(self):
+        result = mech.validate_norm_binding("METRIC_ISO", tolerance_class="6g", internal=False)
+        self.assertTrue(result.ok)
+        self.assertIn("ISO 68-1", result.message)
+
+    def test_norm_binding_rejects_wrong_side_tolerance(self):
+        result = mech.validate_norm_binding("METRIC_ISO", tolerance_class="6H", internal=False)
+        self.assertFalse(result.ok)
+        self.assertIn("nicht zulässig", result.message)
+
+    def test_validate_thread_input_rejects_extreme_length_ratio(self):
+        result = mech.validate_thread_input(
+            diameter=1.0,
+            pitch=0.2,
+            length=1500.0,
+            starts=1,
+            clearance=0.0,
+            standard_key="METRIC_ISO",
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("extrem hoch", result.message)
+
+    def test_validate_buckling_returns_safety_factor(self):
+        d3 = mech._resolve_core_diameter("METRIC_ISO", diameter=10.0, pitch=1.5)
+        result = mech.validate_buckling(
+            force_n=1000.0,
+            core_diameter_mm=d3,
+            unsupported_length_mm=100.0,
+            e_modulus_mpa=210000.0,
+            k_factor=1.0,
+        )
+        self.assertGreater(result["critical_load_n"], 0.0)
+        self.assertGreater(result["safety_factor"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

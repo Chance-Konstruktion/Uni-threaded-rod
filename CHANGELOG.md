@@ -8,10 +8,13 @@ All notable changes to this project are documented in this file.
 - Neues Modul `mechanical_validation.py` für mechanische Validierung (Zug-/Scherungsberechnung, Sicherheitsfaktor, Mutter-Passung, Pitch-Abgleich, FEM-Hinweis).
 - Unit-Tests für mechanische Validierung und Parametervalidierung (`tests/test_mechanical_validation.py`).
 - ISO-898-nahe Festigkeitsklassenprüfung (`validate_property_class_tensile`) inkl. Kernquerschnittsberechnung.
+- Normbindungsprüfung (`validate_norm_binding`) mit ISO-Referenzprüfung für metrische Familien und richtungsabhängiger Toleranzvalidierung.
+- Vereinfachte Euler-Knickvalidierung (`validate_buckling`) auf Basis des Kerndurchmessers.
 
 ### Changed
 - Operator-Parametervalidierung in `__init__.py` über separates Validierungsmodul gekapselt (SRP-orientierte Trennung).
 - Parametervalidierung nutzt nun standardabhängige Kerndurchmesserformeln (`d3`) statt pauschaler Näherung.
+- Zusätzliche Robustheits-Guards in der Eingabevalidierung (`pitch`-Untergrenze, extremes Längen-/Durchmesserverhältnis).
 
 ## [1.0.0] - 2026-04-22
 

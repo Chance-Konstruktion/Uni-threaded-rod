@@ -87,6 +87,8 @@ Neu im Engineering-Modul:
 - Standardabhängige Kerndurchmesserprüfung in der Parametervalidierung (`d3` aus Normdatenbank, fallback 60°-Profil).
 - ISO-898-nahe Zugprüfung über `validate_property_class_tensile(...)` mit Festigkeitsklassen (`4.6`, `5.8`, `8.8`, `10.9`, `12.9`).
 - Kernquerschnittsauswertung via `estimate_core_area_from_standard(...)` für reproduzierbare Spannungsabschätzung.
+- Normbindungs-Check via `validate_norm_binding(...)` (inkl. ISO-Referenz für metrische Gewinde und Toleranzklassenprüfung 6g/6H).
+- Optionaler Euler-Knickcheck via `validate_buckling(...)` auf Basis des Kerndurchmessers.
 
 ### Engineering-Level-Checkliste (verbindlich)
 - **Ziel:** Parametrische Gewindestange (Außengewinde) und zugehörige Innengewinde-Geometrie für CAD/3D-Druck.

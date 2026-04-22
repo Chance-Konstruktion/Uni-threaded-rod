@@ -25,6 +25,12 @@ ISO_898_PROPERTY_CLASS_RM_MPA = {
 }
 
 
+ISO_METRIC_NORM_REFERENCES = {
+    "METRIC_ISO": "ISO 68-1",
+    "METRIC_FINE": "ISO 965-1",
+}
+
+
 def _resolve_core_diameter(standard_key, diameter, pitch):
     std = THREAD_STANDARDS.get(standard_key)
     if std:
@@ -49,12 +55,42 @@ def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standa
         return ValidationResult(False, "Ungültig: Spiel (Clearance) muss >= 0 sein.")
     if pitch > diameter:
         return ValidationResult(False, "Ungültig: Steigung darf nicht größer als Durchmesser sein.")
+    if length > 1000.0 * diameter:
+        return ValidationResult(False, "Ungültig: Länge ist im Verhältnis zum Durchmesser extrem hoch.")
+    if pitch < 1e-4:
+        return ValidationResult(False, "Ungültig: Steigung ist numerisch zu klein.")
 
     d3 = _resolve_core_diameter(standard_key, diameter, pitch)
     if d3 <= 0.0 or d3 < 0.2 * diameter:
         return ValidationResult(False, "Ungültig: Kerndurchmesser wäre kritisch klein (Self-Intersection-Risiko).")
 
     return ValidationResult(True, "")
+
+
+def validate_norm_binding(standard_key, tolerance_class, internal=False):
+    """Sichert die Normbindung (inkl. Toleranzklasse) für den gewählten Standard."""
+    std = THREAD_STANDARDS.get(standard_key)
+    if not std:
+        return ValidationResult(False, f"Unbekannter Standard: {standard_key}")
+
+    norm_ref = ISO_METRIC_NORM_REFERENCES.get(standard_key, std.get("standard", "n/a"))
+    if standard_key in ISO_METRIC_NORM_REFERENCES and "ISO" not in str(norm_ref).upper():
+        return ValidationResult(False, f"Normreferenz für {standard_key} fehlt oder ist ungültig.")
+
+    tc = str(tolerance_class or "").strip()
+    if not tc:
+        return ValidationResult(False, "Toleranzklasse muss gesetzt sein.")
+
+    classes = std.get("tolerance_classes", {})
+    key = "internal" if internal else "external"
+    allowed = {str(v).upper() for v in classes.get(key, [])}
+    if allowed and tc.upper() not in allowed:
+        return ValidationResult(
+            False,
+            f"Toleranzklasse {tolerance_class} ist für {standard_key}/{key} nicht zulässig (Norm {norm_ref}).",
+        )
+
+    return ValidationResult(True, f"{standard_key} mit Normbezug {norm_ref} und Klasse {tc} ist konsistent.")
 
 
 def check_nut_fit(bolt_major_diameter, nut_minor_diameter, radial_clearance=0.0):
@@ -169,6 +205,38 @@ def validate_property_class_tensile(
         "core_area_mm2": core_area,
         "stress_mpa": stress,
         "allowable_mpa": allowable,
+        "safety_factor": sf,
+        "passes": sf >= 1.0,
+    }
+
+
+def euler_buckling_critical_load(e_modulus_mpa, inertia_mm4, unsupported_length_mm, k_factor=1.0):
+    """Euler-Knicklast in N (vereinfachtes Stabmodell, MPa-mm-Einheitensystem)."""
+    if e_modulus_mpa <= 0.0:
+        raise ValueError("E-Modul muss > 0 sein")
+    if inertia_mm4 <= 0.0:
+        raise ValueError("Flächenträgheitsmoment muss > 0 sein")
+    if unsupported_length_mm <= 0.0:
+        raise ValueError("Knicklänge muss > 0 sein")
+    if k_factor <= 0.0:
+        raise ValueError("K-Faktor muss > 0 sein")
+    effective_length = k_factor * unsupported_length_mm
+    return (math.pi ** 2) * e_modulus_mpa * inertia_mm4 / (effective_length ** 2)
+
+
+def validate_buckling(force_n, core_diameter_mm, unsupported_length_mm, e_modulus_mpa=210000.0, k_factor=1.0):
+    """Knickprüfung auf Basis des Kerndurchmessers (vollrunder Querschnitt)."""
+    if core_diameter_mm <= 0.0:
+        raise ValueError("Kerndurchmesser muss > 0 sein")
+    radius = core_diameter_mm * 0.5
+    inertia = math.pi * (radius ** 4) / 4.0
+    critical = euler_buckling_critical_load(e_modulus_mpa, inertia, unsupported_length_mm, k_factor=k_factor)
+    if force_n <= 0.0:
+        raise ValueError("Kraft muss > 0 sein")
+    sf = critical / force_n
+    return {
+        "critical_load_n": critical,
+        "applied_load_n": force_n,
         "safety_factor": sf,
         "passes": sf >= 1.0,
     }
