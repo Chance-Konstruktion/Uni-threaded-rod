@@ -64,6 +64,30 @@ class MechanicalValidationTests(unittest.TestCase):
         self.assertGreater(result["tensile"].safety_factor, 1.0)
         self.assertGreater(result["min_safety_factor"], 1.0)
 
+    def test_validate_thread_input_uses_standard_core_formula(self):
+        result = mech.validate_thread_input(
+            diameter=10.0,
+            pitch=1.5,
+            length=20.0,
+            starts=1,
+            clearance=0.0,
+            standard_key="METRIC_ISO",
+        )
+        self.assertTrue(result.ok)
+
+    def test_property_class_tensile_check(self):
+        result = mech.validate_property_class_tensile(
+            force_n=10000.0,
+            standard_key="METRIC_ISO",
+            diameter=10.0,
+            pitch=1.5,
+            property_class="8.8",
+            required_safety_factor=1.5,
+        )
+        self.assertIn("stress_mpa", result)
+        self.assertIn("core_area_mm2", result)
+        self.assertGreater(result["safety_factor"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
