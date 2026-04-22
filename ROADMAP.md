@@ -28,8 +28,8 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 
 ## Phase 4 – Kugelgewindetrieb (KGT)
 - [ ] Echte GOTHIC-Profilkette nach DIN 69051 / ISO 3408 (annähernd) 🟡
-- [ ] Muttergeometrie mit Innenprofil ⬜
-- [ ] Kugelrückführung als optionales Modul ⬜
+- [x] Muttergeometrie mit Innenprofil ✅
+- [x] Kugelrückführung als optionales Modul ✅
 - [x] Separate Operatoren und UI für KGT-Komponenten 🟡
 
 ## Phase 5 – UX & Performance
@@ -51,7 +51,7 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [ ] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben 🟡
 
 ## Nächste priorisierte Arbeitspakete
-1. NPT-Taper entlang der Gewindelänge in der Mesh-Erzeugung korrekt abbilden.
-2. Profilparameter pro Standard weiter normtreu differenzieren (insb. Rundungen/Abflachungen).
-3. Boolean-Workflow robuster machen (Objektzustand sichern/wiederherstellen).
-4. KGT-Mutter mit Innenprofil als eigenständigen Operator ergänzen.
+1. Profilparameter pro Standard weiter normtreu differenzieren (insb. Rundungen/Abflachungen).
+2. Echte GOTHIC-Profilkette stärker normnah ausarbeiten (DIN 69051 / ISO 3408).
+3. Blender-API Runtime-Tests (Headless) und CI-Smoke-Tests ergänzen.
+4. Referenzvergleich gegen Sollmaße (Regressionstest-Suite) implementieren.
