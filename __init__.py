@@ -32,8 +32,15 @@ def _create_standard_from_custom(props):
     }
 
 
-def _validate_parameters(diameter, pitch, length, starts, clearance=0.0):
-    result = validate_thread_input(diameter, pitch, length, starts, clearance=clearance)
+def _validate_parameters(diameter, pitch, length, starts, clearance=0.0, standard_key="METRIC_ISO"):
+    result = validate_thread_input(
+        diameter,
+        pitch,
+        length,
+        starts,
+        clearance=clearance,
+        standard_key=standard_key,
+    )
     return None if result.ok else result.message
 
 
@@ -60,7 +67,14 @@ class UTG_OT_create_thread(bpy.types.Operator):
                 self.report({"ERROR"}, str(exc))
                 return {"CANCELLED"}
 
-        validation_error = _validate_parameters(diameter, pitch, props.length, props.starts, props.clearance)
+        validation_error = _validate_parameters(
+            diameter,
+            pitch,
+            props.length,
+            props.starts,
+            props.clearance,
+            standard_key=standard_key,
+        )
         if validation_error:
             self.report({"ERROR"}, validation_error)
             return {"CANCELLED"}
@@ -129,7 +143,14 @@ class UTG_OT_create_ball_screw(bpy.types.Operator):
         else:
             diameter, pitch = resolve_thread_parameters(props.standard, props.diameter_enum)
 
-        validation_error = _validate_parameters(diameter, pitch, props.length, props.starts, props.clearance)
+        validation_error = _validate_parameters(
+            diameter,
+            pitch,
+            props.length,
+            props.starts,
+            props.clearance,
+            standard_key="BALL_SCREW",
+        )
         if validation_error:
             self.report({"ERROR"}, validation_error)
             return {"CANCELLED"}
@@ -174,7 +195,14 @@ class UTG_OT_create_ball_nut(bpy.types.Operator):
             source_standard = "BALL_SCREW" if props.standard == "BALL_SCREW" else props.standard
             diameter, pitch = resolve_thread_parameters(source_standard, props.diameter_enum)
 
-        validation_error = _validate_parameters(diameter, pitch, props.length, props.starts, props.clearance)
+        validation_error = _validate_parameters(
+            diameter,
+            pitch,
+            props.length,
+            props.starts,
+            props.clearance,
+            standard_key="BALL_SCREW" if props.standard == "BALL_SCREW" else props.standard,
+        )
         if validation_error:
             self.report({"ERROR"}, validation_error)
             return {"CANCELLED"}

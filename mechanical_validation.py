@@ -16,7 +16,24 @@ class StressResult:
     safety_factor: float
 
 
-def validate_thread_input(diameter, pitch, length, starts, clearance=0.0):
+ISO_898_PROPERTY_CLASS_RM_MPA = {
+    "4.6": 400.0,
+    "5.8": 500.0,
+    "8.8": 800.0,
+    "10.9": 1000.0,
+    "12.9": 1200.0,
+}
+
+
+def _resolve_core_diameter(standard_key, diameter, pitch):
+    std = THREAD_STANDARDS.get(standard_key)
+    if std:
+        return std["d3_formula"](diameter, pitch)
+    # Fallback: konservative V-Gewinde-Näherung.
+    return diameter - 1.226869 * pitch
+
+
+def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standard_key="METRIC_ISO"):
     """Basis-Parametervalidierung für Geometrie- und Engineering-Checks."""
     if diameter <= 0.0:
         return ValidationResult(False, "Ungültig: Durchmesser muss > 0 sein.")
@@ -33,7 +50,7 @@ def validate_thread_input(diameter, pitch, length, starts, clearance=0.0):
     if pitch > diameter:
         return ValidationResult(False, "Ungültig: Steigung darf nicht größer als Durchmesser sein.")
 
-    d3 = diameter - 1.6 * pitch
+    d3 = _resolve_core_diameter(standard_key, diameter, pitch)
     if d3 <= 0.0 or d3 < 0.2 * diameter:
         return ValidationResult(False, "Ungültig: Kerndurchmesser wäre kritisch klein (Self-Intersection-Risiko).")
 
@@ -101,6 +118,14 @@ def estimate_thread_shear_area(pitch_diameter, engagement_length):
     return math.pi * pitch_diameter * engagement_length * 0.5
 
 
+def estimate_core_area_from_standard(standard_key, diameter, pitch):
+    """Kernquerschnitt auf Basis des Kerndurchmessers d3 (mm²)."""
+    d3 = _resolve_core_diameter(standard_key, diameter, pitch)
+    if d3 <= 0.0:
+        raise ValueError("Kerndurchmesser <= 0")
+    return math.pi * 0.25 * d3 * d3
+
+
 def validate_mechanical_load_case(force_n, allowable_tensile_mpa, allowable_shear_mpa, diameter, pitch, engagement_length):
     """Mechanische Validierung: Zug/Scherung + Sicherheitsfaktor (vereinfachte Näherung)."""
     tensile_area = estimate_tensile_stress_area(diameter, pitch)
@@ -117,6 +142,35 @@ def validate_mechanical_load_case(force_n, allowable_tensile_mpa, allowable_shea
         "tensile": StressResult(stress_mpa=sigma_t, safety_factor=sf_tensile),
         "shear": StressResult(stress_mpa=tau, safety_factor=sf_shear),
         "min_safety_factor": min(sf_tensile, sf_shear),
+    }
+
+
+def validate_property_class_tensile(
+    force_n,
+    standard_key,
+    diameter,
+    pitch,
+    property_class="8.8",
+    required_safety_factor=1.5,
+):
+    """ISO-898-nahe Zugprüfung über Kernquerschnitt und Materialklasse."""
+    if required_safety_factor <= 0.0:
+        raise ValueError("Erforderlicher Sicherheitsfaktor muss > 0 sein")
+    if property_class not in ISO_898_PROPERTY_CLASS_RM_MPA:
+        raise ValueError(f"Unbekannte Festigkeitsklasse: {property_class}")
+
+    core_area = estimate_core_area_from_standard(standard_key, diameter, pitch)
+    stress = calculate_tensile_stress(force_n, core_area)
+    rm = ISO_898_PROPERTY_CLASS_RM_MPA[property_class]
+    allowable = rm / required_safety_factor
+    sf = calculate_safety_factor(allowable, stress)
+    return {
+        "property_class": property_class,
+        "core_area_mm2": core_area,
+        "stress_mpa": stress,
+        "allowable_mpa": allowable,
+        "safety_factor": sf,
+        "passes": sf >= 1.0,
     }
 
 

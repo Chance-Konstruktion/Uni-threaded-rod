@@ -7,9 +7,11 @@ All notable changes to this project are documented in this file.
 ### Added
 - Neues Modul `mechanical_validation.py` für mechanische Validierung (Zug-/Scherungsberechnung, Sicherheitsfaktor, Mutter-Passung, Pitch-Abgleich, FEM-Hinweis).
 - Unit-Tests für mechanische Validierung und Parametervalidierung (`tests/test_mechanical_validation.py`).
+- ISO-898-nahe Festigkeitsklassenprüfung (`validate_property_class_tensile`) inkl. Kernquerschnittsberechnung.
 
 ### Changed
 - Operator-Parametervalidierung in `__init__.py` über separates Validierungsmodul gekapselt (SRP-orientierte Trennung).
+- Parametervalidierung nutzt nun standardabhängige Kerndurchmesserformeln (`d3`) statt pauschaler Näherung.
 
 ## [1.0.0] - 2026-04-22
 

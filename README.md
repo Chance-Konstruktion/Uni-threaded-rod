@@ -83,6 +83,11 @@ Empfohlener Minimal-Workflow für reale Anwendungen:
 3. Geometrie gegen Referenztabellen verifizieren.
 4. Mechanische Nachweise (mindestens Zug/Scherung, Sicherheitsfaktor) separat rechnen.
 
+Neu im Engineering-Modul:
+- Standardabhängige Kerndurchmesserprüfung in der Parametervalidierung (`d3` aus Normdatenbank, fallback 60°-Profil).
+- ISO-898-nahe Zugprüfung über `validate_property_class_tensile(...)` mit Festigkeitsklassen (`4.6`, `5.8`, `8.8`, `10.9`, `12.9`).
+- Kernquerschnittsauswertung via `estimate_core_area_from_standard(...)` für reproduzierbare Spannungsabschätzung.
+
 ### Engineering-Level-Checkliste (verbindlich)
 - **Ziel:** Parametrische Gewindestange (Außengewinde) und zugehörige Innengewinde-Geometrie für CAD/3D-Druck.
 - **Normbezug:** Primär `DIN 13 / ISO 68-1` (metrisch), zusätzlich `ANSI/ASME B1.1` (UNC/UNF) und weitere Gewindefamilien.
