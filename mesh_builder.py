@@ -27,13 +27,35 @@ def _apply_end_profile(loop_verts, end_type, z_center):
         v.co.z += z_center
 
 
-def create_thread_mesh(name, profile_points, diameter, pitch, length, starts=1, handedness="RIGHT", end_type="CHAMFER"):
+def create_thread_mesh(
+    name,
+    profile_points,
+    diameter,
+    pitch,
+    length,
+    starts=1,
+    handedness="RIGHT",
+    end_type="CHAMFER",
+    taper_ratio=0.0,
+    lod_level="FINAL",
+    segment_override=48,
+):
     """Erzeugt ein manifoldes BMesh einer Gewindestange."""
     _ = (name, diameter)
     bm = bmesh.new()
 
     turns = max(length / max(pitch, 1e-6), 0.01)
-    segments_per_turn = max(24, int(36 * (pitch / 5.0)))
+    if lod_level == "PREVIEW":
+        lod_factor = 0.70
+    elif lod_level == "CUSTOM":
+        lod_factor = 1.0
+    else:
+        lod_factor = 1.15
+
+    auto_segments = max(24, int((36 * (pitch / 5.0) + diameter * 0.6) * lod_factor))
+    segments_per_turn = max(12, int(segment_override)) if lod_level == "CUSTOM" else auto_segments
+    if length > 250.0:
+        segments_per_turn = max(18, int(segments_per_turn * 0.85))
     total_segments = int(turns * segments_per_turn) + 1
     direction = 1.0 if handedness == "RIGHT" else -1.0
 
@@ -46,9 +68,15 @@ def create_thread_mesh(name, profile_points, diameter, pitch, length, starts=1, 
         z = t * pitch * starts
 
         current_verts = []
+        taper_scale = 1.0
+        if taper_ratio > 0.0:
+            # NPT: Durchmesseränderung über Länge mit 1:x-Verhältnis
+            diam_delta = z * taper_ratio
+            taper_scale = max(0.2, 1.0 - diam_delta / max(diameter, 1e-6))
         for pt in profile_points:
-            x = pt.x * math.cos(angle)
-            y = pt.x * math.sin(angle)
+            radial = pt.x * taper_scale
+            x = radial * math.cos(angle)
+            y = radial * math.sin(angle)
             z_local = pt.y * starts
             current_verts.append(bm.verts.new(Vector((x, y, z_local + z))))
 

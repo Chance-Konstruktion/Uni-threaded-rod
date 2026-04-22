@@ -190,6 +190,39 @@ MATERIAL_PRESETS = {
     "BRASS": {"name": "Messing", "color": (0.9, 0.7, 0.2, 1.0), "metallic": 0.9, "roughness": 0.3, "ior": 1.45},
 }
 
+THREAD_PRESETS = {
+    "M10_STD": {
+        "name": "M10x1.5 8.8 verzinkt",
+        "standard": "METRIC_ISO",
+        "diameter_token": "10.0",
+        "material": "STEEL_8.8",
+        "surface": "ZINC",
+        "tolerance_class": "6g",
+        "clearance": 0.10,
+        "starts": 1,
+    },
+    "M8_FINE_A2": {
+        "name": "M8x1.0 A2",
+        "standard": "METRIC_FINE",
+        "diameter_token": "8.0",
+        "material": "STAINLESS_A2",
+        "surface": "NONE",
+        "tolerance_class": "6g",
+        "clearance": 0.06,
+        "starts": 1,
+    },
+    "TR20_DRIVE": {
+        "name": "Tr20x4 Antrieb",
+        "standard": "TRAPEZOIDAL",
+        "diameter_token": "20",
+        "material": "STEEL_10.9",
+        "surface": "NONE",
+        "tolerance_class": "7e",
+        "clearance": 0.05,
+        "starts": 1,
+    },
+}
+
 
 def get_diameter_items_for_standard(standard_key):
     std = THREAD_STANDARDS[standard_key]

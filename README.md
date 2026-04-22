@@ -12,6 +12,9 @@ Bereits umgesetzt:
 - Helix-Mesh-Erzeugung inkl. Endkappen und Basis-Manifold-Postprocessing
 - N-Panel UI inkl. Custom-Mode
 - Basis-Operatoren für Gewinde und einfachen KGT-Startpunkt
+- NPT-Taper entlang der Gewindelänge
+- Presets inkl. Schnellanwendung im UI
+- LOD-Stufen (Preview/Final/Custom) und adaptive Segmentierung für lange Gewinde
 
 Roadmap-Fokus (v1.1+):
 - Performance-Optimierung für sehr lange Gewinde

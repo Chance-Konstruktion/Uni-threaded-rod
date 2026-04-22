@@ -1,6 +1,6 @@
 import bpy
 
-from .database import MATERIAL_PRESETS, THREAD_STANDARDS, get_diameter_items_for_standard
+from .database import MATERIAL_PRESETS, THREAD_PRESETS, THREAD_STANDARDS, get_diameter_items_for_standard
 
 
 def get_diameter_items(self, context):
@@ -47,6 +47,17 @@ class UTG_Properties(bpy.types.PropertyGroup):
 
     end_type: bpy.props.EnumProperty(name="Enden", items=[("FLAT", "Flach", ""), ("CHAMFER", "Fase 45°", ""), ("RUNOUT", "Auslauf", "")], default="CHAMFER")
     negative_mode: bpy.props.BoolProperty(name="Negativ-Modus", description="Erzeugt Bohrung statt Stange (Boolesche Differenz)", default=False)
+    lod_level: bpy.props.EnumProperty(
+        name="LOD",
+        items=[("PREVIEW", "Preview", "Schnelle Vorschau"), ("FINAL", "Final", "Höhere Qualität"), ("CUSTOM", "Benutzerdefiniert", "Eigene Segmentanzahl")],
+        default="FINAL",
+    )
+    segment_override: bpy.props.IntProperty(name="Segmente/Umdr.", default=48, min=12, max=256)
+    preset_key: bpy.props.EnumProperty(
+        name="Preset",
+        items=[("NONE", "Kein Preset", "")] + [(k, THREAD_PRESETS[k]["name"], "") for k in THREAD_PRESETS.keys()],
+        default="NONE",
+    )
 
     custom_diameter: bpy.props.FloatProperty(name="Durchmesser", default=10.0, min=0.1)
     custom_pitch: bpy.props.FloatProperty(name="Steigung", default=1.5, min=0.1)
@@ -83,14 +94,23 @@ class THREADFORGE_PT_main(bpy.types.Panel):
             layout.prop(props, "handedness")
 
         layout.separator()
+        row = layout.row(align=True)
+        row.prop(props, "preset_key", text="Preset")
+        row.operator("utg.apply_preset", text="", icon="IMPORT")
+
         layout.prop(props, "material", text="Material")
         layout.prop(props, "surface", text="Oberfläche")
 
         layout.separator()
-        layout.prop(props, "tolerance_class", text="Toleranz")
+        std_cfg = THREAD_STANDARDS.get(props.standard)
+        if props.standard == "CUSTOM" or (std_cfg and std_cfg.get("tolerance_classes")):
+            layout.prop(props, "tolerance_class", text="Toleranz")
         layout.prop(props, "clearance", text="3D-Druck Spiel (mm)")
         layout.prop(props, "end_type", text="Enden")
         layout.prop(props, "negative_mode", text="Negativ-Modus (Bohrung)")
+        layout.prop(props, "lod_level", text="Mesh-Detail")
+        if props.lod_level == "CUSTOM":
+            layout.prop(props, "segment_override", text="Segmente/Umdr.")
 
         layout.separator()
         layout.operator("utg.create_thread", text="Gewinde erstellen", icon="MOD_SCREW")
