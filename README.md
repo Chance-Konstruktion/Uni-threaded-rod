@@ -12,13 +12,15 @@ Bereits umgesetzt:
 - Helix-Mesh-Erzeugung inkl. Endkappen und Basis-Manifold-Postprocessing
 - N-Panel UI inkl. Custom-Mode
 - Basis-Operatoren für Gewinde und einfachen KGT-Startpunkt
+- Eigenständiger KGT-Mutter-Operator mit Innenprofil (Boolean-basiert)
+- Optionales Rückführungsmodul für KGT-Mutter (vereinfachte Geometrie)
 - NPT-Taper entlang der Gewindelänge
 - Presets inkl. Schnellanwendung im UI
 - LOD-Stufen (Preview/Final/Custom) und adaptive Segmentierung für lange Gewinde
 
 Roadmap-Fokus (v1.1+):
 - Performance-Optimierung für sehr lange Gewinde
-- Erweiterte KGT-Features (Mutter/Rückführung)
+- Normnähere KGT-Profilkette (GOTHIC) und Maßvergleich
 - Zusätzliche automatisierte Blender-Regressionstests
 
 ---
@@ -77,10 +79,12 @@ Already implemented:
 - Helix mesh generation with end caps and basic manifold post-processing
 - N-panel UI and custom mode
 - Base operators for thread creation and an initial ball-screw entry point
+- Dedicated ball-nut operator with internal profile (boolean-based)
+- Optional return-path module for ball nuts (simplified geometry)
 
 Roadmap focus (v1.1+):
 - Performance tuning for very long threads
-- Extended ball-screw features (nut/return path)
+- More standards-accurate GOTHIC chain and dimensional checks
 - Additional automated Blender regression tests
 
 ---

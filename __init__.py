@@ -2,7 +2,13 @@ import bpy
 
 from .database import THREAD_PRESETS, THREAD_STANDARDS, resolve_thread_parameters
 from .geometry_engine import generate_profile
-from .mesh_builder import apply_boolean_cutter, apply_material, create_thread_mesh
+from .mesh_builder import (
+    apply_boolean_cutter,
+    apply_material,
+    create_nut_body_mesh,
+    create_return_tube_mesh,
+    create_thread_mesh,
+)
 from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
 
 bl_info = {
@@ -162,6 +168,85 @@ class UTG_OT_create_ball_screw(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class UTG_OT_create_ball_nut(bpy.types.Operator):
+    bl_idname = "utg.create_ball_nut"
+    bl_label = "KGT-Mutter erstellen"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        props = context.scene.utg_props
+
+        if props.standard == "CUSTOM":
+            diameter = props.custom_diameter
+            pitch = props.custom_pitch
+        else:
+            source_standard = "BALL_SCREW" if props.standard == "BALL_SCREW" else props.standard
+            diameter, pitch = resolve_thread_parameters(source_standard, props.diameter_enum)
+
+        validation_error = _validate_parameters(diameter, pitch, props.length, props.starts)
+        if validation_error:
+            self.report({"ERROR"}, validation_error)
+            return {"CANCELLED"}
+
+        body_bm = create_nut_body_mesh(
+            name="KGT_Mutter_Rohling",
+            outer_diameter=max(props.nut_outer_diameter, diameter + 2.0),
+            length=max(props.nut_length, pitch * 2.0),
+            segments=max(props.segment_override, 32),
+        )
+        body_mesh = bpy.data.meshes.new("UTG_BallNutBody")
+        body_bm.to_mesh(body_mesh)
+        body_bm.free()
+
+        nut_obj = bpy.data.objects.new("KGT_Mutter", body_mesh)
+        context.collection.objects.link(nut_obj)
+
+        inner_profile = generate_profile(
+            "BALL_SCREW",
+            diameter,
+            pitch,
+            tolerance_class=props.tolerance_class,
+            internal=True,
+            clearance=props.clearance + props.nut_internal_clearance,
+        )
+        cutter_bm = create_thread_mesh(
+            name="KGT_Innenprofil",
+            profile_points=inner_profile,
+            diameter=diameter,
+            pitch=pitch,
+            length=max(props.nut_length, pitch * 2.0),
+            starts=max(1, props.starts),
+            handedness=props.handedness,
+            end_type="FLAT",
+            lod_level=props.lod_level,
+            segment_override=props.segment_override,
+        )
+        cutter_mesh = bpy.data.meshes.new("UTG_BallNutCutter")
+        cutter_bm.to_mesh(cutter_mesh)
+        cutter_bm.free()
+        cutter_obj = bpy.data.objects.new("KGT_Mutter_Cutter", cutter_mesh)
+        context.collection.objects.link(cutter_obj)
+
+        apply_boolean_cutter(context, cutter_obj, nut_obj)
+
+        if props.ball_return_enabled:
+            tube_bm = create_return_tube_mesh(
+                name="KGT_Rueckfuehrung",
+                major_radius=max(props.nut_outer_diameter * 0.55, 0.5),
+                minor_radius=max(pitch * 0.25, 0.2),
+                location=(0.0, max(props.nut_outer_diameter * 0.52, 0.5), max(props.nut_length * 0.5, 0.2)),
+            )
+            tube_mesh = bpy.data.meshes.new("UTG_BallNutReturn")
+            tube_bm.to_mesh(tube_mesh)
+            tube_bm.free()
+            tube_obj = bpy.data.objects.new("KGT_Rueckfuehrung", tube_mesh)
+            context.collection.objects.link(tube_obj)
+            apply_material(tube_obj, props.material, props.surface)
+
+        apply_material(nut_obj, props.material, props.surface)
+        return {"FINISHED"}
+
+
 class UTG_OT_apply_preset(bpy.types.Operator):
     bl_idname = "utg.apply_preset"
     bl_label = "Preset anwenden"
@@ -194,6 +279,7 @@ classes = [
     THREADFORGE_PT_main,
     UTG_OT_create_thread,
     UTG_OT_create_ball_screw,
+    UTG_OT_create_ball_nut,
     UTG_OT_apply_preset,
 ]
 

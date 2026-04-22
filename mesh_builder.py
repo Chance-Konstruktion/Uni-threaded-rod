@@ -156,14 +156,65 @@ def apply_material(obj, material_key, surface_key="NONE"):
 
 
 def apply_boolean_cutter(context, cutter_obj, target_obj):
-    """Führt Boolesche Differenz aus und löscht Cutter."""
-    context.view_layer.objects.active = target_obj
-    target_obj.select_set(True)
-    cutter_obj.select_set(True)
+    """Führt Boolesche Differenz aus und löscht Cutter.
 
-    mod = target_obj.modifiers.new(name="UTG_Boolean", type="BOOLEAN")
-    mod.object = cutter_obj
-    mod.operation = "DIFFERENCE"
+    Sichert und restauriert den Objekt-/Selektionszustand, damit der Workflow
+    auch in komplexeren Szenen stabil bleibt.
+    """
+    prev_active = context.view_layer.objects.active
+    prev_selected = [obj for obj in context.selected_objects]
 
-    bpy.ops.object.modifier_apply({"object": target_obj, "active_object": target_obj}, modifier=mod.name)
-    bpy.data.objects.remove(cutter_obj, do_unlink=True)
+    try:
+        for obj in prev_selected:
+            obj.select_set(False)
+
+        context.view_layer.objects.active = target_obj
+        target_obj.select_set(True)
+        cutter_obj.select_set(True)
+
+        mod = target_obj.modifiers.new(name="UTG_Boolean", type="BOOLEAN")
+        mod.object = cutter_obj
+        mod.operation = "DIFFERENCE"
+
+        bpy.ops.object.modifier_apply({"object": target_obj, "active_object": target_obj}, modifier=mod.name)
+        bpy.data.objects.remove(cutter_obj, do_unlink=True)
+    finally:
+        for obj in context.selected_objects:
+            obj.select_set(False)
+        for obj in prev_selected:
+            if obj.name in bpy.data.objects:
+                obj.select_set(True)
+        if prev_active and prev_active.name in bpy.data.objects:
+            context.view_layer.objects.active = prev_active
+
+
+def create_nut_body_mesh(name, outer_diameter, length, segments=64):
+    """Erzeugt einen einfachen zylindrischen Mutterrohling als BMesh."""
+    bm = bmesh.new()
+    bmesh.ops.create_cone(
+        bm,
+        cap_ends=True,
+        cap_tris=False,
+        segments=max(16, int(segments)),
+        radius1=max(outer_diameter * 0.5, 0.1),
+        radius2=max(outer_diameter * 0.5, 0.1),
+        depth=max(length, 0.1),
+    )
+    bmesh.ops.translate(bm, verts=bm.verts, vec=Vector((0.0, 0.0, length * 0.5)))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
+
+
+def create_return_tube_mesh(name, major_radius, minor_radius, location):
+    """Erzeugt ein optionales Rückführungsmodul (vereinfachter Torus)."""
+    bm = bmesh.new()
+    bmesh.ops.create_torus(
+        bm,
+        major_segments=40,
+        minor_segments=16,
+        major_radius=max(major_radius, 0.1),
+        minor_radius=max(minor_radius, 0.05),
+    )
+    bmesh.ops.translate(bm, verts=bm.verts, vec=Vector(location))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    return bm
