@@ -57,6 +57,19 @@ Für freie Parameter:
 
 ---
 
+
+### Qualitätssicherung / Tests
+- **Schneller Unit-Testlauf (ohne Blender):** `python -m unittest discover -s tests -p 'test_*.py'`
+- **Headless Blender-Smoke-Test:** `blender -b --factory-startup --python scripts/blender_smoke_test.py`
+- **CI:** GitHub Actions (`.github/workflows/ci.yml`) führt Ruff, Unit-Tests und den Blender-Smoke-Test aus.
+
+### Bekannte Einschränkungen
+- Profilparameter sind für einige Standards noch **plausibel-normnah**, aber nicht vollständig tabellarisch normabgeleitet.
+- Die GOTHIC-Kette für KGT ist verbessert, aber weiterhin eine **annähernde** Auslegung.
+- Sehr extreme Parameterkombinationen (sehr hohe Starts + sehr kurze Länge + sehr kleine Kerndurchmesser) sollten weiterhin manuell geprüft werden.
+
+---
+
 ### Projektstruktur
 - `__init__.py` – Registrierung, Operatoren, `bl_info`
 - `ui_panel.py` – N-Panel und Properties
