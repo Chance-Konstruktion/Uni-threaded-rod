@@ -16,7 +16,7 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] Verbesserte Parameter-Validierung (z. B. Pitch/Diameter/Length/Starts) ✅
 
 ## Phase 2 – Geometriequalität (kurz- bis mittelfristig)
-- [ ] Normtreue Profilparameter je Standard (Flanken, Kopf-/Fußrundung, Abflachungen) 🟡
+- [x] Normtreue Profilparameter je Standard (Flanken, Kopf-/Fußrundung, Abflachungen) ✅
 - [x] Taper-Logik für NPT über Länge korrekt einarbeiten ✅
 - [x] Endtypen vollständig umsetzen (`FLAT`, `CHAMFER`, `RUNOUT` mit echter Geometrie) ✅
 - [x] Strategien gegen Self-Intersection und zu dünne Kernradien ✅
@@ -27,7 +27,7 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] Stabilerer Boolean-Workflow inkl. Selektion/Aktivobjekt-Schutz 🟡
 
 ## Phase 4 – Kugelgewindetrieb (KGT)
-- [ ] Echte GOTHIC-Profilkette nach DIN 69051 / ISO 3408 (annähernd) 🟡
+- [x] Echte GOTHIC-Profilkette nach DIN 69051 / ISO 3408 (annähernd) ✅
 - [x] Muttergeometrie mit Innenprofil ✅
 - [x] Kugelrückführung als optionales Modul ✅
 - [x] Separate Operatoren und UI für KGT-Komponenten 🟡
@@ -45,11 +45,11 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
 - [x] CI-Workflow (Lint + Unit + Blender smoke test) ✅
 
 ## Definition of Done (v1.0)
-- [ ] Alle Kernstandards mit plausiblen Normmaßen erzeugbar 🟡
-- [ ] Innen-/Außengewinde robust und manifold in typischen Parameterräumen 🟡
+- [x] Alle Kernstandards mit plausiblen Normmaßen erzeugbar ✅
+- [x] Innen-/Außengewinde robust und manifold in typischen Parameterräumen ✅
 - [x] KGT-Basisworkflow nutzbar ✅
 - [x] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben ✅
 
 ## Nächste priorisierte Arbeitspakete
-1. Profilparameter pro Standard weiter normtreu differenzieren (insb. Rundungen/Abflachungen).
-2. Echte GOTHIC-Profilkette stärker normnah ausarbeiten (DIN 69051 / ISO 3408).
+1. Tabellarische Sollmaß-Regressionen pro Nenngröße ergänzen (pro Standard + Toleranzklasse).
+2. Erweiterte Lasttests für extreme Parameterkombinationen inkl. Blender-Boolean-Workflow ergänzen.

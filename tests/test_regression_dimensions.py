@@ -57,6 +57,45 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertLess(min(p.y for p in points), 0.0)
         self.assertGreater(max(p.y for p in points), 5.0)
 
+    def test_v_profile_parameterization_differs_by_standard(self):
+        pitch = 1.5
+        metric = geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=pitch)
+        unc = geometry_engine.generate_profile("UNC", diameter=10.0, pitch=pitch)
+        bsw = geometry_engine.generate_profile("WHITWORTH_BSW", diameter=10.0, pitch=pitch)
+
+        # Root-/Crest-Breiten unterscheiden sich je Normfamilie.
+        self.assertNotAlmostEqual(metric[1].y, unc[1].y, places=6)
+        self.assertNotAlmostEqual(unc[4].y, bsw[4].y, places=6)
+
+    def test_ball_screw_gothic_uses_standard_specific_ratios(self):
+        points = geometry_engine.generate_profile("BALL_SCREW", diameter=25.0, pitch=5.0)
+        r2 = database.THREAD_STANDARDS["BALL_SCREW"]["d2_formula"](25.0, 5.0) / 2.0 - 0.01
+        expected_min_x = r2 - 2.0 * (5.0 * 0.52)
+        self.assertAlmostEqual(min(p.x for p in points), expected_min_x, places=6)
+
+    def test_core_standards_generate_non_degenerate_profiles(self):
+        cases = [
+            ("METRIC_ISO", 10.0, 1.5),
+            ("METRIC_FINE", 10.0, 1.25),
+            ("WHITWORTH_BSW", 12.0, 1.4),
+            ("UNC", 10.0, 1.5),
+            ("UNF", 10.0, 1.0),
+            ("PIPE_G", 20.0, 1.814285714),
+            ("TRAPEZOIDAL", 20.0, 4.0),
+            ("BUTTRESS", 20.0, 5.0),
+            ("ROUND", 20.0, 4.0),
+            ("ACME", 20.0, 2.0),
+            ("NPT", 20.0, 1.8),
+            ("PG", 20.4, 1.41),
+            ("EDISON", 27.0, 3.5),
+            ("BALL_SCREW", 20.0, 5.0),
+        ]
+        for standard, diameter, pitch in cases:
+            with self.subTest(standard=standard):
+                points = geometry_engine.generate_profile(standard, diameter=diameter, pitch=pitch)
+                self.assertGreaterEqual(len(points), 3)
+                self.assertLess(min(p.x for p in points), max(p.x for p in points))
+
 
 if __name__ == "__main__":
     unittest.main()
