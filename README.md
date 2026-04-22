@@ -67,7 +67,7 @@ Für freie Parameter:
 - Änderungsverlauf siehe `CHANGELOG.md`.
 
 ### Bekannte Einschränkungen
-- Profilparameter sind für einige Standards noch **plausibel-normnah**, aber nicht vollständig tabellarisch normabgeleitet.
+- ISO-Regelgewinde sind für die Grobreihe tabellarisch von **M1 bis M64** hinterlegt; andere Familien bleiben teilweise als normnahe Näherung implementiert.
 - Die GOTHIC-Kette für KGT ist verbessert, aber weiterhin eine **annähernde** Auslegung.
 - Sehr extreme Parameterkombinationen (sehr hohe Starts + sehr kurze Länge + sehr kleine Kerndurchmesser) sollten weiterhin manuell geprüft werden.
 
@@ -89,9 +89,10 @@ Neu im Engineering-Modul:
 - Kernquerschnittsauswertung via `estimate_core_area_from_standard(...)` für reproduzierbare Spannungsabschätzung.
 - Normbindungs-Check via `validate_norm_binding(...)` (inkl. ISO-Referenz für metrische Gewinde und Toleranzklassenprüfung 6g/6H).
 - Optionaler Euler-Knickcheck via `validate_buckling(...)` auf Basis des Kerndurchmessers.
-- Integrierte ISO-Regelgewinde-Normtabelle (`M6`, `M8`, `M10`, `M12`) für reproduzierbare Nennwerte statt reiner Formeln.
+- Integrierte ISO-Regelgewinde-Normtabelle (`M1`–`M64`) für reproduzierbare Nennwerte inkl. Crest-/Kerbradius-Parametern.
 - Ergänzter Flankentragfähigkeitscheck via `validate_thread_engagement_strength(...)` (Scher-/Abstreifnäherung mit Sicherheitsfaktor).
 - Nicht-blockierende Engineering-Hinweise via `collect_validation_warnings(...)` für kritische Eingabe-Kombinationen.
+- High-Level-Python-API via `api.thread("M10", fit="6g/6H", material="8.8", length=50)` für CAD-nahe Aufrufe.
 
 ### Engineering-Level-Checkliste (verbindlich)
 - **Ziel:** Parametrische Gewindestange (Außengewinde) und zugehörige Innengewinde-Geometrie für CAD/3D-Druck.

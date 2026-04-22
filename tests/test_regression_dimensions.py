@@ -45,9 +45,9 @@ class ReferenceRegressionTests(unittest.TestCase):
         points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm)
         d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
 
-        self.assertEqual(len(points), 6)
+        self.assertEqual(len(points), 8)
         self.assertAlmostEqual(points[0].x, diameter_mm / 2.0 - 0.01, places=6)
-        self.assertAlmostEqual(points[2].x, d3 / 2.0 - 0.01, places=6)
+        self.assertAlmostEqual(points[3].x, d3 / 2.0 - 0.01, places=6)
 
     def test_ball_screw_gothic_profile_regression_shape(self):
         points = geometry_engine.generate_profile("BALL_SCREW", diameter=20.0, pitch=5.0)
@@ -128,6 +128,18 @@ class ReferenceRegressionTests(unittest.TestCase):
         row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
         self.assertIsNotNone(row)
         self.assertAlmostEqual(row["d2_basic"], 9.026, places=3)
+
+
+class HighEndDataCoverageTests(unittest.TestCase):
+    def test_metric_iso_series_contains_m1_to_m64(self):
+        expected_tokens = {"M1", "M1.2", "M1.4", "M1.6", "M2", "M2.5", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M16", "M20", "M24", "M30", "M36", "M42", "M48", "M56", "M64"}
+        self.assertTrue(expected_tokens.issubset(set(database.ISO_METRIC_COARSE_TABLE.keys())))
+
+    def test_metric_iso_row_contains_crest_and_root_radius(self):
+        row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
+        self.assertIsNotNone(row)
+        self.assertGreater(row["crest_flat"], 0.0)
+        self.assertGreater(row["root_radius"], 0.0)
 
 
 if __name__ == "__main__":

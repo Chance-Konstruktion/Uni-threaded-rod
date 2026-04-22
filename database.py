@@ -2,11 +2,27 @@ MM_PER_INCH = 25.4
 
 # Kleine praxisrelevante ISO-Tabellenbasis (erweiterbar) für exakte Nennreihen.
 # Werte in mm, abgeleitet aus ISO 261 / ISO 965-1 (vereinfachte Auswahldaten).
+ISO_METRIC_COARSE_PITCH_SERIES = {
+    1.0: 0.25, 1.2: 0.25, 1.4: 0.3, 1.6: 0.35, 1.8: 0.35,
+    2.0: 0.4, 2.5: 0.45, 3.0: 0.5, 3.5: 0.6, 4.0: 0.7,
+    5.0: 0.8, 6.0: 1.0, 7.0: 1.0, 8.0: 1.25, 10.0: 1.5,
+    12.0: 1.75, 14.0: 2.0, 16.0: 2.0, 18.0: 2.5, 20.0: 2.5,
+    22.0: 2.5, 24.0: 3.0, 27.0: 3.0, 30.0: 3.5, 33.0: 3.5,
+    36.0: 4.0, 39.0: 4.0, 42.0: 4.5, 45.0: 4.5, 48.0: 5.0,
+    52.0: 5.0, 56.0: 5.5, 60.0: 5.5, 64.0: 6.0,
+}
+
 ISO_METRIC_COARSE_TABLE = {
-    "M6": {"diameter": 6.0, "pitch": 1.0, "d2_basic": 5.350, "d3_basic": 4.773},
-    "M8": {"diameter": 8.0, "pitch": 1.25, "d2_basic": 7.188, "d3_basic": 6.466},
-    "M10": {"diameter": 10.0, "pitch": 1.5, "d2_basic": 9.026, "d3_basic": 8.160},
-    "M12": {"diameter": 12.0, "pitch": 1.75, "d2_basic": 10.863, "d3_basic": 9.853},
+    f"M{diameter:g}": {
+        "diameter": diameter,
+        "pitch": pitch,
+        "d2_basic": diameter - 0.649519 * pitch,
+        "d3_basic": diameter - 1.226869 * pitch,
+        # ISO 68-1 Grundprofil: Kuppenabflachung P/8, Kerbradius ~0.14434*P (typ. extern)
+        "crest_flat": pitch / 8.0,
+        "root_radius": 0.14434 * pitch,
+    }
+    for diameter, pitch in ISO_METRIC_COARSE_PITCH_SERIES.items()
 }
 
 # Vereinfachte fundamentale Abmaße (radial) für häufige Paarung 6g / 6H.
@@ -29,10 +45,7 @@ THREAD_STANDARDS = {
         "flank_angle": 60.0,
         "profile_type": "V",
         "diam_pitch_map": {
-            1.6: 0.35, 2.0: 0.40, 2.5: 0.45, 3.0: 0.50, 4.0: 0.70,
-            5.0: 0.80, 6.0: 1.00, 8.0: 1.25, 10.0: 1.50, 12.0: 1.75,
-            16.0: 2.00, 20.0: 2.50, 24.0: 3.00, 30.0: 3.50, 36.0: 4.00,
-            42.0: 4.50, 48.0: 5.00, 56.0: 5.50, 64.0: 6.00,
+            **ISO_METRIC_COARSE_PITCH_SERIES,
         },
         "d2_formula": lambda d, p: d - 0.649519 * p,
         "d3_formula": lambda d, p: d - 1.226869 * p,

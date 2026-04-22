@@ -141,33 +141,53 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
     if profile_type == "V":
         h = r - r3
         sp = std.get("special_params", {})
+        iso_row = resolve_iso_metric_coarse_row(diameter, pitch) if standard_key.startswith("METRIC") else None
+
         if standard_key.startswith("METRIC"):
-            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            crest_flat = iso_row["crest_flat"] if iso_row else pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 4.0)
+            root_radius = iso_row["root_radius"] if iso_row else pitch * 0.14434
         elif standard_key in {"UNC", "UNF"}:
             crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 8.0)
+            root_radius = 0.0
         elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G"}:
             # Vereinfachte Rundungs-Ersatzgeometrie: kürzere Flats bei 55°-Profilen.
             crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 12.0)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 6.0)
+            root_radius = pitch * 0.137329
         else:
             crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 0.05)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 0.10)
+            root_radius = 0.0
 
         crest_flat = max(0.0, min(crest_flat, pitch * 0.45))
         root_flat = max(0.0, min(root_flat, pitch * 0.45))
 
         y_crest = crest_flat / 2.0
         y_root = pitch / 2.0 - root_flat / 2.0
-        pts = [
-            ProfilePoint(r, 0.0),
-            ProfilePoint(r - h + root_flat * 0.5, y_root),
-            ProfilePoint(r3, pitch / 2.0),
-            ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
-            ProfilePoint(r, pitch - y_crest),
-            ProfilePoint(r, pitch),
-        ]
+        if root_radius > 0.0:
+            # Lokaler Kerbradius als zusätzlicher Stützpunkt beidseitig der Talsohle.
+            radius_control = min(root_radius * 0.4, (pitch / 2.0 - y_root) * 0.95)
+            pts = [
+                ProfilePoint(r, 0.0),
+                ProfilePoint(r - h + root_flat * 0.5, y_root),
+                ProfilePoint(r3 + root_radius * 0.5, pitch / 2.0 - radius_control),
+                ProfilePoint(r3, pitch / 2.0),
+                ProfilePoint(r3 + root_radius * 0.5, pitch / 2.0 + radius_control),
+                ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
+                ProfilePoint(r, pitch - y_crest),
+                ProfilePoint(r, pitch),
+            ]
+        else:
+            pts = [
+                ProfilePoint(r, 0.0),
+                ProfilePoint(r - h + root_flat * 0.5, y_root),
+                ProfilePoint(r3, pitch / 2.0),
+                ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
+                ProfilePoint(r, pitch - y_crest),
+                ProfilePoint(r, pitch),
+            ]
 
     elif profile_type == "TRAPEZOID":
         crest_width = 0.5 * pitch

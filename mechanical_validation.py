@@ -31,6 +31,16 @@ ISO_METRIC_NORM_REFERENCES = {
 }
 
 
+ISO_898_ALLOWABLE_FACTORS = {
+    # konservative Näherung: zulässige Zugspannung ~0.6*Rm, Schub ~0.58*zul. Zug
+    "4.6": {"tensile": 0.55, "shear_of_tensile": 0.58},
+    "5.8": {"tensile": 0.58, "shear_of_tensile": 0.58},
+    "8.8": {"tensile": 0.60, "shear_of_tensile": 0.58},
+    "10.9": {"tensile": 0.62, "shear_of_tensile": 0.58},
+    "12.9": {"tensile": 0.63, "shear_of_tensile": 0.58},
+}
+
+
 def _resolve_core_diameter(standard_key, diameter, pitch):
     std = THREAD_STANDARDS.get(standard_key)
     if std:
@@ -310,3 +320,85 @@ def resolve_standard_pitch_diameter(standard_key, diameter, pitch):
 
 def fem_placeholder_note():
     return "FEM optional: nicht Teil dieses Moduls, Export in externen Solver vorgesehen."
+
+
+def allowables_from_property_class(property_class):
+    if property_class not in ISO_898_PROPERTY_CLASS_RM_MPA:
+        raise ValueError(f"Unbekannte Festigkeitsklasse: {property_class}")
+    rm = ISO_898_PROPERTY_CLASS_RM_MPA[property_class]
+    factors = ISO_898_ALLOWABLE_FACTORS[property_class]
+    allowable_tensile = rm * factors["tensile"]
+    allowable_shear = allowable_tensile * factors["shear_of_tensile"]
+    return {
+        "property_class": property_class,
+        "rm_mpa": rm,
+        "allowable_tensile_mpa": allowable_tensile,
+        "allowable_shear_mpa": allowable_shear,
+    }
+
+
+def preload_from_torque(tightening_torque_nmm, nominal_diameter_mm, nut_factor=0.2):
+    """Vorspannkraft aus Montage-Drehmoment F = T/(K*d)."""
+    if tightening_torque_nmm <= 0.0:
+        raise ValueError("Anziehdrehmoment muss > 0 sein")
+    if nominal_diameter_mm <= 0.0:
+        raise ValueError("Nenndurchmesser muss > 0 sein")
+    if nut_factor <= 0.0:
+        raise ValueError("Reibwertfaktor K muss > 0 sein")
+    return tightening_torque_nmm / (nut_factor * nominal_diameter_mm)
+
+
+def tightening_torque_from_preload(preload_n, nominal_diameter_mm, nut_factor=0.2):
+    if preload_n <= 0.0:
+        raise ValueError("Vorspannkraft muss > 0 sein")
+    if nominal_diameter_mm <= 0.0:
+        raise ValueError("Nenndurchmesser muss > 0 sein")
+    if nut_factor <= 0.0:
+        raise ValueError("Reibwertfaktor K muss > 0 sein")
+    return preload_n * nut_factor * nominal_diameter_mm
+
+
+def combined_von_mises(tensile_stress_mpa, shear_stress_mpa):
+    if tensile_stress_mpa < 0.0 or shear_stress_mpa < 0.0:
+        raise ValueError("Spannungen müssen >= 0 sein")
+    return math.sqrt(tensile_stress_mpa ** 2 + 3.0 * shear_stress_mpa ** 2)
+
+
+def validate_combined_load_case(
+    axial_force_n,
+    transverse_force_n,
+    torsion_moment_nmm,
+    diameter,
+    pitch,
+    engagement_length,
+    allowable_tensile_mpa,
+    allowable_shear_mpa,
+):
+    """Erweiterter Lastfall: Axial + Querkraft + Torsion inkl. v. Mises."""
+    tensile_area = estimate_tensile_stress_area(diameter, pitch)
+    pitch_diameter = diameter - 0.649519 * pitch
+    shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
+
+    sigma_axial = calculate_tensile_stress(max(axial_force_n, 0.0), tensile_area)
+    tau_transverse = calculate_shear_stress(abs(transverse_force_n), shear_area)
+
+    core_diameter = _resolve_core_diameter("METRIC_ISO", diameter, pitch)
+    polar_section_modulus = math.pi * (core_diameter ** 3) / 16.0
+    tau_torsion = abs(torsion_moment_nmm) / polar_section_modulus if polar_section_modulus > 0.0 else 0.0
+
+    tau_combined = tau_transverse + tau_torsion
+    sigma_vm = combined_von_mises(sigma_axial, tau_combined)
+    sf_vm = calculate_safety_factor(allowable_tensile_mpa, sigma_vm) if sigma_vm > 0.0 else float("inf")
+    sf_shear = calculate_safety_factor(allowable_shear_mpa, tau_combined) if tau_combined > 0.0 else float("inf")
+
+    return {
+        "sigma_axial_mpa": sigma_axial,
+        "tau_transverse_mpa": tau_transverse,
+        "tau_torsion_mpa": tau_torsion,
+        "tau_total_mpa": tau_combined,
+        "sigma_von_mises_mpa": sigma_vm,
+        "safety_factor_vm": sf_vm,
+        "safety_factor_shear": sf_shear,
+        "min_safety_factor": min(sf_vm, sf_shear),
+        "passes": min(sf_vm, sf_shear) >= 1.0,
+    }
