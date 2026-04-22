@@ -57,6 +57,7 @@ class UTG_OT_create_thread(bpy.types.Operator):
 
     def execute(self, context):
         props = context.scene.utg_props
+        target_for_boolean = context.active_object if props.negative_mode else None
 
         if props.standard == "CUSTOM":
             diameter = props.custom_diameter
@@ -77,12 +78,16 @@ class UTG_OT_create_thread(bpy.types.Operator):
             self.report({"ERROR"}, validation_error)
             return {"CANCELLED"}
 
+        negative_mode_active = bool(props.negative_mode and target_for_boolean)
+        if props.negative_mode and not negative_mode_active:
+            self.report({"INFO"}, "Negativ-Modus deaktiviert: Kein aktives Zielobjekt gefunden, erzeuge stattdessen Gewindestab.")
+
         profile = generate_profile(
             standard_key,
             diameter,
             pitch,
             tolerance_class=props.tolerance_class,
-            internal=props.negative_mode,
+            internal=negative_mode_active,
             clearance=props.clearance,
         )
 
@@ -109,12 +114,11 @@ class UTG_OT_create_thread(bpy.types.Operator):
 
         apply_material(obj, props.material, props.surface)
 
-        if props.negative_mode:
-            target = context.active_object
-            if target and target != obj:
-                apply_boolean_cutter(context, obj, target)
+        if negative_mode_active:
+            if target_for_boolean != obj:
+                apply_boolean_cutter(context, obj, target_for_boolean)
             else:
-                self.report({"WARNING"}, "Negativ-Modus aktiv, aber kein gültiges Zielobjekt aktiv.")
+                self.report({"WARNING"}, "Negativ-Modus aktiv, aber Zielobjekt ist ungültig.")
 
         if standard_key == "_UTG_CUSTOM":
             THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
