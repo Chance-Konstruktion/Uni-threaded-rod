@@ -69,8 +69,40 @@ def _tolerance_offset_mm(tolerance_class):
     return tolerance_map.get(tc, 0.0)
 
 
+def _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance):
+    if standard_key not in THREAD_STANDARDS:
+        raise ValueError(f"Unbekannter Standard: {standard_key}")
+    if diameter <= 0:
+        raise ValueError("Durchmesser muss > 0 sein")
+    if pitch <= 0:
+        raise ValueError("Steigung (Pitch) muss > 0 sein")
+    if clearance < 0:
+        raise ValueError("Spiel (Clearance) muss >= 0 sein")
+
+    std = THREAD_STANDARDS[standard_key]
+    d3 = std["d3_formula"](diameter, pitch)
+    if d3 <= 0:
+        raise ValueError(
+            f"Ungültige Geometrie: Kerndurchmesser <= 0 (d={diameter}, p={pitch}, d3={d3:.6g})"
+        )
+
+    tc = str(tolerance_class or "").strip()
+    tolerance_def = std.get("tolerance_classes")
+    if tc and tolerance_def:
+        allowed = set()
+        for values in tolerance_def.values():
+            allowed.update(str(v).upper() for v in values)
+        # Rückwärtskompatibel: viele Aufrufer verlassen sich auf den Default "6g",
+        # auch bei Normfamilien ohne 6g-Klasse in dieser vereinfachten Datenbank.
+        if tc.upper() not in allowed and tc.upper() != "6G":
+            raise ValueError(
+                f"Toleranzklasse {tolerance_class} ist für {standard_key} nicht definiert"
+            )
+
+
 def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0):
     """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
+    _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance)
     std = THREAD_STANDARDS[standard_key]
     profile_type = std["profile_type"]
 

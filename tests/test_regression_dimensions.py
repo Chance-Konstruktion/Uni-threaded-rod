@@ -95,6 +95,18 @@ class ReferenceRegressionTests(unittest.TestCase):
                 self.assertGreaterEqual(len(points), 3)
                 self.assertLess(min(p.x for p in points), max(p.x for p in points))
 
+    def test_rejects_non_positive_pitch(self):
+        with self.assertRaisesRegex(ValueError, "Steigung"):
+            geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)
+
+    def test_rejects_unknown_standard(self):
+        with self.assertRaisesRegex(ValueError, "Unbekannter Standard"):
+            geometry_engine.generate_profile("NOT_A_STANDARD", diameter=10.0, pitch=1.5)
+
+    def test_rejects_undefined_tolerance_class(self):
+        with self.assertRaisesRegex(ValueError, "Toleranzklasse"):
+            geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=1.5, tolerance_class="9Z")
+
 
 if __name__ == "__main__":
     unittest.main()
