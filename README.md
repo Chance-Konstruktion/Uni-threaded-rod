@@ -83,6 +83,24 @@ Empfohlener Minimal-Workflow für reale Anwendungen:
 3. Geometrie gegen Referenztabellen verifizieren.
 4. Mechanische Nachweise (mindestens Zug/Scherung, Sicherheitsfaktor) separat rechnen.
 
+### Engineering-Level-Checkliste (verbindlich)
+- **Ziel:** Parametrische Gewindestange (Außengewinde) und zugehörige Innengewinde-Geometrie für CAD/3D-Druck.
+- **Normbezug:** Primär `DIN 13 / ISO 68-1` (metrisch), zusätzlich `ANSI/ASME B1.1` (UNC/UNF) und weitere Gewindefamilien.
+- **Einheiten:** Interne Geometrieberechnung in **mm**; Zollnormen werden beim Auflösen auf mm umgerechnet.
+- **Parameterliste (Mindestumfang):**
+  - `d` (Nenndurchmesser, mm)
+  - `pitch` (Steigung, mm)
+  - `length` (Gewindelänge, mm)
+  - `tolerance_class` (z. B. `6g`, `6H`, `2A`, `2B`)
+  - `clearance` / Spiel (radiales Zusatzspiel, mm)
+- **Normkonformitäts-Status:**
+  - ISO-V-Profil für metrische Gewinde mit normnahen Kennwerten (`d2`, `d3`, Crest-/Root-Parameter) implementiert.
+  - Kerndurchmesserberechnung (`d3`) je Gewindefamilie in der Normdatenbank hinterlegt.
+  - Toleranz- und Spiel-Offsets für Außen-/Innengewinde im Profilgenerator berücksichtigt.
+- **Optional unterstützt:**
+  - Auswahl unterschiedlicher Familien inkl. **DIN/ISO** und **UNC/UNF**.
+  - Material-/Festigkeitsklassen über Presets (z. B. Stahl **8.8**, 10.9, A2, A4).
+
 ---
 
 ### Projektstruktur
