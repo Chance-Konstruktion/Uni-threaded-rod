@@ -1,5 +1,4 @@
 import importlib.util
-import math
 import pathlib
 import sys
 import types
