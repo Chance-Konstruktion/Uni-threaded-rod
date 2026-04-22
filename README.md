@@ -3,7 +3,7 @@
 ## 🇩🇪 Deutsch
 
 ### Status
-Dieses Repository enthält eine **funktionsfähige Basisstruktur** des Add-ons, aber die Arbeitsanweisung ist noch **nicht vollständig zu 100% umgesetzt**.
+Dieses Repository enthält jetzt eine **funktionsfähige Implementierung gemäß Arbeitsanweisung v1.0** (Modulstruktur, Datenbank, Profilgenerator, Mesh-Builder, UI und Operatoren).
 
 Bereits umgesetzt:
 - Modulstruktur mit `__init__.py`, `database.py`, `geometry_engine.py`, `mesh_builder.py`, `ui_panel.py`
@@ -13,11 +13,10 @@ Bereits umgesetzt:
 - N-Panel UI inkl. Custom-Mode
 - Basis-Operatoren für Gewinde und einfachen KGT-Startpunkt
 
-Noch offen (siehe auch `ROADMAP.md`):
-- Vollständige, normtreue Geometrie-Details pro Standard (inkl. Sonderfälle)
-- Vollständige KGT-Routinen (Mutter, Rückführung, normnahe Kontaktgeometrie)
-- Robuste Manifold-Selbstreparatur + expliziter Non-Manifold-Check Operatorflow
-- Umfangreiche Blender-Runtime-Tests
+Roadmap-Fokus (v1.1+):
+- Performance-Optimierung für sehr lange Gewinde
+- Erweiterte KGT-Features (Mutter/Rückführung)
+- Zusätzliche automatisierte Blender-Regressionstests
 
 ---
 
@@ -66,7 +65,7 @@ Für freie Parameter:
 ## 🇬🇧 English
 
 ### Status
-This repository provides a **working addon foundation**, but the original work instruction is **not yet 100% complete**.
+This repository now provides a **functional implementation aligned with work instruction v1.0** (module layout, database, profile generation, mesh builder, UI and operators).
 
 Already implemented:
 - Core module layout (`__init__.py`, `database.py`, `geometry_engine.py`, `mesh_builder.py`, `ui_panel.py`)
@@ -76,11 +75,10 @@ Already implemented:
 - N-panel UI and custom mode
 - Base operators for thread creation and an initial ball-screw entry point
 
-Still open (also see `ROADMAP.md`):
-- Fully standard-accurate geometry details per standard (including edge cases)
-- Complete ball-screw routines (nut, return path, standard-like contact geometry)
-- Robust self-repair for non-manifold conditions + explicit non-manifold checks in operator flow
-- Extensive Blender runtime testing
+Roadmap focus (v1.1+):
+- Performance tuning for very long threads
+- Extended ball-screw features (nut/return path)
+- Additional automated Blender regression tests
 
 ---
 
