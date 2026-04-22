@@ -122,6 +122,29 @@ class MechanicalValidationTests(unittest.TestCase):
         self.assertGreater(result["critical_load_n"], 0.0)
         self.assertGreater(result["safety_factor"], 1.0)
 
+    def test_validate_thread_engagement_strength(self):
+        result = mech.validate_thread_engagement_strength(
+            force_n=4000.0,
+            standard_key="METRIC_ISO",
+            diameter=10.0,
+            pitch=1.5,
+            engagement_length=12.0,
+            nut_allowable_shear_mpa=120.0,
+            bolt_allowable_shear_mpa=220.0,
+        )
+        self.assertGreater(result["shear_stress_mpa"], 0.0)
+        self.assertGreater(result["min_safety_factor"], 1.0)
+        self.assertTrue(result["passes"])
+
+    def test_collect_validation_warnings(self):
+        warnings = mech.collect_validation_warnings(diameter=8.0, pitch=2.0, length=240.0, engagement_length=5.0)
+        self.assertGreaterEqual(len(warnings), 2)
+
+    def test_get_iso965_tolerance_offset_info(self):
+        info = mech.get_iso965_tolerance_offset_info(diameter=10.0, pitch=1.5)
+        self.assertAlmostEqual(info["6g_external"], -0.01, places=6)
+        self.assertAlmostEqual(info["6H_internal"], 0.0, places=6)
+
 
 if __name__ == "__main__":
     unittest.main()

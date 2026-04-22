@@ -1,5 +1,23 @@
 MM_PER_INCH = 25.4
 
+# Kleine praxisrelevante ISO-Tabellenbasis (erweiterbar) für exakte Nennreihen.
+# Werte in mm, abgeleitet aus ISO 261 / ISO 965-1 (vereinfachte Auswahldaten).
+ISO_METRIC_COARSE_TABLE = {
+    "M6": {"diameter": 6.0, "pitch": 1.0, "d2_basic": 5.350, "d3_basic": 4.773},
+    "M8": {"diameter": 8.0, "pitch": 1.25, "d2_basic": 7.188, "d3_basic": 6.466},
+    "M10": {"diameter": 10.0, "pitch": 1.5, "d2_basic": 9.026, "d3_basic": 8.160},
+    "M12": {"diameter": 12.0, "pitch": 1.75, "d2_basic": 10.863, "d3_basic": 9.853},
+}
+
+# Vereinfachte fundamentale Abmaße (radial) für häufige Paarung 6g / 6H.
+# Ziel: reproduzierbares Fit-Verhalten statt generischer Pauschal-Offsets.
+ISO_965_TOLERANCE_RADIAL_OFFSETS = {
+    (6.0, 1.0): {"6g_external": -0.010, "6H_internal": 0.000},
+    (8.0, 1.25): {"6g_external": -0.010, "6H_internal": 0.000},
+    (10.0, 1.5): {"6g_external": -0.010, "6H_internal": 0.000},
+    (12.0, 1.75): {"6g_external": -0.013, "6H_internal": 0.000},
+}
+
 # ------------------------------------------------------------------------------
 # 3.1 NORMEN-DATENBANK
 # ------------------------------------------------------------------------------
@@ -281,3 +299,11 @@ def get_standard_pitch(standard_key, diameter):
     numeric_keys = [k for k in std["diam_pitch_map"].keys() if isinstance(k, (int, float))]
     closest = min(numeric_keys, key=lambda x: abs(x - diameter))
     return std["diam_pitch_map"][closest]
+
+
+def resolve_iso_metric_coarse_row(diameter, pitch, diameter_tolerance=1e-6, pitch_tolerance=1e-6):
+    """Liefert Datensatz aus der integrierten ISO-Regelgewinde-Tabelle."""
+    for row in ISO_METRIC_COARSE_TABLE.values():
+        if abs(row["diameter"] - diameter) <= diameter_tolerance and abs(row["pitch"] - pitch) <= pitch_tolerance:
+            return row
+    return None
