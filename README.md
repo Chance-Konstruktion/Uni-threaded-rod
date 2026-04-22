@@ -18,10 +18,9 @@ Bereits umgesetzt:
 - Presets inkl. Schnellanwendung im UI
 - LOD-Stufen (Preview/Final/Custom) und adaptive Segmentierung für lange Gewinde
 
-Roadmap-Fokus (v1.1+):
-- Performance-Optimierung für sehr lange Gewinde
-- Normnähere KGT-Profilkette (GOTHIC) und Maßvergleich
-- Zusätzliche automatisierte Blender-Regressionstests
+Roadmap-Status:
+- ✅ v1.0-Roadmap vollständig abgeschlossen
+- v1.1+ als optionaler Ausbaupfad (Performance, zusätzliche Maß-Regressionen, Lasttests)
 
 ---
 
@@ -30,7 +29,7 @@ Der **Universal Thread Generator** erstellt parametrisierte Gewindegeometrie in 
 - Außengewinde
 - Innengewinde via Negativ-/Boolean-Modus
 - Mehrgängige Gewinde
-- (In Entwicklung) Kugelgewindetriebe
+- Kugelgewindetriebe (Basisworkflow verfügbar)
 
 ---
 
@@ -95,10 +94,9 @@ Already implemented:
 - Dedicated ball-nut operator with internal profile (boolean-based)
 - Optional return-path module for ball nuts (simplified geometry)
 
-Roadmap focus (v1.1+):
-- Performance tuning for very long threads
-- More standards-accurate GOTHIC chain and dimensional checks
-- Additional automated Blender regression tests
+Roadmap status:
+- ✅ v1.0 roadmap fully completed
+- v1.1+ remains an optional expansion path (performance, extra dimensional regressions, stress tests)
 
 ---
 
@@ -107,7 +105,7 @@ The **Universal Thread Generator** creates parametric thread geometry in Blender
 - External threads
 - Internal threads via negative/boolean mode
 - Multi-start threads
-- (In progress) ball screw geometry
+- Ball screw geometry (baseline workflow available)
 
 ---
 
