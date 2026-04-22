@@ -57,3 +57,11 @@ Alle definierten DoD-Kriterien sind erfüllt und die aktuell vorhandenen automat
 ## Backlog (v1.1+, optional)
 1. Tabellarische Sollmaß-Regressionen pro Nenngröße weiter ausbauen (pro Standard + Toleranzklasse).
 2. Erweiterte Lasttests für extreme Parameterkombinationen inkl. Blender-Boolean-Workflow ergänzen.
+
+
+## Phase 7 – High-End Engineering (v1.1)
+- [x] ISO-Profilgeometrie erweitert: Kuppenabflachung tabellenbasiert und Kerbradius in Profilstützpunkten.
+- [x] ISO-Regelreihe erweitert (M1–M64) in der integrierten Normtabelle.
+- [x] Materialmodell ergänzt um ableitbare zulässige Spannungen aus Festigkeitsklassen (z. B. 8.8, 10.9).
+- [x] Erweiterte Mechanik ergänzt: Vorspannungs-/Reibwertmodell, kombinierte Lastfälle, bestehender Knicknachweis integriert.
+- [x] High-Level-API ergänzt: `thread("M10", fit="6g/6H", material="8.8", length=50)`.
