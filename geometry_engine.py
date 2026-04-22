@@ -4,9 +4,32 @@ from mathutils import Vector
 from .database import THREAD_STANDARDS
 
 
+def _tolerance_offset_mm(tolerance_class):
+    """Grobe radiale Toleranzverschiebung in mm (positiv = größer, negativ = kleiner)."""
+    if not tolerance_class:
+        return 0.0
+
+    tc = str(tolerance_class).strip().upper()
+    tolerance_map = {
+        "4G": -0.02,
+        "6G": -0.01,
+        "8G": -0.04,
+        "4H": 0.00,
+        "5H": 0.01,
+        "6H": 0.02,
+        "7H": 0.03,
+        "1A": -0.05,
+        "2A": -0.03,
+        "3A": -0.01,
+        "1B": 0.01,
+        "2B": 0.02,
+        "3B": 0.03,
+    }
+    return tolerance_map.get(tc, 0.0)
+
+
 def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0):
     """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
-    _ = tolerance_class
     std = THREAD_STANDARDS[standard_key]
     profile_type = std["profile_type"]
 
@@ -16,7 +39,8 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
     r2 = d2 / 2.0
     r3 = d3 / 2.0
 
-    offset = clearance / 2.0 if internal else -clearance / 2.0
+    tol_offset = _tolerance_offset_mm(tolerance_class)
+    offset = (clearance / 2.0 + tol_offset) if internal else (-clearance / 2.0 + tol_offset)
     r += offset
     r2 += offset
     r3 += offset
