@@ -62,6 +62,10 @@ Für freie Parameter:
 - **Headless Blender-Smoke-Test:** `blender -b --factory-startup --python scripts/blender_smoke_test.py`
 - **CI:** GitHub Actions (`.github/workflows/ci.yml`) führt Ruff, Unit-Tests und den Blender-Smoke-Test aus.
 
+### Release-Hinweis
+- Der initiale Abschlussstand ist als **v1.0.0** dokumentiert.
+- Änderungsverlauf siehe `CHANGELOG.md`.
+
 ### Bekannte Einschränkungen
 - Profilparameter sind für einige Standards noch **plausibel-normnah**, aber nicht vollständig tabellarisch normabgeleitet.
 - Die GOTHIC-Kette für KGT ist verbessert, aber weiterhin eine **annähernde** Auslegung.
@@ -76,6 +80,7 @@ Für freie Parameter:
 - `geometry_engine.py` – 2D-Profilberechnung
 - `mesh_builder.py` – Helix-Extrusion, Material, Boolean-Helfer
 - `ROADMAP.md` – offener Entwicklungsplan
+- `CHANGELOG.md` – Versionshistorie
 
 ---
 
@@ -139,3 +144,4 @@ For free/custom parameters:
 - `geometry_engine.py` – 2D profile generation
 - `mesh_builder.py` – helix extrusion, material, boolean helpers
 - `ROADMAP.md` – open development roadmap
+- `CHANGELOG.md` – release history
