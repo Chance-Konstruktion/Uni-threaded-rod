@@ -3,28 +3,34 @@
 ## Zielbild
 Normnahe, robuste und workflow-taugliche Gewindeerzeugung in Blender für Außengewinde, Innengewinde und Kugelgewindetriebe.
 
+## Status-Update (2026-04-22)
+Systematische Durchsicht der Punkte gegen aktuellen Code-Stand:
+- ✅ **Erledigt**: technisch vorhanden und im Add-on nutzbar
+- 🟡 **Teilweise**: Grundfunktion vorhanden, aber noch nicht norm- oder workflow-vollständig
+- ⬜ **Offen**: noch nicht umgesetzt
+
 ## Phase 1 – Fundament stabilisieren (kurzfristig)
-- [ ] Einheitliche Einheiten-/Konvertierungslogik für inch/mm und symbolische Nenngrößen
-- [ ] Fehlerbehandlung für Standards mit String-Durchmessern (z. B. G, NPT, PG, Edison)
-- [ ] Konsistente Nutzung von `tolerance_class` in Geometrieformeln
-- [ ] Verbesserte Parameter-Validierung (z. B. Pitch/Diameter/Length/Starts)
+- [x] Einheitliche Einheiten-/Konvertierungslogik für inch/mm und symbolische Nenngrößen ✅
+- [x] Fehlerbehandlung für Standards mit String-Durchmessern (z. B. G, NPT, PG, Edison) ✅
+- [x] Konsistente Nutzung von `tolerance_class` in Geometrieformeln ✅
+- [x] Verbesserte Parameter-Validierung (z. B. Pitch/Diameter/Length/Starts) ✅
 
 ## Phase 2 – Geometriequalität (kurz- bis mittelfristig)
-- [ ] Normtreue Profilparameter je Standard (Flanken, Kopf-/Fußrundung, Abflachungen)
-- [ ] Taper-Logik für NPT über Länge korrekt einarbeiten
-- [ ] Endtypen vollständig umsetzen (`FLAT`, `CHAMFER`, `RUNOUT` mit echter Geometrie)
-- [ ] Strategien gegen Self-Intersection und zu dünne Kernradien
+- [ ] Normtreue Profilparameter je Standard (Flanken, Kopf-/Fußrundung, Abflachungen) 🟡
+- [ ] Taper-Logik für NPT über Länge korrekt einarbeiten ⬜
+- [x] Endtypen vollständig umsetzen (`FLAT`, `CHAMFER`, `RUNOUT` mit echter Geometrie) ✅
+- [x] Strategien gegen Self-Intersection und zu dünne Kernradien ✅
 
 ## Phase 3 – Manifold- und Boolean-Robustheit
-- [ ] Expliziter Non-Manifold-Check nach Erzeugung
-- [ ] Automatische Reparaturpfade (Lochfüllung, Brückenkanten, lokale Neuvernetzung)
-- [ ] Stabilerer Boolean-Workflow inkl. Selektion/Aktivobjekt-Schutz
+- [x] Expliziter Non-Manifold-Check nach Erzeugung ✅
+- [x] Automatische Reparaturpfade (Lochfüllung, Brückenkanten, lokale Neuvernetzung) 🟡
+- [x] Stabilerer Boolean-Workflow inkl. Selektion/Aktivobjekt-Schutz 🟡
 
 ## Phase 4 – Kugelgewindetrieb (KGT)
-- [ ] Echte GOTHIC-Profilkette nach DIN 69051 / ISO 3408 (annähernd)
-- [ ] Muttergeometrie mit Innenprofil
-- [ ] Kugelrückführung als optionales Modul
-- [ ] Separate Operatoren und UI für KGT-Komponenten
+- [ ] Echte GOTHIC-Profilkette nach DIN 69051 / ISO 3408 (annähernd) 🟡
+- [ ] Muttergeometrie mit Innenprofil ⬜
+- [ ] Kugelrückführung als optionales Modul ⬜
+- [x] Separate Operatoren und UI für KGT-Komponenten 🟡
 
 ## Phase 5 – UX & Performance
 - [ ] Dynamische UI-Optionen pro Standard (nur gültige Felder anzeigen)
@@ -39,7 +45,13 @@ Normnahe, robuste und workflow-taugliche Gewindeerzeugung in Blender für Außen
 - [ ] CI-Workflow (Lint + Unit + Blender smoke test)
 
 ## Definition of Done (v1.0)
-- [ ] Alle Kernstandards mit plausiblen Normmaßen erzeugbar
-- [ ] Innen-/Außengewinde robust und manifold in typischen Parameterräumen
-- [ ] KGT-Basisworkflow nutzbar
-- [ ] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben
+- [ ] Alle Kernstandards mit plausiblen Normmaßen erzeugbar 🟡
+- [ ] Innen-/Außengewinde robust und manifold in typischen Parameterräumen 🟡
+- [x] KGT-Basisworkflow nutzbar ✅
+- [ ] Dokumentation (DE/EN), Beispiele und bekannte Einschränkungen klar beschrieben 🟡
+
+## Nächste priorisierte Arbeitspakete
+1. NPT-Taper entlang der Gewindelänge in der Mesh-Erzeugung korrekt abbilden.
+2. Profilparameter pro Standard weiter normtreu differenzieren (insb. Rundungen/Abflachungen).
+3. Boolean-Workflow robuster machen (Objektzustand sichern/wiederherstellen).
+4. KGT-Mutter mit Innenprofil als eigenständigen Operator ergänzen.
