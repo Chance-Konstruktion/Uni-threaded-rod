@@ -107,6 +107,23 @@ class ReferenceRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Toleranzklasse"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=1.5, tolerance_class="9Z")
 
+    def test_metric_iso_core_diameter_matches_reference_formula(self):
+        diameter_mm, pitch_mm = 12.0, 1.75
+        d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
+        self.assertAlmostEqual(d3, diameter_mm - 1.226869 * pitch_mm, places=6)
+
+    def test_tolerance_and_clearance_shift_profile_radius(self):
+        base = geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=1.5, tolerance_class="6g", clearance=0.0)
+        loose_internal = geometry_engine.generate_profile(
+            "METRIC_ISO",
+            diameter=10.0,
+            pitch=1.5,
+            tolerance_class="6H",
+            internal=True,
+            clearance=0.2,
+        )
+        self.assertGreater(loose_internal[0].x, base[0].x)
+
 
 if __name__ == "__main__":
     unittest.main()
