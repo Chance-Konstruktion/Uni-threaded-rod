@@ -83,12 +83,17 @@ class UTG_OT_create_thread(bpy.types.Operator):
         if props.negative_mode and not negative_mode_active:
             self.report({"INFO"}, "Negativ-Modus deaktiviert: Kein aktives Zielobjekt gefunden, erzeuge stattdessen Gewindestab.")
 
+        std_tol = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
+        internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
+        tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
+        profile_internal = bool(negative_mode_active or tolerance_is_internal)
+
         profile = generate_profile(
             standard_key,
             diameter,
             pitch,
             tolerance_class=props.tolerance_class,
-            internal=negative_mode_active,
+            internal=profile_internal,
             clearance=props.clearance,
         )
 
