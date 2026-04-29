@@ -21,7 +21,11 @@ def get_tolerance_items(self, context):
     tol = std.get("tolerance_classes", {})
     ext = tol.get("external", [])
     inner = tol.get("internal", [])
-    all_items = ext + inner
+    # Für normale Gewindestangen nur Außengewinde-Klassen anzeigen.
+    # Innenklassen (z. B. 6H) erscheinen nur im Negativ-Modus.
+    all_items = inner if props.negative_mode else ext
+    if not all_items:
+        all_items = ext + inner
     if not all_items:
         all_items = ["6g"]
     return [(v, v, "Toleranz") for v in all_items]
