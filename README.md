@@ -1,5 +1,32 @@
 # Uni-Threaded-rod for Blender
 
+## Kurzfassung / Executive Summary
+
+### 🇩🇪 Deutsch (Kurzfassung)
+**Uni-Threaded-rod** ist ein Blender-Add-on zur parametrischen Gewindeerzeugung für Außen- und Innengewinde sowie einen KGT-Basisworkflow.
+
+**Kernfunktionen**
+- Parametrische Erzeugung von Außengewinden, Innengewinden (Boolean) und mehrgängigen Gewinden
+- Unterstützte Profilfamilien: V, Trapez, Rund, Buttress, Gothic
+- Presets, LOD-Stufen (Preview/Final/Custom) und adaptive Segmentierung
+- Engineering-Helfer (z. B. Material-/Festigkeitsklassen, Plausibilitäts-Checks)
+
+**Hinweis**
+Das Add-on erzeugt CAD-Geometrie normnah, ersetzt aber keine vollständige technische Auslegung.
+
+### 🇬🇧 English (Short Summary)
+**Uni-Threaded-rod** is a Blender add-on for parametric thread generation covering external threads, internal threads, and a baseline ball-screw workflow.
+
+**Core features**
+- Parametric creation of external/internal (boolean) and multi-start threads
+- Supported profile families: V, trapezoid, round, buttress, gothic
+- Presets, LOD levels (Preview/Final/Custom), and adaptive segmentation
+- Engineering helpers (e.g., material/property classes, plausibility checks)
+
+**Note**
+The add-on targets standards-aligned CAD geometry generation and does not replace full engineering verification.
+
+---
 ## 🇩🇪 Deutsch
 
 ### Status
