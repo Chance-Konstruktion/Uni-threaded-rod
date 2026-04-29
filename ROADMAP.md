@@ -68,6 +68,6 @@ Systematische Durchsicht der Punkte gegen aktuellen Code-Stand / Systematic revi
 
 ## Phase 8 – Bilingual Workflow (v1.2)
 - [x] Roadmap zweisprachig (DE/EN) strukturiert.
-- [ ] README-Kurzfassung als DE/EN-Dual-Section ergänzen.
+- [x] README-Kurzfassung als DE/EN-Dual-Section ergänzen.
 - [ ] UI-Textressourcen vorbereiten (DE/EN labels/tooltips via lookup table).
 - [ ] Exportierbare Reports optional in Deutsch oder Englisch erzeugen.
