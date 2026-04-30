@@ -8,6 +8,13 @@ import importlib.util
 import pathlib
 import sys
 
+if importlib.util.find_spec("bpy") is None:
+    if "pytest" in sys.modules:
+        import pytest
+
+        pytest.skip("bpy is required for Blender smoke test", allow_module_level=True)
+    raise SystemExit("bpy is required. Run this script through Blender.")
+
 import bpy
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
