@@ -27,6 +27,24 @@ if HAS_BPY:
     )
     from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
 
+    bl_info = {
+        "name": "Uni-threaded-rod",
+        "author": "Ihr Name",
+        "version": (1, 0, 0),
+        "blender": (4, 0, 0),
+        "location": "View3D > Sidebar > Uni-threaded-rod",
+        "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
+        "category": "Mesh",
+    }
+
+    def _create_standard_from_custom(props):
+        return {
+            "profile_type": props.custom_profile_type,
+            "flank_angle": props.custom_flank_angle,
+            "d2_formula": lambda d, p: d - 0.5 * p,
+            "d3_formula": lambda d, p: d - p,
+        }
+
 
     def _create_standard_from_custom(props):
         return {
@@ -250,6 +268,34 @@ if HAS_BPY:
                 lod_level=props.lod_level,
                 segment_override=props.segment_override,
             )
+            )
+            body_mesh = bpy.data.meshes.new("UTG_BallNutBody")
+            body_bm.to_mesh(body_mesh)
+            body_bm.free()
+
+            nut_obj = bpy.data.objects.new("KGT_Mutter", body_mesh)
+            context.collection.objects.link(nut_obj)
+
+            inner_profile = generate_profile(
+                "BALL_SCREW",
+                diameter,
+                pitch,
+                tolerance_class=props.tolerance_class,
+                internal=True,
+                clearance=props.clearance + props.nut_internal_clearance,
+            )
+            cutter_bm = create_thread_mesh(
+                name="KGT_Innenprofil",
+                profile_points=inner_profile,
+                diameter=diameter,
+                pitch=pitch,
+                length=max(props.nut_length, pitch * 2.0),
+                starts=max(1, props.starts),
+                handedness=props.handedness,
+                end_type="FLAT",
+                lod_level=props.lod_level,
+                segment_override=props.segment_override,
+            )
             cutter_mesh = bpy.data.meshes.new("UTG_BallNutCutter")
             cutter_bm.to_mesh(cutter_mesh)
             cutter_bm.free()
@@ -329,6 +375,16 @@ if HAS_BPY:
     if __name__ == "__main__":
         register()
 else:
+    bl_info = {
+        "name": "Uni-threaded-rod",
+        "author": "Ihr Name",
+        "version": (1, 0, 0),
+        "blender": (4, 0, 0),
+        "location": "View3D > Sidebar > Uni-threaded-rod",
+        "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
+        "category": "Mesh",
+    }
+
     def register():
         return None
 
