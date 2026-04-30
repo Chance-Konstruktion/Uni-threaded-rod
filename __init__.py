@@ -268,34 +268,6 @@ if HAS_BPY:
                 lod_level=props.lod_level,
                 segment_override=props.segment_override,
             )
-            )
-            body_mesh = bpy.data.meshes.new("UTG_BallNutBody")
-            body_bm.to_mesh(body_mesh)
-            body_bm.free()
-
-            nut_obj = bpy.data.objects.new("KGT_Mutter", body_mesh)
-            context.collection.objects.link(nut_obj)
-
-            inner_profile = generate_profile(
-                "BALL_SCREW",
-                diameter,
-                pitch,
-                tolerance_class=props.tolerance_class,
-                internal=True,
-                clearance=props.clearance + props.nut_internal_clearance,
-            )
-            cutter_bm = create_thread_mesh(
-                name="KGT_Innenprofil",
-                profile_points=inner_profile,
-                diameter=diameter,
-                pitch=pitch,
-                length=max(props.nut_length, pitch * 2.0),
-                starts=max(1, props.starts),
-                handedness=props.handedness,
-                end_type="FLAT",
-                lod_level=props.lod_level,
-                segment_override=props.segment_override,
-            )
             cutter_mesh = bpy.data.meshes.new("UTG_BallNutCutter")
             cutter_bm.to_mesh(cutter_mesh)
             cutter_bm.free()
