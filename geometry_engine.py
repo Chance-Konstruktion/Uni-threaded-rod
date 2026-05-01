@@ -20,6 +20,14 @@ class ProfilePoint:
 
     x: float
     y: float
+_RATIO_WARNINGS = []
+
+
+def consume_ratio_warnings():
+    """Liefert und leert gesammelte Ratio-Parserwarnungen."""
+    warnings = list(_RATIO_WARNINGS)
+    _RATIO_WARNINGS.clear()
+    return warnings
 
 
 def _safe_ratio(value, default):
@@ -35,7 +43,9 @@ def _safe_ratio(value, default):
     try:
         node = ast.parse(expr, mode="eval")
     except SyntaxError:
-        logging.getLogger(__name__).warning("Ungültiger Ratio-Ausdruck '%s'; verwende Default %s.", value, default)
+        message = f"Ungültiger Ratio-Ausdruck '{value}'; Default {default} verwendet."
+        logging.getLogger(__name__).warning(message)
+        _RATIO_WARNINGS.append(message)
         return default
 
     def _eval(n):
@@ -56,7 +66,9 @@ def _safe_ratio(value, default):
     try:
         return float(_eval(node))
     except Exception:
-        logging.getLogger(__name__).warning("Ratio-Ausdruck '%s' konnte nicht ausgewertet werden; verwende Default %s.", value, default)
+        message = f"Ratio-Ausdruck '{value}' konnte nicht ausgewertet werden; Default {default} verwendet."
+        logging.getLogger(__name__).warning(message)
+        _RATIO_WARNINGS.append(message)
         return default
 
 
