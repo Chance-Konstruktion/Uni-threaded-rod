@@ -27,25 +27,6 @@ if HAS_BPY:
     )
     from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
 
-    bl_info = {
-        "name": "Uni-threaded-rod",
-        "author": "Ihr Name",
-        "version": (1, 0, 0),
-        "blender": (4, 0, 0),
-        "location": "View3D > Sidebar > Uni-threaded-rod",
-        "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
-        "category": "Mesh",
-    }
-
-    def _create_standard_from_custom(props):
-        return {
-            "profile_type": props.custom_profile_type,
-            "flank_angle": props.custom_flank_angle,
-            "d2_formula": lambda d, p: d - 0.5 * p,
-            "d3_formula": lambda d, p: d - p,
-        }
-
-
     def _create_standard_from_custom(props):
         return {
             "profile_type": props.custom_profile_type,
