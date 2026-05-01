@@ -156,9 +156,11 @@ def calculate_safety_factor(allowable_stress_mpa, actual_stress_mpa):
     return allowable_stress_mpa / actual_stress_mpa
 
 
-def estimate_tensile_stress_area(diameter, pitch):
-    """Näherung für metrische Gewinde nach As ~= π/4*(d-0.9382P)^2 in mm²."""
-    d_eff = diameter - 0.9382 * pitch
+def estimate_tensile_stress_area(diameter, pitch, standard_key="METRIC_ISO"):
+    """Näherung für Spannungsquerschnitt As in mm² (standardabhängig, metrischer Fallback)."""
+    std = THREAD_STANDARDS.get(standard_key, {})
+    tensile_formula = std.get("tensile_stress_area_formula")
+    d_eff = tensile_formula(diameter, pitch) if callable(tensile_formula) else (diameter - 0.9382 * pitch)
     if d_eff <= 0:
         raise ValueError("Effektivdurchmesser <= 0")
     return math.pi * 0.25 * d_eff * d_eff
@@ -189,7 +191,7 @@ def validate_mechanical_load_case(
     standard_key="METRIC_ISO",
 ):
     """Mechanische Validierung: Zug/Scherung + Sicherheitsfaktor (vereinfachte Näherung)."""
-    tensile_area = estimate_tensile_stress_area(diameter, pitch)
+    tensile_area = estimate_tensile_stress_area(diameter, pitch, standard_key=standard_key)
     pitch_diameter = resolve_standard_pitch_diameter(standard_key, diameter, pitch)
     shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
 
@@ -384,7 +386,7 @@ def validate_combined_load_case(
     standard_key="METRIC_ISO",
 ):
     """Erweiterter Lastfall: Axial + Querkraft + Torsion inkl. v. Mises."""
-    tensile_area = estimate_tensile_stress_area(diameter, pitch)
+    tensile_area = estimate_tensile_stress_area(diameter, pitch, standard_key=standard_key)
     pitch_diameter = resolve_standard_pitch_diameter(standard_key, diameter, pitch)
     shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
 
