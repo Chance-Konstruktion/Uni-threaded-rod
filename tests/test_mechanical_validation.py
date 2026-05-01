@@ -161,6 +161,8 @@ class HighEndMechanicsTests(unittest.TestCase):
         self.assertAlmostEqual(torque, 50000.0, places=6)
 
     def test_combined_load_case(self):
+        # Bewusst ohne standard_key: validiert den rückwärtskompatiblen Default
+        # (derzeit "METRIC_ISO"). Für nicht-metrische Standards separat ergänzen.
         result = mech.validate_combined_load_case(
             axial_force_n=5000.0,
             transverse_force_n=1200.0,

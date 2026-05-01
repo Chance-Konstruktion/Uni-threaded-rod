@@ -25,7 +25,7 @@ def get_tolerance_items(self, context):
     # Innenklassen (z. B. 6H) erscheinen nur im Negativ-Modus.
     all_items = inner if props.negative_mode else ext
     if props.negative_mode and not all_items:
-        all_items = ["6H"] if not inner else inner
+        all_items = inner
     elif not all_items:
         all_items = ext + inner
     if not all_items:
