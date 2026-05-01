@@ -1,4 +1,5 @@
 import ast
+import logging
 import math
 from dataclasses import dataclass
 
@@ -34,6 +35,7 @@ def _safe_ratio(value, default):
     try:
         node = ast.parse(expr, mode="eval")
     except SyntaxError:
+        logging.getLogger(__name__).warning("Ungültiger Ratio-Ausdruck '%s'; verwende Default %s.", value, default)
         return default
 
     def _eval(n):
@@ -54,6 +56,7 @@ def _safe_ratio(value, default):
     try:
         return float(_eval(node))
     except Exception:
+        logging.getLogger(__name__).warning("Ratio-Ausdruck '%s' konnte nicht ausgewertet werden; verwende Default %s.", value, default)
         return default
 
 
