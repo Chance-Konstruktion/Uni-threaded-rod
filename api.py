@@ -43,6 +43,7 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
         engagement_length=min(length, max(diameter, pitch * 2.0)),
         allowable_tensile_mpa=allowables["allowable_tensile_mpa"],
         allowable_shear_mpa=allowables["allowable_shear_mpa"],
+        standard_key=standard,
     )
 
     return {

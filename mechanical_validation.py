@@ -373,6 +373,7 @@ def validate_combined_load_case(
     engagement_length,
     allowable_tensile_mpa,
     allowable_shear_mpa,
+    standard_key="METRIC_ISO",
 ):
     """Erweiterter Lastfall: Axial + Querkraft + Torsion inkl. v. Mises."""
     tensile_area = estimate_tensile_stress_area(diameter, pitch)
@@ -382,7 +383,7 @@ def validate_combined_load_case(
     sigma_axial = calculate_tensile_stress(max(axial_force_n, 0.0), tensile_area)
     tau_transverse = calculate_shear_stress(abs(transverse_force_n), shear_area)
 
-    core_diameter = _resolve_core_diameter("METRIC_ISO", diameter, pitch)
+    core_diameter = _resolve_core_diameter(standard_key, diameter, pitch)
     polar_section_modulus = math.pi * (core_diameter ** 3) / 16.0
     tau_torsion = abs(torsion_moment_nmm) / polar_section_modulus if polar_section_modulus > 0.0 else 0.0
 

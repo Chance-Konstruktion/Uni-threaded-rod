@@ -1,3 +1,4 @@
+import ast
 import math
 from dataclasses import dataclass
 
@@ -21,32 +22,39 @@ class ProfilePoint:
 
 
 def _safe_ratio(value, default):
-    """Akzeptiert numerische Werte oder einfache P-Ausdrücke (z. B. 'P/8')."""
+    """Akzeptiert numerische Werte oder P-Ausdrücke mit +,-,*,/ (z. B. '0.5*P-0.5')."""
     if value is None:
         return default
     if isinstance(value, (int, float)):
         return float(value)
 
-    text = str(value).strip().upper().replace(" ", "")
-    if text == "P":
-        return 1.0
-    if text.startswith("P/"):
-        try:
-            return 1.0 / float(text[2:])
-        except ValueError:
-            return default
-    if text.endswith("*P"):
-        try:
-            return float(text[:-2])
-        except ValueError:
-            return default
-    if "*P/" in text:
-        try:
-            num, den = text.split("*P/")
-            return float(num) / float(den)
-        except ValueError:
-            return default
-    return default
+    expr = str(value).strip().upper().replace(" ", "")
+    if not expr:
+        return default
+    try:
+        node = ast.parse(expr, mode="eval")
+    except SyntaxError:
+        return default
+
+    def _eval(n):
+        if isinstance(n, ast.Expression):
+            return _eval(n.body)
+        if isinstance(n, ast.BinOp) and type(n.op) in (ast.Add, ast.Sub, ast.Mult, ast.Div):
+            left, right = _eval(n.left), _eval(n.right)
+            return {ast.Add: left + right, ast.Sub: left - right, ast.Mult: left * right, ast.Div: left / right}[type(n.op)]
+        if isinstance(n, ast.UnaryOp) and type(n.op) in (ast.UAdd, ast.USub):
+            val = _eval(n.operand)
+            return val if isinstance(n.op, ast.UAdd) else -val
+        if isinstance(n, ast.Name) and n.id == "P":
+            return 1.0
+        if isinstance(n, ast.Constant) and isinstance(n.value, (int, float)):
+            return float(n.value)
+        raise ValueError
+
+    try:
+        return float(_eval(node))
+    except Exception:
+        return default
 
 
 def _tolerance_offset_mm(tolerance_class, standard_key=None, diameter=None, pitch=None, internal=False):
@@ -156,6 +164,10 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
             crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 12.0)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 6.0)
             root_radius = pitch * 0.137329
+        elif standard_key in {"NPT"}:
+            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 8.0)
+            root_radius = pitch * _safe_ratio(sp.get("root_radius"), 0.0714)
         else:
             crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 0.05)
             root_flat = pitch * _safe_ratio(sp.get("root_flat"), 0.10)
