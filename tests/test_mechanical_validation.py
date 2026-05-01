@@ -64,6 +64,27 @@ class MechanicalValidationTests(unittest.TestCase):
         self.assertGreater(result["tensile"].safety_factor, 1.0)
         self.assertGreater(result["min_safety_factor"], 1.0)
 
+    def test_mechanical_load_case_uses_standard_pitch_diameter(self):
+        metric = mech.validate_mechanical_load_case(
+            force_n=5000.0,
+            allowable_tensile_mpa=320.0,
+            allowable_shear_mpa=180.0,
+            diameter=10.0,
+            pitch=1.5,
+            engagement_length=10.0,
+            standard_key="METRIC_ISO",
+        )
+        bsw = mech.validate_mechanical_load_case(
+            force_n=5000.0,
+            allowable_tensile_mpa=320.0,
+            allowable_shear_mpa=180.0,
+            diameter=10.0,
+            pitch=1.5,
+            engagement_length=10.0,
+            standard_key="WHITWORTH_BSW",
+        )
+        self.assertNotAlmostEqual(metric["shear"].stress_mpa, bsw["shear"].stress_mpa, places=6)
+
     def test_validate_thread_input_uses_standard_core_formula(self):
         result = mech.validate_thread_input(
             diameter=10.0,
@@ -176,6 +197,31 @@ class HighEndMechanicsTests(unittest.TestCase):
         self.assertGreater(result["sigma_von_mises_mpa"], 0.0)
         self.assertGreater(result["tau_torsion_mpa"], 0.0)
         self.assertGreater(result["min_safety_factor"], 1.0)
+
+    def test_combined_load_case_uses_standard_pitch_diameter(self):
+        metric = mech.validate_combined_load_case(
+            axial_force_n=5000.0,
+            transverse_force_n=1200.0,
+            torsion_moment_nmm=20000.0,
+            diameter=10.0,
+            pitch=1.5,
+            engagement_length=10.0,
+            allowable_tensile_mpa=480.0,
+            allowable_shear_mpa=250.0,
+            standard_key="METRIC_ISO",
+        )
+        bsw = mech.validate_combined_load_case(
+            axial_force_n=5000.0,
+            transverse_force_n=1200.0,
+            torsion_moment_nmm=20000.0,
+            diameter=10.0,
+            pitch=1.5,
+            engagement_length=10.0,
+            allowable_tensile_mpa=480.0,
+            allowable_shear_mpa=250.0,
+            standard_key="WHITWORTH_BSW",
+        )
+        self.assertNotAlmostEqual(metric["tau_transverse_mpa"], bsw["tau_transverse_mpa"], places=6)
 
     def test_high_level_thread_api(self):
         payload = api.thread("M10", fit="6g/6H", material="8.8", length=50)

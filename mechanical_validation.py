@@ -179,10 +179,18 @@ def estimate_core_area_from_standard(standard_key, diameter, pitch):
     return math.pi * 0.25 * d3 * d3
 
 
-def validate_mechanical_load_case(force_n, allowable_tensile_mpa, allowable_shear_mpa, diameter, pitch, engagement_length):
+def validate_mechanical_load_case(
+    force_n,
+    allowable_tensile_mpa,
+    allowable_shear_mpa,
+    diameter,
+    pitch,
+    engagement_length,
+    standard_key="METRIC_ISO",
+):
     """Mechanische Validierung: Zug/Scherung + Sicherheitsfaktor (vereinfachte Näherung)."""
     tensile_area = estimate_tensile_stress_area(diameter, pitch)
-    pitch_diameter = diameter - 0.649519 * pitch
+    pitch_diameter = resolve_standard_pitch_diameter(standard_key, diameter, pitch)
     shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
 
     sigma_t = calculate_tensile_stress(force_n, tensile_area)
@@ -377,7 +385,7 @@ def validate_combined_load_case(
 ):
     """Erweiterter Lastfall: Axial + Querkraft + Torsion inkl. v. Mises."""
     tensile_area = estimate_tensile_stress_area(diameter, pitch)
-    pitch_diameter = diameter - 0.649519 * pitch
+    pitch_diameter = resolve_standard_pitch_diameter(standard_key, diameter, pitch)
     shear_area = estimate_thread_shear_area(pitch_diameter, engagement_length)
 
     sigma_axial = calculate_tensile_stress(max(axial_force_n, 0.0), tensile_area)
