@@ -60,8 +60,8 @@ def create_thread_mesh(
     total_segments = int(turns * segments_per_turn) + 1
     direction = 1.0 if handedness == "RIGHT" else -1.0
 
-    first_start_loop = []
-    last_end_loop = []
+    start_loops = []
+    end_loops = []
     for start_idx in range(starts):
         prev_loop_verts = []
         first_loop_verts = []
@@ -105,26 +105,27 @@ def create_thread_mesh(
         _apply_end_profile(first_loop_verts, end_type, z_center=0.0)
         _apply_end_profile(prev_loop_verts, end_type, z_center=0.0)
 
-        if start_idx == 0:
-            first_start_loop = first_loop_verts
-            last_end_loop = prev_loop_verts
-        if start_idx == starts - 1:
-            last_end_loop = prev_loop_verts
+        start_loops.append(first_loop_verts)
+        end_loops.append(prev_loop_verts)
 
-    if starts == 1:
+    cap_start_loop = [v for loop in start_loops for v in loop]
+    cap_end_loop = [v for loop in end_loops for v in loop]
+
+    if cap_start_loop:
         center_bottom = bm.verts.new(Vector((0.0, 0.0, 0.0)))
-        for i in range(len(first_start_loop)):
-            v1 = first_start_loop[i]
-            v2 = first_start_loop[(i + 1) % len(first_start_loop)]
+        for i in range(len(cap_start_loop)):
+            v1 = cap_start_loop[i]
+            v2 = cap_start_loop[(i + 1) % len(cap_start_loop)]
             try:
                 bm.faces.new((center_bottom, v1, v2))
             except ValueError:
                 pass
 
+    if cap_end_loop:
         center_top = bm.verts.new(Vector((0.0, 0.0, length)))
-        for i in range(len(last_end_loop)):
-            v1 = last_end_loop[i]
-            v2 = last_end_loop[(i + 1) % len(last_end_loop)]
+        for i in range(len(cap_end_loop)):
+            v1 = cap_end_loop[i]
+            v2 = cap_end_loop[(i + 1) % len(cap_end_loop)]
             try:
                 bm.faces.new((center_top, v2, v1))
             except ValueError:
