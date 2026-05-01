@@ -6,7 +6,7 @@ from mathutils import Vector
 from .database import MATERIAL_PRESETS
 
 
-def _apply_end_profile(loop_verts, end_type, z_center):
+def _apply_end_profile(loop_verts, end_type):
     if end_type == "FLAT" or not loop_verts:
         return
 
@@ -24,7 +24,10 @@ def _apply_end_profile(loop_verts, end_type, z_center):
             shrink = 1.0 - 0.16 * (rel * rel * (3.0 - 2.0 * rel))
         v.co.x *= shrink
         v.co.y *= shrink
-        v.co.z += z_center
+
+def _sort_vertices_radially(verts):
+    """Sortiert Vertices radial um die Z-Achse nach Polarwinkel."""
+    return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length))
 
 
 def create_thread_mesh(
@@ -102,14 +105,14 @@ def create_thread_mesh(
                 first_loop_verts = current_verts
 
         # Endtyp-Modifikation an den äußersten Querschnitten
-        _apply_end_profile(first_loop_verts, end_type, z_center=0.0)
-        _apply_end_profile(prev_loop_verts, end_type, z_center=0.0)
+        _apply_end_profile(first_loop_verts, end_type)
+        _apply_end_profile(prev_loop_verts, end_type)
 
         start_loops.append(first_loop_verts)
         end_loops.append(prev_loop_verts)
 
-    cap_start_loop = [v for loop in start_loops for v in loop]
-    cap_end_loop = [v for loop in end_loops for v in loop]
+    cap_start_loop = _sort_vertices_radially([v for loop in start_loops for v in loop])
+    cap_end_loop = _sort_vertices_radially([v for loop in end_loops for v in loop])
 
     if cap_start_loop:
         center_bottom = bm.verts.new(Vector((0.0, 0.0, 0.0)))
