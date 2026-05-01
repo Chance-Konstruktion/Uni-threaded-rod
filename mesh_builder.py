@@ -27,7 +27,7 @@ def _apply_end_profile(loop_verts, end_type):
 
 def _sort_vertices_radially(verts):
     """Sortiert Vertices radial um die Z-Achse nach Polarwinkel."""
-    return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length))
+    return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length, v.co.z))
 
 
 def create_thread_mesh(
