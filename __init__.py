@@ -2,18 +2,18 @@ import importlib.util
 
 HAS_BPY = importlib.util.find_spec("bpy") is not None
 
-bl_info = {
-    "name": "Uni-threaded-rod",
-    "author": "Ihr Name",
-    "version": (1, 0, 0),
-    "blender": (4, 0, 0),
-    "location": "View3D > Sidebar > Uni-threaded-rod",
-    "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
-    "category": "Mesh",
-}
-
 if HAS_BPY:
     import bpy
+
+    bl_info = {
+        "name": "Uni-threaded-rod",
+        "author": "Ihr Name",
+        "version": (1, 0, 0),
+        "blender": (4, 0, 0),
+        "location": "View3D > Sidebar > Uni-threaded-rod",
+        "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
+        "category": "Mesh",
+    }
 
     from .database import THREAD_PRESETS, THREAD_STANDARDS, resolve_thread_parameters
     from .geometry_engine import consume_ratio_warnings, generate_profile
