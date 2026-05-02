@@ -167,7 +167,12 @@ def estimate_tensile_stress_area(diameter, pitch, standard_key="METRIC_ISO"):
 
 
 def estimate_thread_shear_area(pitch_diameter, engagement_length):
-    """Einfache Scherflächen-Näherung der tragenden Flanke (mm²)."""
+    """Einfache Scherflächen-Näherung der tragenden Flanke (mm²).
+
+    Hinweis: nutzt A≈π*d2*Le*0.5 als konservative 1-Flanken-Näherung mit idealisierter
+    Lastverteilung. Bei sehr kurzen Eingriffslängen/Mehrganggewinden kann die reale
+    Lastverteilung ungünstiger sein.
+    """
     if pitch_diameter <= 0.0 or engagement_length <= 0.0:
         raise ValueError("Mitteldurchmesser und Eingriffslänge müssen > 0 sein")
     return math.pi * pitch_diameter * engagement_length * 0.5
@@ -267,20 +272,22 @@ def validate_property_class_tensile(
     property_class="8.8",
     required_safety_factor=1.5,
 ):
-    """ISO-898-nahe Zugprüfung über Kernquerschnitt und Materialklasse."""
+    """ISO-898-nahe Zugprüfung über Spannungsquerschnitt As und Materialklasse."""
     if required_safety_factor <= 0.0:
         raise ValueError("Erforderlicher Sicherheitsfaktor muss > 0 sein")
     if property_class not in ISO_898_PROPERTY_CLASS_RM_MPA:
         raise ValueError(f"Unbekannte Festigkeitsklasse: {property_class}")
 
-    core_area = estimate_core_area_from_standard(standard_key, diameter, pitch)
-    stress = calculate_tensile_stress(force_n, core_area)
+    tensile_stress_area = estimate_tensile_stress_area(diameter, pitch, standard_key=standard_key)
+    stress = calculate_tensile_stress(force_n, tensile_stress_area)
     rm = ISO_898_PROPERTY_CLASS_RM_MPA[property_class]
     allowable = rm / required_safety_factor
     sf = calculate_safety_factor(allowable, stress)
     return {
         "property_class": property_class,
-        "core_area_mm2": core_area,
+        "tensile_stress_area_mm2": tensile_stress_area,
+        # Rückwärtskompatibilität für bestehende Aufrufer, die den alten Key erwarten.
+        "core_area_mm2": tensile_stress_area,
         "stress_mpa": stress,
         "allowable_mpa": allowable,
         "safety_factor": sf,
