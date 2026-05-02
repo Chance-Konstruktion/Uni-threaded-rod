@@ -1,6 +1,7 @@
 import bpy
 
 from .database import MATERIAL_PRESETS, THREAD_PRESETS, THREAD_STANDARDS, get_diameter_items_for_standard
+from .ui_i18n import ui_label
 
 
 def get_diameter_items(self, context):
@@ -66,6 +67,8 @@ class UTG_Properties(bpy.types.PropertyGroup):
         default="NONE",
     )
 
+    ui_language: bpy.props.EnumProperty(name="UI Sprache", items=[("de", "Deutsch", ""), ("en", "English", "")], default="de")
+
     custom_diameter: bpy.props.FloatProperty(name="Durchmesser", default=10.0, min=0.1)
     custom_pitch: bpy.props.FloatProperty(name="Steigung", default=1.5, min=0.1)
     custom_flank_angle: bpy.props.FloatProperty(name="Flankenwinkel", default=60.0, min=0.0, max=120.0)
@@ -87,13 +90,14 @@ class THREADFORGE_PT_main(bpy.types.Panel):
         layout = self.layout
         props = context.scene.utg_props
 
-        layout.prop(props, "standard", text="Norm")
+        layout.prop(props, "ui_language", text="UI")
+        layout.prop(props, "standard", text=ui_label("standard", props.ui_language))
 
         if props.standard in THREAD_STANDARDS:
-            layout.prop(props, "diameter_enum", text="Durchmesser")
-            layout.prop(props, "length", text="Länge")
-            layout.prop(props, "handedness", text="Drehrichtung")
-            layout.prop(props, "starts", text="Gängigkeit")
+            layout.prop(props, "diameter_enum", text=ui_label("diameter", props.ui_language))
+            layout.prop(props, "length", text=ui_label("length", props.ui_language))
+            layout.prop(props, "handedness", text=ui_label("handedness", props.ui_language))
+            layout.prop(props, "starts", text=ui_label("starts", props.ui_language))
 
         if props.standard == "CUSTOM":
             layout.prop(props, "custom_diameter")
@@ -106,34 +110,34 @@ class THREADFORGE_PT_main(bpy.types.Panel):
 
         layout.separator()
         row = layout.row(align=True)
-        row.prop(props, "preset_key", text="Preset")
+        row.prop(props, "preset_key", text=ui_label("preset", props.ui_language))
         row.operator("utg.apply_preset", text="", icon="IMPORT")
 
-        layout.prop(props, "material", text="Material")
-        layout.prop(props, "surface", text="Oberfläche")
+        layout.prop(props, "material", text=ui_label("material", props.ui_language))
+        layout.prop(props, "surface", text=ui_label("surface", props.ui_language))
 
         layout.separator()
         std_cfg = THREAD_STANDARDS.get(props.standard)
         if props.standard == "CUSTOM" or (std_cfg and std_cfg.get("tolerance_classes")):
-            layout.prop(props, "tolerance_class", text="Toleranz")
-        layout.prop(props, "clearance", text="3D-Druck Spiel (mm)")
-        layout.prop(props, "end_type", text="Enden")
-        layout.prop(props, "negative_mode", text="Negativ-Modus (Bohrung)")
-        layout.prop(props, "lod_level", text="Mesh-Detail")
+            layout.prop(props, "tolerance_class", text=ui_label("tolerance", props.ui_language))
+        layout.prop(props, "clearance", text=ui_label("clearance", props.ui_language))
+        layout.prop(props, "end_type", text=ui_label("end_type", props.ui_language))
+        layout.prop(props, "negative_mode", text=ui_label("negative_mode", props.ui_language))
+        layout.prop(props, "lod_level", text=ui_label("lod", props.ui_language))
         if props.lod_level == "CUSTOM":
-            layout.prop(props, "segment_override", text="Segmente/Umdr.")
+            layout.prop(props, "segment_override", text=ui_label("segment_override", props.ui_language))
 
         layout.separator()
-        layout.operator("utg.create_thread", text="Gewinde erstellen", icon="MOD_SCREW")
-        layout.operator("utg.create_ball_screw", text="Kugelgewindetrieb", icon="CON_ROTLIKE")
+        layout.operator("utg.create_thread", text=ui_label("create_thread", props.ui_language), icon="MOD_SCREW")
+        layout.operator("utg.create_ball_screw", text=ui_label("create_ball_screw", props.ui_language), icon="CON_ROTLIKE")
         if props.standard == "BALL_SCREW":
             layout.separator()
-            layout.label(text="KGT Mutter")
+            layout.label(text=ui_label("ball_nut", props.ui_language))
             layout.prop(props, "nut_outer_diameter")
             layout.prop(props, "nut_length")
             layout.prop(props, "nut_internal_clearance")
             layout.prop(props, "ball_return_enabled")
-            layout.operator("utg.create_ball_nut", text="KGT-Mutter erstellen", icon="MESH_CYLINDER")
+            layout.operator("utg.create_ball_nut", text=ui_label("create_ball_nut", props.ui_language), icon="MESH_CYLINDER")
 
 
 def register_properties():
