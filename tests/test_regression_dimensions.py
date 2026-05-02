@@ -28,6 +28,8 @@ def _load_utg_module(module_name: str):
 database = _load_utg_module("database")
 geometry_engine = _load_utg_module("geometry_engine")
 
+ui_i18n = _load_utg_module("ui_i18n")
+
 
 class ReferenceRegressionTests(unittest.TestCase):
     def test_symbolic_pipe_resolution_g_half(self):
@@ -140,6 +142,41 @@ class HighEndDataCoverageTests(unittest.TestCase):
         self.assertIsNotNone(row)
         self.assertGreater(row["crest_flat"], 0.0)
         self.assertGreater(row["root_radius"], 0.0)
+
+
+class LocalizationAndReferenceExpansionTests(unittest.TestCase):
+    def test_ui_i18n_has_de_and_en_labels_for_core_keys(self):
+        keys = [
+            "standard", "diameter", "length", "handedness", "starts",
+            "tolerance", "create_thread", "create_ball_screw",
+        ]
+        for key in keys:
+            with self.subTest(key=key):
+                self.assertIsInstance(ui_i18n.ui_label(key, "de"), str)
+                self.assertIsInstance(ui_i18n.ui_label(key, "en"), str)
+                self.assertNotEqual(ui_i18n.ui_label(key, "de"), "")
+                self.assertNotEqual(ui_i18n.ui_label(key, "en"), "")
+
+    def test_iso_reference_rows_additional_sizes(self):
+        cases = [
+            (1.0, 0.25),
+            (8.0, 1.25),
+            (24.0, 3.0),
+            (64.0, 6.0),
+        ]
+        for diameter, pitch in cases:
+            with self.subTest(diameter=diameter, pitch=pitch):
+                row = database.resolve_iso_metric_coarse_row(diameter, pitch)
+                self.assertIsNotNone(row)
+                self.assertAlmostEqual(row["d2_basic"], diameter - 0.649519 * pitch, places=6)
+                self.assertAlmostEqual(row["d3_basic"], diameter - 1.226869 * pitch, places=6)
+
+    def test_tensile_stress_area_formula_available_for_v_families(self):
+        for standard in ["METRIC_ISO", "METRIC_FINE", "WHITWORTH_BSW", "UNC", "UNF", "PIPE_G"]:
+            with self.subTest(standard=standard):
+                formula = database.THREAD_STANDARDS[standard].get("tensile_stress_area_formula")
+                self.assertIsNotNone(formula)
+                self.assertLess(formula(10.0, 1.5), 10.0)
 
 
 if __name__ == "__main__":
