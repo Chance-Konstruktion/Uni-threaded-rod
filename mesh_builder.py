@@ -1,6 +1,8 @@
+import math
+from bisect import bisect_left
+
 import bmesh
 import bpy
-import math
 from mathutils import Vector
 
 from .database import MATERIAL_PRESETS
@@ -80,13 +82,13 @@ def create_thread_mesh(
     lod_level="FINAL",
     segment_override=48,
 ):
-    """Erzeugt ein manifoldes BMesh einer massiven Außengewindestange.
+    """Erzeugt immer einen soliden Vollkörper mit Außengewinde.
 
-    Der Aufbau folgt wieder einem klaren Helix-Sweep: Für jede axiale Station
-    wird der Außenradius aus der periodischen Gewindeprofil-Koordinate gelesen,
-    daraus wird ein voller Ring um die Z-Achse erzeugt, und die Ringe werden zu
-    einer geschlossenen Vollkörper-Hülle verbunden. Die Stirnflächen entstehen
-    ausschließlich aus den Ring-Vertices auf exakt z=0 und z=length.
+    Dieser Mesh-Builder ist ausschließlich für massive Außengewindestangen
+    gedacht: Jede axiale Station wird als voller Ring um die Z-Achse aufgebaut
+    und die Stirnflächen werden mit Zentrumspunkten geschlossen. Er ist nicht
+    für Innengewinde-Cutter gedacht; solche Cutter müssen nur über den
+    expliziten Negativ-/Boolean-Workflow entstehen.
     """
     _ = name, end_type
     if diameter <= 0.0:
@@ -98,52 +100,57 @@ def create_thread_mesh(
     if len(profile_points) < 3:
         raise ValueError("Gewindeprofil benötigt mindestens drei Punkte")
 
-    profile_samples = []
     axial_tolerance = max(1e-9, pitch * 1e-9)
+    profile_samples = []
     for point in profile_points:
         if not math.isfinite(point.x) or not math.isfinite(point.y):
             raise ValueError("Gewindeprofil enthält nicht-finite Koordinaten")
         if point.x <= 0.0:
             raise ValueError("Gewindeprofil enthält radiale Koordinaten <= 0")
 
-        # Kontrollpunkte außerhalb der Profilperiode (z. B. gerundete Profile)
-        # werden für den periodischen Sweep ignoriert; die validierten Profile
-        # enthalten weiterhin saubere Stützpunkte bei 0 und pitch.
         if -axial_tolerance <= point.y <= pitch + axial_tolerance:
-            y = min(max(point.y, 0.0), pitch)
-            profile_samples.append((y, point.x))
+            clamped_y = min(max(point.y, 0.0), pitch)
+            profile_samples.append((clamped_y, point.x))
 
     if len(profile_samples) < 2:
         raise ValueError("Gewindeprofil enthält keine nutzbare Profilperiode")
 
+    # Profilperiode direkt als sortierte Stützstellen ablegen. Fallen mehrere
+    # Punkte numerisch auf dieselbe y-Position, bleibt der größere Radius als
+    # sichere Außenkontur erhalten.
     profile_samples.sort(key=lambda sample: sample[0])
-    compact_samples = []
+    period_samples = []
     for y, radius in profile_samples:
-        if compact_samples and abs(y - compact_samples[-1][0]) <= axial_tolerance:
-            # Bei numerisch doppelten Stützstellen bleibt der größere Radius die
-            # sichere Außenkontur; das ist keine Mehrgang-Max-Hülle, sondern nur
-            # Degenerationsschutz innerhalb derselben Profilperiode.
-            compact_samples[-1] = (compact_samples[-1][0], max(compact_samples[-1][1], radius))
+        if period_samples and abs(y - period_samples[-1][0]) <= axial_tolerance:
+            previous_y, previous_radius = period_samples[-1]
+            period_samples[-1] = (previous_y, max(previous_radius, radius))
         else:
-            compact_samples.append((y, radius))
-    profile_samples = compact_samples
+            period_samples.append((y, radius))
 
-    if abs(profile_samples[0][0]) > axial_tolerance:
+    if abs(period_samples[0][0]) > axial_tolerance:
         raise ValueError("Gewindeprofil muss bei y=0 beginnen")
-    if abs(profile_samples[-1][0] - pitch) > axial_tolerance:
+    if abs(period_samples[-1][0] - pitch) > axial_tolerance:
         raise ValueError("Gewindeprofil muss bei y=pitch enden")
 
-    def profile_radius(local_y):
-        local_y = local_y % pitch
-        if local_y <= profile_samples[0][0]:
-            return profile_samples[0][1]
-        for index in range(len(profile_samples) - 1):
-            y0, radius0 = profile_samples[index]
-            y1, radius1 = profile_samples[index + 1]
-            if y0 <= local_y <= y1:
-                factor = (local_y - y0) / max(y1 - y0, 1e-12)
-                return radius0 + (radius1 - radius0) * factor
-        return profile_samples[-1][1]
+    sample_y = [sample[0] for sample in period_samples]
+    sample_radius = [sample[1] for sample in period_samples]
+    core_radius = min(sample_radius)
+    major_radius = max(sample_radius)
+
+    def radius_at_profile_y(local_y):
+        y = local_y % pitch
+        upper_index = bisect_left(sample_y, y)
+        if upper_index <= 0:
+            return sample_radius[0]
+        if upper_index >= len(sample_y):
+            return sample_radius[-1]
+
+        y0 = sample_y[upper_index - 1]
+        y1 = sample_y[upper_index]
+        r0 = sample_radius[upper_index - 1]
+        r1 = sample_radius[upper_index]
+        blend = (y - y0) / max(y1 - y0, 1e-12)
+        return r0 + (r1 - r0) * blend
 
     bm = bmesh.new()
 
@@ -163,6 +170,14 @@ def create_thread_mesh(
     direction = 1.0 if handedness == "RIGHT" else -1.0
     lead = pitch * start_count
     segments_per_lead = max(circumferential_segments * start_count, circumferential_segments)
+    multi_start_floor = core_radius
+    if start_count > 1:
+        # Mehrgängige Gewinde bleiben ausdrücklich eine massive Vollstange:
+        # Die zusätzlichen Gänge dürfen keine tiefen, cutterartigen
+        # Aussparungen erzeugen. Deshalb wird der Talradius moderat angehoben,
+        # während der Major-Radius unverändert bleibt.
+        floor_lift = min(0.35, 0.12 * (start_count - 1))
+        multi_start_floor = core_radius + (major_radius - core_radius) * floor_lift
 
     # math.ceil verhindert ein zu kurzes Mesh. Die tatsächliche Z-Koordinate
     # wird pro Ring hart mit z = min(t * lead, length) begrenzt.
@@ -175,8 +190,8 @@ def create_thread_mesh(
         ring = []
         for radial_index in range(circumferential_segments):
             angle = 2.0 * math.pi * radial_index / circumferential_segments
-            helical_y = (z - direction * angle * lead / (2.0 * math.pi)) % pitch
-            radius = profile_radius(helical_y)
+            helical_y = z - direction * angle * lead / (2.0 * math.pi)
+            radius = max(radius_at_profile_y(helical_y), multi_start_floor)
 
             if taper_ratio > 0.0:
                 diameter_delta = z * taper_ratio
