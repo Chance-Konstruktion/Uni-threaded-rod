@@ -27,10 +27,6 @@ def _apply_end_profile(loop_verts, end_type):
         v.co.x *= shrink
         v.co.y *= shrink
 
-def _sort_vertices_radially(verts):
-    """Sortiert Vertices radial um die Z-Achse nach Polarwinkel."""
-    return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length, v.co.z))
-
 
 def _flip_caps_to_outside(bm, length):
     """Stellt sicher, dass Stirnflächen unten nach -Z und oben nach +Z zeigen."""
@@ -51,7 +47,6 @@ def _enforce_external_normals(bm, length):
 
 
 def create_thread_mesh(
-    name,
     profile_points,
     diameter,
     pitch,
@@ -73,7 +68,6 @@ def create_thread_mesh(
     für Innengewinde-Cutter gedacht; solche Cutter müssen nur über den
     expliziten Negativ-/Boolean-Workflow entstehen.
     """
-    _ = name, end_type
     if diameter <= 0.0:
         raise ValueError("Durchmesser muss > 0 sein")
     if pitch <= 0.0:
@@ -211,6 +205,8 @@ def create_thread_mesh(
             bm.faces.new((center_top, v1, v2))
         except ValueError:
             pass
+
+    _apply_end_profile([vert for ring in rings for vert in ring], end_type)
 
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.000001)
     bm.normal_update()

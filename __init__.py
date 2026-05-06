@@ -16,7 +16,7 @@ if HAS_BPY:
     import bpy
 
     from .database import THREAD_PRESETS, THREAD_STANDARDS, resolve_thread_parameters
-    from .geometry_engine import consume_ratio_warnings, generate_profile
+    from .geometry_engine import generate_profile
     from .mechanical_validation import validate_thread_input
     from .mesh_builder import (
         apply_boolean_cutter,
@@ -36,8 +36,8 @@ if HAS_BPY:
         }
 
 
-    def _report_ratio_warnings(operator):
-        for msg in dict.fromkeys(consume_ratio_warnings()):
+    def _report_ratio_warnings(operator, ratio_warnings):
+        for msg in dict.fromkeys(ratio_warnings):
             operator.report({"WARNING"}, msg)
 
 
@@ -119,18 +119,18 @@ if HAS_BPY:
             profile_internal = bool(negative_mode_active)
 
             try:
-                profile = generate_profile(
+                profile, ratio_warnings = generate_profile(
                     standard_key,
                     diameter,
                     pitch,
                     tolerance_class=props.tolerance_class,
                     internal=profile_internal,
                     clearance=props.clearance,
+                    return_warnings=True,
                 )
-                _report_ratio_warnings(self)
+                _report_ratio_warnings(self, ratio_warnings)
 
                 bm = create_thread_mesh(
-                    name="Gewinde",
                     profile_points=profile,
                     diameter=diameter,
                     pitch=pitch,
@@ -210,11 +210,17 @@ if HAS_BPY:
                 self.report({"ERROR"}, validation_error)
                 return {"CANCELLED"}
 
-            profile = generate_profile("BALL_SCREW", diameter, pitch, internal=False, clearance=props.clearance)
-            _report_ratio_warnings(self)
+            profile, ratio_warnings = generate_profile(
+                "BALL_SCREW",
+                diameter,
+                pitch,
+                internal=False,
+                clearance=props.clearance,
+                return_warnings=True,
+            )
+            _report_ratio_warnings(self, ratio_warnings)
 
             bm = create_thread_mesh(
-                name="KGT",
                 profile_points=profile,
                 diameter=diameter,
                 pitch=pitch,
@@ -280,17 +286,17 @@ if HAS_BPY:
                 self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
                 return {"CANCELLED"}
 
-            inner_profile = generate_profile(
+            inner_profile, ratio_warnings = generate_profile(
                 "BALL_SCREW",
                 diameter,
                 pitch,
                 tolerance_class=props.tolerance_class,
                 internal=True,
                 clearance=props.clearance + props.nut_internal_clearance,
+                return_warnings=True,
             )
-            _report_ratio_warnings(self)
+            _report_ratio_warnings(self, ratio_warnings)
             cutter_bm = create_thread_mesh(
-                name="KGT_Innenprofil",
                 profile_points=inner_profile,
                 diameter=diameter,
                 pitch=pitch,

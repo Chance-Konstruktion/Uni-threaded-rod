@@ -1,5 +1,5 @@
 from .database import resolve_thread_parameters
-from .geometry_engine import consume_ratio_warnings, generate_profile
+from .geometry_engine import generate_profile
 from .mechanical_validation import (
     allowables_from_property_class,
     validate_combined_load_case,
@@ -24,17 +24,15 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
     diameter, pitch = resolve_thread_parameters(standard, diameter_token)
     tolerance_class = _split_fit(fit, internal=internal)
 
-    # Alte Warnungen verwerfen, damit API-Aufrufe keinen UI-Status verschmutzen.
-    consume_ratio_warnings()
-    profile = generate_profile(
+    profile, ratio_warnings = generate_profile(
         standard,
         diameter,
         pitch,
         tolerance_class=tolerance_class,
         internal=internal,
         clearance=0.0,
+        return_warnings=True,
     )
-    ratio_warnings = consume_ratio_warnings()
 
     allowables = allowables_from_property_class(material)
     mechanics = validate_combined_load_case(

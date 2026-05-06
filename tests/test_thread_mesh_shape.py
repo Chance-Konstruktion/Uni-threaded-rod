@@ -179,12 +179,29 @@ class ThreadMeshShapeTests(unittest.TestCase):
         cls.geometry_engine = load("geometry_engine")
         cls.mesh_builder = load("mesh_builder")
 
+
+    def test_chamfer_end_type_changes_top_ring_radius(self):
+        diameter = 10.0
+        pitch = 1.5
+        length = 30.0
+        profile = self.geometry_engine.generate_profile("METRIC_ISO", diameter, pitch)
+
+        flat = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="FLAT")
+        chamfered = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="CHAMFER")
+
+        flat_top_radius = max(math.hypot(vert.co.x, vert.co.y) for vert in flat.verts if abs(vert.co.z - length) < 1e-8)
+        chamfered_top_radius = max(
+            math.hypot(vert.co.x, vert.co.y) for vert in chamfered.verts if abs(vert.co.z - length) < 1e-8
+        )
+
+        self.assertLess(chamfered_top_radius, flat_top_radius)
+
     def test_m10x15_mesh_is_single_solid_rod(self):
         diameter = 10.0
         pitch = 1.5
         length = 30.0
         profile = self.geometry_engine.generate_profile("METRIC_ISO", diameter, pitch)
-        bm = self.mesh_builder.create_thread_mesh("M10x1.5", profile, diameter, pitch, length, end_type="FLAT")
+        bm = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="FLAT")
         write_obj(bm)
 
         d3 = self.database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter, pitch)
