@@ -1,4 +1,6 @@
+import importlib
 import importlib.util
+import sys
 
 bl_info = {
     "name": "Uni-threaded-rod",
@@ -15,15 +17,30 @@ HAS_BPY = importlib.util.find_spec("bpy") is not None
 if HAS_BPY:
     import bpy
 
-    from .database import THREAD_PRESETS, THREAD_STANDARDS, resolve_thread_parameters
-    from .geometry_engine import generate_profile
-    from .mechanical_validation import validate_thread_input
-    from .mesh_builder import (
-        apply_boolean_cutter,
-        apply_material,
-        create_thread_mesh,
-    )
-    from .ui_panel import THREADFORGE_PT_main, UTG_Properties, register_properties
+    def _runtime_module(module_name):
+        full_name = f"{__name__}.{module_name}"
+        if full_name in sys.modules:
+            return importlib.reload(sys.modules[full_name])
+        return importlib.import_module(f".{module_name}", __name__)
+
+
+    database = _runtime_module("database")
+    geometry_engine = _runtime_module("geometry_engine")
+    mechanical_validation = _runtime_module("mechanical_validation")
+    mesh_builder = _runtime_module("mesh_builder")
+    ui_panel = _runtime_module("ui_panel")
+
+    THREAD_PRESETS = database.THREAD_PRESETS
+    THREAD_STANDARDS = database.THREAD_STANDARDS
+    resolve_thread_parameters = database.resolve_thread_parameters
+    generate_profile = geometry_engine.generate_profile
+    validate_thread_input = mechanical_validation.validate_thread_input
+    apply_boolean_cutter = mesh_builder.apply_boolean_cutter
+    apply_material = mesh_builder.apply_material
+    create_thread_mesh = mesh_builder.create_thread_mesh
+    THREADFORGE_PT_main = ui_panel.THREADFORGE_PT_main
+    UTG_Properties = ui_panel.UTG_Properties
+    register_properties = ui_panel.register_properties
 
     def _create_standard_from_custom(props):
         return {
