@@ -201,22 +201,25 @@ class ThreadMeshShapeTests(unittest.TestCase):
         pitch = 1.5
         length = 30.0
         profile = self.geometry_engine.generate_profile("METRIC_ISO", diameter, pitch)
-        bm = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="FLAT")
-        write_obj(bm)
-
         d3 = self.database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter, pitch)
         expected = math.pi * (d3 / 2.0) ** 2 * length
-        volume = abs(sum(face_volume(face) for face in bm.faces))
-        failures = []
 
-        if not all(edge.is_manifold for edge in bm.edges):
-            failures.append("(a) non-manifold edges")
-        if not all(single_loop_at_z(bm, z) for z in sorted({round(vert.co.z, 9) for vert in bm.verts})):
-            failures.append("(b) not exactly one closed polygon per z-section")
-        if not expected * 0.8 <= volume <= expected * 1.2:
-            failures.append(f"(c) volume {volume:.3f}, expected {expected:.3f}")
+        for starts in (1, 2, 4):
+            with self.subTest(starts=starts):
+                bm = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, starts=starts, end_type="FLAT")
+                write_obj(bm)
 
-        self.assertEqual([], failures)
+                volume = abs(sum(face_volume(face) for face in bm.faces))
+                failures = []
+
+                if not all(edge.is_manifold for edge in bm.edges):
+                    failures.append("(a) non-manifold edges")
+                if not all(single_loop_at_z(bm, z) for z in sorted({round(vert.co.z, 9) for vert in bm.verts})):
+                    failures.append("(b) not exactly one closed polygon per z-section")
+                if not expected * 0.8 <= volume <= expected * 1.2:
+                    failures.append(f"(c) volume {volume:.3f}, expected {expected:.3f}")
+
+                self.assertEqual([], failures)
 
 
 if __name__ == "__main__":
