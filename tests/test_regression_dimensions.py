@@ -114,6 +114,27 @@ class ReferenceRegressionTests(unittest.TestCase):
                 self.assertAlmostEqual(points[-1].x, major_radius, places=6)
                 self.assertAlmostEqual(points[-1].y, pitch, places=6)
 
+    def test_rejects_metric_v_profile_with_regressed_root_shoulder_radius(self):
+        diameter_mm, pitch_mm = 10.0, 1.5
+        points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm)
+        major_radius = diameter_mm / 2.0 - 0.01
+        d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
+        core_radius = d3 / 2.0 - 0.01
+        root_flat = pitch_mm / 4.0
+        bad_points = list(points)
+        bad_points[1] = geometry_engine.ProfilePoint(
+            major_radius - (major_radius - core_radius) + root_flat * 0.5,
+            points[1].y,
+        )
+
+        with self.assertRaisesRegex(ValueError, "Kernradius"):
+            geometry_engine._validate_external_profile_points(
+                bad_points,
+                major_radius,
+                core_radius,
+                pitch_mm,
+            )
+
     def test_rejects_non_positive_pitch(self):
         with self.assertRaisesRegex(ValueError, "Steigung"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)

@@ -167,12 +167,34 @@ def _validate_external_profile_points(points, major_radius, core_radius, pitch):
     if points[-1].x < major_radius - radial_tolerance:
         raise ValueError("Außengewindeprofil muss außen am Major-Radius enden")
 
-    core_tolerance = max(radial_tolerance, pitch * 0.02)
+    core_tolerance = max(radial_tolerance, pitch * 0.007)
     if minimum_radius > core_radius + core_tolerance:
         raise ValueError(
             f"Außengewindeprofil erreicht den Kernradius nicht "
             f"(min={minimum_radius:.6g}, core={core_radius:.6g})"
         )
+
+    if len(points) <= 8 and any(abs(p.x - core_radius) <= core_tolerance for p in points[1:-1]):
+        left_shoulder = next(
+            (p for p in points[1:-1] if p.x < major_radius - radial_tolerance),
+            None,
+        )
+        right_shoulder = next(
+            (p for p in reversed(points[1:-1]) if p.x < major_radius - radial_tolerance),
+            None,
+        )
+        if left_shoulder is not None and right_shoulder is not None:
+            left_outside_core = left_shoulder.x > core_radius + core_tolerance
+            right_outside_core = right_shoulder.x > core_radius + core_tolerance
+            if (left_outside_core != right_outside_core) or (
+                left_outside_core
+                and right_outside_core
+                and abs(left_shoulder.x - right_shoulder.x) <= radial_tolerance
+            ):
+                raise ValueError(
+                    f"Außengewindeprofil setzt Kernradius-Schulterpunkte zu weit außen "
+                    f"(left={left_shoulder.x:.6g}, right={right_shoulder.x:.6g}, core={core_radius:.6g})"
+                )
 
     if abs(points[0].y) > axial_tolerance:
         raise ValueError("Außengewindeprofil muss bei y=0 beginnen")
