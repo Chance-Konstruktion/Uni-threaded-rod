@@ -82,7 +82,9 @@ def create_thread_mesh(
     lod_level="FINAL",
     segment_override=48,
 ):
-    """Erzeugt immer einen soliden Vollkörper mit Außengewinde.
+    """Dieser Builder erzeugt ausschließlich massive Vollkörper mit Außengewinde. Er ist nicht dafür gedacht, dünnwandige Hüllen oder primäre Innengewinde zu erzeugen.
+
+    Erzeugt immer einen soliden Vollkörper mit Außengewinde.
 
     Dieser Mesh-Builder ist ausschließlich für massive Außengewindestangen
     gedacht: Jede axiale Station wird als voller Ring um die Z-Achse aufgebaut
