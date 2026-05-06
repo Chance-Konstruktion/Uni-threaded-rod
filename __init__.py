@@ -95,11 +95,22 @@ if HAS_BPY:
             std_tol = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
             internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
             tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
-            profile_internal = bool(negative_mode_active or tolerance_is_internal)
 
             if props.tolerance_class == "N_A":
                 self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
                 return {"CANCELLED"}
+
+            if tolerance_is_internal and not negative_mode_active:
+                self.report(
+                    {"ERROR"},
+                    "Innengewinde-Toleranzen sind nur im aktiven Negativ-Modus als Bohrungs-Cutter erlaubt.",
+                )
+                return {"CANCELLED"}
+
+            # Harte Kernregel: Das Primärobjekt ist immer eine massive
+            # Außengewindestange. Ein internes/aufgeweitetes Profil ist nur als
+            # temporärer Boolean-Difference-Cutter erlaubt, niemals als Default.
+            profile_internal = bool(negative_mode_active)
 
             profile = generate_profile(
                 standard_key,

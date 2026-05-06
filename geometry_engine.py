@@ -137,6 +137,54 @@ def _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, cle
             )
 
 
+def _validate_external_profile_points(points, major_radius, core_radius, pitch):
+    """Harte Schutzschicht für massive Außengewindeprofile.
+
+    Ein Primärprofil für eine Gewindestange muss am Außendurchmesser starten,
+    in Richtung Kernradius laufen und am Außendurchmesser enden. Dadurch kann
+    der Mesh-Builder das Profil als Material-Außenkontur interpretieren, statt
+    versehentlich eine Innengewinde- oder Hohlkörperkontur zu sweepen.
+    """
+    if len(points) < 3:
+        raise ValueError("Außengewindeprofil benötigt mindestens drei Profilpunkte")
+
+    if not all(math.isfinite(p.x) and math.isfinite(p.y) for p in points):
+        raise ValueError("Außengewindeprofil enthält nicht-finite Koordinaten")
+
+    if min(p.x for p in points) <= 0.0:
+        raise ValueError("Außengewindeprofil enthält radiale Koordinaten <= 0")
+
+    radial_tolerance = max(1e-6, major_radius * 1e-6)
+    axial_tolerance = max(1e-6, pitch * 1e-6)
+    maximum_radius = max(p.x for p in points)
+    minimum_radius = min(p.x for p in points)
+
+    if abs(maximum_radius - major_radius) > radial_tolerance:
+        raise ValueError(
+            f"Außengewindeprofil erreicht den Major-Radius nicht exakt "
+            f"(max={maximum_radius:.6g}, major={major_radius:.6g})"
+        )
+
+    if points[0].x < major_radius - radial_tolerance:
+        raise ValueError("Außengewindeprofil muss außen am Major-Radius beginnen")
+
+    if points[-1].x < major_radius - radial_tolerance:
+        raise ValueError("Außengewindeprofil muss außen am Major-Radius enden")
+
+    core_tolerance = max(radial_tolerance, pitch * 0.02)
+    if minimum_radius > core_radius + core_tolerance:
+        raise ValueError(
+            f"Außengewindeprofil erreicht den Kernradius nicht "
+            f"(min={minimum_radius:.6g}, core={core_radius:.6g})"
+        )
+
+    if abs(points[0].y) > axial_tolerance:
+        raise ValueError("Außengewindeprofil muss bei y=0 beginnen")
+
+    if abs(points[-1].y - pitch) > axial_tolerance:
+        raise ValueError("Außengewindeprofil muss bei y=pitch enden")
+
+
 def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0):
     """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
     _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance)
@@ -264,10 +312,14 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         contact_angle = math.radians(std.get("special_params", {}).get("contact_angle", 45.0))
         center_offset = ball_radius * _safe_ratio(sp.get("center_offset_ratio"), math.sin(contact_angle))
         steps = 16
-        pts = []
+        # Auch das KGT-/Gothic-Profil bleibt für den Primärpfad ein
+        # Außengewindeprofil: erster und letzter Punkt liegen bewusst auf dem
+        # Major-Radius. Der erste Bogenstützpunkt wird ausgelassen, damit die
+        # historische Punktanzahl stabil bleibt und trotzdem hart validierbar ist.
+        pts = [ProfilePoint(r, 0.0)]
 
         center_a = ProfilePoint(r2 - ball_radius, pitch / 2.0 - center_offset)
-        for i in range(steps + 1):
+        for i in range(1, steps + 1):
             ang = -math.pi / 2 + contact_angle + (math.pi - 2 * contact_angle) * i / steps
             pts.append(ProfilePoint(center_a.x + ball_radius * math.cos(ang), center_a.y + ball_radius * math.sin(ang)))
 
@@ -281,5 +333,8 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
 
     else:
         pts = [ProfilePoint(r, 0.0), ProfilePoint(r3, pitch / 2.0), ProfilePoint(r, pitch)]
+
+    if not internal:
+        _validate_external_profile_points(pts, r, r3, pitch)
 
     return pts
