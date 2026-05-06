@@ -30,6 +30,42 @@ def _sort_vertices_radially(verts):
     return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length, v.co.z))
 
 
+def _flip_faces_with_inward_radial_normals(bm):
+    """Erzwingt nach außen zeigende Mantel-Normalen an der Gewindegeometrie.
+
+    Die Helix-Flächen werden je nach Drehrichtung unterschiedlich gewickelt.
+    Blender kann bei den sehr eng beieinanderliegenden Start-/Endkappen sonst
+    gelegentlich eine nach innen orientierte Hülle behalten, wodurch das Gewinde
+    optisch wie ein Innengewinde bzw. als nach innen stehendes Profil wirkt.
+    """
+    for face in bm.faces:
+        radial = Vector((face.calc_center_median().x, face.calc_center_median().y, 0.0))
+        if radial.length <= 1e-9:
+            continue
+        radial.normalize()
+        if face.normal.dot(radial) < -1e-7:
+            face.normal_flip()
+
+
+def _flip_caps_to_outside(bm, length):
+    """Stellt sicher, dass Stirnflächen unten nach -Z und oben nach +Z zeigen."""
+    for face in bm.faces:
+        center = face.calc_center_median()
+        if abs(center.z) <= 1e-5 and face.normal.z > 0.0:
+            face.normal_flip()
+        elif abs(center.z - length) <= 1e-5 and face.normal.z < 0.0:
+            face.normal_flip()
+
+
+def _enforce_external_normals(bm, length):
+    """Korrigiert die Normalen der erzeugten Stange auf Außenorientierung."""
+    bm.normal_update()
+    _flip_faces_with_inward_radial_normals(bm)
+    bm.normal_update()
+    _flip_caps_to_outside(bm, length)
+    bm.normal_update()
+
+
 def create_thread_mesh(
     name,
     profile_points,
@@ -95,8 +131,16 @@ def create_thread_mesh(
                     v2 = prev_loop_verts[(i + 1) % n]
                     v3 = current_verts[(i + 1) % n]
                     v4 = current_verts[i]
+                    # Bei positivem Helixwinkel (Rechtsgewinde) erzeugt die
+                    # alte Wicklung Innen-Normalen (Z x Tangential = -Radial).
+                    # Deshalb wird die Quad-Reihenfolge abhängig von der
+                    # Drehrichtung gewählt, damit die Mantelflächen nach außen zeigen.
+                    if direction > 0.0:
+                        face_verts = (v1, v4, v3, v2)
+                    else:
+                        face_verts = (v1, v2, v3, v4)
                     try:
-                        bm.faces.new((v1, v2, v3, v4))
+                        bm.faces.new(face_verts)
                     except ValueError:
                         pass
 
@@ -120,7 +164,7 @@ def create_thread_mesh(
             v1 = cap_start_loop[i]
             v2 = cap_start_loop[(i + 1) % len(cap_start_loop)]
             try:
-                bm.faces.new((center_bottom, v1, v2))
+                bm.faces.new((center_bottom, v2, v1))
             except ValueError:
                 pass
 
@@ -130,17 +174,19 @@ def create_thread_mesh(
             v1 = cap_end_loop[i]
             v2 = cap_end_loop[(i + 1) % len(cap_end_loop)]
             try:
-                bm.faces.new((center_top, v2, v1))
+                bm.faces.new((center_top, v1, v2))
             except ValueError:
                 pass
 
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    _enforce_external_normals(bm, length)
 
     non_manifold_edges = [e for e in bm.edges if not e.is_manifold]
     if non_manifold_edges:
         bmesh.ops.holes_fill(bm, edges=non_manifold_edges, sides=0)
         bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        _enforce_external_normals(bm, length)
 
     return bm
 
