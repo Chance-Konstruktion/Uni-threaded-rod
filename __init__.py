@@ -66,9 +66,9 @@ if HAS_BPY:
                 diameter = props.custom_diameter
                 pitch = props.custom_pitch
                 custom_std = _create_standard_from_custom(props)
-                THREAD_STANDARDS["_UTG_CUSTOM"] = custom_std
-                standard_key = "_UTG_CUSTOM"
+                standard_key = "CUSTOM"
             else:
+                custom_std = None
                 standard_key = props.standard
                 try:
                     diameter, pitch = resolve_thread_parameters(standard_key, props.diameter_enum)
@@ -98,7 +98,8 @@ if HAS_BPY:
                     f"Mehrgängiges Gewinde mit {props.starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
                 )
 
-            std_tol = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
+            standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
+            std_tol = standard.get("tolerance_classes", {})
             internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
             tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
 
@@ -127,6 +128,7 @@ if HAS_BPY:
                     internal=profile_internal,
                     clearance=props.clearance,
                     return_warnings=True,
+                    standard=custom_std,
                 )
                 _report_ratio_warnings(self, ratio_warnings)
 
@@ -138,13 +140,11 @@ if HAS_BPY:
                     starts=props.starts,
                     handedness=props.handedness,
                     end_type=props.end_type,
-                    taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
+                    taper_ratio=standard.get("special_params", {}).get("taper_ratio", 0.0),
                     lod_level=props.lod_level,
                     segment_override=props.segment_override,
                 )
             except ValueError as exc:
-                if standard_key == "_UTG_CUSTOM":
-                    THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
                 self.report({"ERROR"}, str(exc))
                 return {"CANCELLED"}
 
@@ -163,10 +163,7 @@ if HAS_BPY:
                 else:
                     self.report({"WARNING"}, "Negativ-Modus aktiv, aber Zielobjekt ist ungültig.")
 
-            report_standard = props.standard if standard_key == "_UTG_CUSTOM" else standard_key
-
-            if standard_key == "_UTG_CUSTOM":
-                THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
+            report_standard = props.standard if custom_std is not None else standard_key
 
             if negative_mode_active:
                 self.report(

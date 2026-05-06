@@ -100,9 +100,11 @@ def _tolerance_offset_mm(tolerance_class, standard_key=None, diameter=None, pitc
     return tolerance_map.get(tc, 0.0)
 
 
-def _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance):
-    if standard_key not in THREAD_STANDARDS:
-        raise ValueError(f"Unbekannter Standard: {standard_key}")
+def _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance, standard=None):
+    if standard is None:
+        if standard_key not in THREAD_STANDARDS:
+            raise ValueError(f"Unbekannter Standard: {standard_key}")
+        standard = THREAD_STANDARDS[standard_key]
     if diameter <= 0:
         raise ValueError("Durchmesser muss > 0 sein")
     if pitch <= 0:
@@ -110,7 +112,7 @@ def _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, cle
     if clearance < 0:
         raise ValueError("Spiel (Clearance) muss >= 0 sein")
 
-    std = THREAD_STANDARDS[standard_key]
+    std = standard
     d3 = std["d3_formula"](diameter, pitch)
     if d3 <= 0:
         raise ValueError(
@@ -179,11 +181,20 @@ def _validate_external_profile_points(points, major_radius, core_radius, pitch):
         raise ValueError("Außengewindeprofil muss bei y=pitch enden")
 
 
-def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0, return_warnings=False):
+def generate_profile(
+    standard_key,
+    diameter,
+    pitch,
+    tolerance_class="6g",
+    internal=False,
+    clearance=0.0,
+    return_warnings=False,
+    standard=None,
+):
     """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
-    _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance)
+    _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance, standard=standard)
     ratio_warnings = []
-    std = THREAD_STANDARDS[standard_key]
+    std = standard if standard is not None else THREAD_STANDARDS[standard_key]
     profile_type = std["profile_type"]
 
     def ratio(value, default):
