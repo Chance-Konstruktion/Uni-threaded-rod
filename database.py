@@ -199,18 +199,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.5 * p,
         "d3_formula": lambda d, p: d - p,
         "special_params": {"radius": "P/3"},
-    },
-    "BALL_SCREW": {
-        "name": "Kugelgewindetrieb (DIN 69051 / ISO 3408)",
-        "standard": "DIN 69051 / ISO 3408",
-        "unit": "mm",
-        "flank_angle": 45.0,
-        "profile_type": "GOTHIC",
-        "diam_pitch_map": {12: 5.0, 16: 5.0, 20: 5.0, 25: 5.0, 32: 10.0, 40: 10.0},
-        "d2_formula": lambda d, p: d - 0.5 * p,
-        "d3_formula": lambda d, p: d - 0.9 * p,
-        "special_params": {"contact_angle": 45.0, "ball_radius_ratio": 0.52, "center_offset_ratio": 0.72},
-    },
+    }
 }
 
 # ------------------------------------------------------------------------------

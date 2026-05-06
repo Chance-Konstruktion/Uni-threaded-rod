@@ -51,13 +51,6 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertAlmostEqual(points[0].x, diameter_mm / 2.0 - 0.01, places=6)
         self.assertAlmostEqual(points[3].x, d3 / 2.0 - 0.01, places=6)
 
-    def test_ball_screw_gothic_profile_regression_shape(self):
-        points = geometry_engine.generate_profile("BALL_SCREW", diameter=20.0, pitch=5.0)
-        self.assertEqual(len(points), 34)
-        self.assertAlmostEqual(points[-1].y, 5.0, places=6)
-        self.assertLess(min(p.y for p in points), 0.0)
-        self.assertGreater(max(p.y for p in points), 5.0)
-
     def test_v_profile_parameterization_differs_by_standard(self):
         pitch = 1.5
         metric = geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=pitch)
@@ -67,12 +60,6 @@ class ReferenceRegressionTests(unittest.TestCase):
         # Root-/Crest-Breiten unterscheiden sich je Normfamilie.
         self.assertNotAlmostEqual(metric[1].y, unc[1].y, places=6)
         self.assertNotAlmostEqual(unc[4].y, bsw[4].y, places=6)
-
-    def test_ball_screw_gothic_uses_standard_specific_ratios(self):
-        points = geometry_engine.generate_profile("BALL_SCREW", diameter=25.0, pitch=5.0)
-        r2 = database.THREAD_STANDARDS["BALL_SCREW"]["d2_formula"](25.0, 5.0) / 2.0 - 0.01
-        expected_min_x = r2 - 2.0 * (5.0 * 0.52)
-        self.assertAlmostEqual(min(p.x for p in points), expected_min_x, places=6)
 
     def test_core_standards_generate_non_degenerate_profiles(self):
         cases = [
@@ -89,7 +76,6 @@ class ReferenceRegressionTests(unittest.TestCase):
             ("NPT", 20.0, 1.8),
             ("PG", 20.4, 1.41),
             ("EDISON", 27.0, 3.5),
-            ("BALL_SCREW", 20.0, 5.0),
         ]
         for standard, diameter, pitch in cases:
             with self.subTest(standard=standard):
@@ -103,7 +89,6 @@ class ReferenceRegressionTests(unittest.TestCase):
             ("TRAPEZOIDAL", 20.0, 4.0),
             ("ROUND", 20.0, 4.0),
             ("BUTTRESS", 20.0, 5.0),
-            ("BALL_SCREW", 20.0, 5.0),
         ]
         for standard, diameter, pitch in cases:
             with self.subTest(standard=standard):
@@ -186,7 +171,7 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
     def test_ui_i18n_has_de_and_en_labels_for_core_keys(self):
         keys = [
             "standard", "diameter", "length", "handedness", "starts",
-            "tolerance", "create_thread", "create_ball_screw",
+            "tolerance", "create_thread",
         ]
         for key in keys:
             with self.subTest(key=key):

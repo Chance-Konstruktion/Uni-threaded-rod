@@ -337,31 +337,6 @@ def generate_profile(
             ProfilePoint(r, pitch),
         ]
 
-    elif profile_type == "GOTHIC":
-        sp = std.get("special_params", {})
-        ball_radius = pitch * ratio(sp.get("ball_radius_ratio"), 0.60)
-        contact_angle = math.radians(std.get("special_params", {}).get("contact_angle", 45.0))
-        center_offset = ball_radius * ratio(sp.get("center_offset_ratio"), math.sin(contact_angle))
-        steps = 16
-        # Auch das KGT-/Gothic-Profil bleibt für den Primärpfad ein
-        # Außengewindeprofil: erster und letzter Punkt liegen bewusst auf dem
-        # Major-Radius. Der erste Bogenstützpunkt wird ausgelassen, damit die
-        # historische Punktanzahl stabil bleibt und trotzdem hart validierbar ist.
-        pts = [ProfilePoint(r, 0.0)]
-
-        center_a = ProfilePoint(r2 - ball_radius, pitch / 2.0 - center_offset)
-        for i in range(1, steps + 1):
-            ang = -math.pi / 2 + contact_angle + (math.pi - 2 * contact_angle) * i / steps
-            pts.append(ProfilePoint(center_a.x + ball_radius * math.cos(ang), center_a.y + ball_radius * math.sin(ang)))
-
-        center_b = ProfilePoint(r2 - ball_radius, pitch / 2.0 + center_offset)
-        for i in range(1, steps + 1):
-            ang = math.pi / 2 + contact_angle + (math.pi - 2 * contact_angle) * i / steps
-            pts.append(ProfilePoint(center_b.x + ball_radius * math.cos(ang), center_b.y + ball_radius * math.sin(ang)))
-
-        # Normnähere KGT-Ausprägung: Abschluss sauber an Crest-Radius anbinden.
-        pts.append(ProfilePoint(r, pitch))
-
     else:
         pts = [ProfilePoint(r, 0.0), ProfilePoint(r3, pitch / 2.0), ProfilePoint(r, pitch)]
 

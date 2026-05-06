@@ -282,35 +282,3 @@ def apply_boolean_cutter(context, cutter_obj, target_obj):
                 obj.select_set(True)
         if prev_active and prev_active.name in bpy.data.objects:
             context.view_layer.objects.active = prev_active
-
-
-def create_nut_body_mesh(name, outer_diameter, length, segments=64):
-    """Erzeugt einen einfachen zylindrischen Mutterrohling als BMesh."""
-    bm = bmesh.new()
-    bmesh.ops.create_cone(
-        bm,
-        cap_ends=True,
-        cap_tris=False,
-        segments=max(16, int(segments)),
-        radius1=max(outer_diameter * 0.5, 0.1),
-        radius2=max(outer_diameter * 0.5, 0.1),
-        depth=max(length, 0.1),
-    )
-    bmesh.ops.translate(bm, verts=bm.verts, vec=Vector((0.0, 0.0, length * 0.5)))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return bm
-
-
-def create_return_tube_mesh(name, major_radius, minor_radius, location):
-    """Erzeugt ein optionales Rückführungsmodul (vereinfachter Torus)."""
-    bm = bmesh.new()
-    bmesh.ops.create_torus(
-        bm,
-        major_segments=40,
-        minor_segments=16,
-        major_radius=max(major_radius, 0.1),
-        minor_radius=max(minor_radius, 0.05),
-    )
-    bmesh.ops.translate(bm, verts=bm.verts, vec=Vector(location))
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    return bm
