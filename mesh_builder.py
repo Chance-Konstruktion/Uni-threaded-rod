@@ -32,23 +32,6 @@ def _sort_vertices_radially(verts):
     return sorted(verts, key=lambda v: (math.atan2(v.co.y, v.co.x), v.co.length, v.co.z))
 
 
-def _flip_faces_with_inward_radial_normals(bm):
-    """Erzwingt nach außen zeigende Mantel-Normalen an der Gewindegeometrie.
-
-    Die Helix-Flächen werden je nach Drehrichtung unterschiedlich gewickelt.
-    Blender kann bei den sehr eng beieinanderliegenden Start-/Endkappen sonst
-    gelegentlich eine nach innen orientierte Hülle behalten, wodurch das Gewinde
-    optisch wie ein Innengewinde bzw. als nach innen stehendes Profil wirkt.
-    """
-    for face in bm.faces:
-        radial = Vector((face.calc_center_median().x, face.calc_center_median().y, 0.0))
-        if radial.length <= 1e-9:
-            continue
-        radial.normalize()
-        if face.normal.dot(radial) < -1e-7:
-            face.normal_flip()
-
-
 def _flip_caps_to_outside(bm, length):
     """Stellt sicher, dass Stirnflächen unten nach -Z und oben nach +Z zeigen."""
     for face in bm.faces:
@@ -61,8 +44,6 @@ def _flip_caps_to_outside(bm, length):
 
 def _enforce_external_normals(bm, length):
     """Korrigiert die Normalen der erzeugten Stange auf Außenorientierung."""
-    bm.normal_update()
-    _flip_faces_with_inward_radial_normals(bm)
     bm.normal_update()
     _flip_caps_to_outside(bm, length)
     bm.normal_update()
@@ -172,15 +153,6 @@ def create_thread_mesh(
     direction = 1.0 if handedness == "RIGHT" else -1.0
     lead = pitch * start_count
     segments_per_lead = max(circumferential_segments * start_count, circumferential_segments)
-    multi_start_floor = core_radius
-    if start_count > 1:
-        # Mehrgängige Gewinde bleiben ausdrücklich eine massive Vollstange:
-        # Die zusätzlichen Gänge dürfen keine tiefen, cutterartigen
-        # Aussparungen erzeugen. Deshalb wird der Talradius moderat angehoben,
-        # während der Major-Radius unverändert bleibt.
-        floor_lift = min(0.35, 0.12 * (start_count - 1))
-        multi_start_floor = core_radius + (major_radius - core_radius) * floor_lift
-
     # math.ceil verhindert ein zu kurzes Mesh. Die tatsächliche Z-Koordinate
     # wird pro Ring hart mit z = min(t * lead, length) begrenzt.
     axial_segments = max(1, math.ceil((length / lead) * segments_per_lead))
@@ -193,7 +165,7 @@ def create_thread_mesh(
         for radial_index in range(circumferential_segments):
             angle = 2.0 * math.pi * radial_index / circumferential_segments
             helical_y = z - direction * angle * lead / (2.0 * math.pi)
-            radius = max(radius_at_profile_y(helical_y), multi_start_floor)
+            radius = radius_at_profile_y(helical_y)
 
             if taper_ratio > 0.0:
                 diameter_delta = z * taper_ratio

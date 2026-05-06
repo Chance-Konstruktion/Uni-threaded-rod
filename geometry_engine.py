@@ -246,20 +246,20 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
             radius_control = min(root_radius * 0.4, (pitch / 2.0 - y_root) * 0.95)
             pts = [
                 ProfilePoint(r, 0.0),
-                ProfilePoint(r - h + root_flat * 0.5, y_root),
+                ProfilePoint(r3, y_root),
                 ProfilePoint(r3 + root_radius * 0.5, pitch / 2.0 - radius_control),
                 ProfilePoint(r3, pitch / 2.0),
                 ProfilePoint(r3 + root_radius * 0.5, pitch / 2.0 + radius_control),
-                ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
+                ProfilePoint(r3, pitch - y_root),
                 ProfilePoint(r, pitch - y_crest),
                 ProfilePoint(r, pitch),
             ]
         else:
             pts = [
                 ProfilePoint(r, 0.0),
-                ProfilePoint(r - h + root_flat * 0.5, y_root),
+                ProfilePoint(r3, y_root),
                 ProfilePoint(r3, pitch / 2.0),
-                ProfilePoint(r - h + root_flat * 0.5, pitch - y_root),
+                ProfilePoint(r3, pitch - y_root),
                 ProfilePoint(r, pitch - y_crest),
                 ProfilePoint(r, pitch),
             ]
