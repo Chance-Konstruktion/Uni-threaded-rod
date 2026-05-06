@@ -95,35 +95,52 @@ if HAS_BPY:
             std_tol = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
             internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
             tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
-            profile_internal = bool(negative_mode_active or tolerance_is_internal)
 
             if props.tolerance_class == "N_A":
                 self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
                 return {"CANCELLED"}
 
-            profile = generate_profile(
-                standard_key,
-                diameter,
-                pitch,
-                tolerance_class=props.tolerance_class,
-                internal=profile_internal,
-                clearance=props.clearance,
-            )
-            _report_ratio_warnings(self)
+            if tolerance_is_internal and not negative_mode_active:
+                self.report(
+                    {"ERROR"},
+                    "Innengewinde-Toleranzen sind nur im aktiven Negativ-Modus als Bohrungs-Cutter erlaubt.",
+                )
+                return {"CANCELLED"}
 
-            bm = create_thread_mesh(
-                name="Gewinde",
-                profile_points=profile,
-                diameter=diameter,
-                pitch=pitch,
-                length=props.length,
-                starts=props.starts,
-                handedness=props.handedness,
-                end_type=props.end_type,
-                taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
-                lod_level=props.lod_level,
-                segment_override=props.segment_override,
-            )
+            # Harte Kernregel: Das Primärobjekt ist immer eine massive
+            # Außengewindestange. Ein internes/aufgeweitetes Profil ist nur als
+            # temporärer Boolean-Difference-Cutter erlaubt, niemals als Default.
+            profile_internal = bool(negative_mode_active)
+
+            try:
+                profile = generate_profile(
+                    standard_key,
+                    diameter,
+                    pitch,
+                    tolerance_class=props.tolerance_class,
+                    internal=profile_internal,
+                    clearance=props.clearance,
+                )
+                _report_ratio_warnings(self)
+
+                bm = create_thread_mesh(
+                    name="Gewinde",
+                    profile_points=profile,
+                    diameter=diameter,
+                    pitch=pitch,
+                    length=props.length,
+                    starts=props.starts,
+                    handedness=props.handedness,
+                    end_type=props.end_type,
+                    taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
+                    lod_level=props.lod_level,
+                    segment_override=props.segment_override,
+                )
+            except ValueError as exc:
+                if standard_key == "_UTG_CUSTOM":
+                    THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
+                self.report({"ERROR"}, str(exc))
+                return {"CANCELLED"}
 
             mesh = bpy.data.meshes.new("UTG_Thread")
             bm.to_mesh(mesh)
