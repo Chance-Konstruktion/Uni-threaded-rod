@@ -117,9 +117,6 @@ def create_thread_mesh(
 
     sample_y = [sample[0] for sample in period_samples]
     sample_radius = [sample[1] for sample in period_samples]
-    core_radius = min(sample_radius)
-    major_radius = max(sample_radius)
-
     def radius_at_profile_y(local_y):
         y = local_y % pitch
         upper_index = bisect_left(sample_y, y)
