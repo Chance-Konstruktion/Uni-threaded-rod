@@ -72,11 +72,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
     custom_diameter: bpy.props.FloatProperty(name="Durchmesser", default=10.0, min=0.1)
     custom_pitch: bpy.props.FloatProperty(name="Steigung", default=1.5, min=0.1)
     custom_flank_angle: bpy.props.FloatProperty(name="Flankenwinkel", default=60.0, min=0.0, max=120.0)
-    custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", ""), ("GOTHIC", "Gothic/KGT", "")], default="V")
-    nut_outer_diameter: bpy.props.FloatProperty(name="KGT Mutter-Ø außen", default=30.0, min=1.0, unit="LENGTH")
-    nut_length: bpy.props.FloatProperty(name="KGT Mutter-Länge", default=24.0, min=1.0, unit="LENGTH")
-    nut_internal_clearance: bpy.props.FloatProperty(name="KGT Innen-Spiel", default=0.04, min=0.0, max=1.0, unit="LENGTH")
-    ball_return_enabled: bpy.props.BoolProperty(name="Kugelrückführung", description="Einfaches optionales Rückführungsmodul erzeugen", default=False)
+    custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", "")], default="V")
 
 
 class THREADFORGE_PT_main(bpy.types.Panel):
@@ -129,15 +125,6 @@ class THREADFORGE_PT_main(bpy.types.Panel):
 
         layout.separator()
         layout.operator("utg.create_thread", text=ui_label("create_thread", props.ui_language), icon="MOD_SCREW")
-        layout.operator("utg.create_ball_screw", text=ui_label("create_ball_screw", props.ui_language), icon="CON_ROTLIKE")
-        if props.standard == "BALL_SCREW":
-            layout.separator()
-            layout.label(text=ui_label("ball_nut", props.ui_language))
-            layout.prop(props, "nut_outer_diameter")
-            layout.prop(props, "nut_length")
-            layout.prop(props, "nut_internal_clearance")
-            layout.prop(props, "ball_return_enabled")
-            layout.operator("utg.create_ball_nut", text=ui_label("create_ball_nut", props.ui_language), icon="MESH_CYLINDER")
 
 
 def register_properties():

@@ -21,9 +21,6 @@ UI_TEXT = {
         "lod": "Mesh-Detail",
         "segment_override": "Segmente/Umdr.",
         "create_thread": "Gewinde erstellen",
-        "create_ball_screw": "Kugelgewindetrieb",
-        "ball_nut": "KGT Mutter",
-        "create_ball_nut": "KGT-Mutter erstellen",
     },
     "en": {
         "standard": "Standard",
@@ -41,9 +38,6 @@ UI_TEXT = {
         "lod": "Mesh detail",
         "segment_override": "Segments/turn",
         "create_thread": "Create thread",
-        "create_ball_screw": "Ball screw",
-        "ball_nut": "Ball nut",
-        "create_ball_nut": "Create ball nut",
     },
 }
 

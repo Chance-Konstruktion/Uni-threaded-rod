@@ -1,6 +1,6 @@
 # Uni-threaded-rod for Blender
 
-Blender-Add-on zur parametrischen Erzeugung von Außengewinden, Innengewinde-Cuttern, mehrgängigen Gewinden und Kugelgewindetrieb-Basisgeometrie.
+Blender-Add-on zur parametrischen Erzeugung von Außengewinden, Innengewinde-Cuttern und mehrgängigen Gewinden.
 
 ## Installation
 
@@ -45,7 +45,6 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `NPT` | National Pipe Taper | ANSI B1.20.1 | inch | V, konisch |
 | `PG` | Panzergewinde | DIN 40430 | mm | V |
 | `EDISON` | Edison-Gewinde | IEC 60061 | mm | Rund |
-| `BALL_SCREW` | Kugelgewindetrieb | DIN 69051 / ISO 3408 | mm | Gothic |
 
 ## Lizenz
 
