@@ -12,7 +12,8 @@ All notable changes to this project are documented in this file.
 - Vereinfachte Euler-Knickvalidierung (`validate_buckling`) auf Basis des Kerndurchmessers.
 
 ### Changed
-- Kernregel durchgesetzt: `create_thread` erzeugt standardmäßig immer massive Außengewindestangen (keine Hohlkörper mehr als Default).
+- Kernregel strikt durchgesetzt: `UTG_OT_create_thread` erzeugt standardmäßig immer massive, volle Außengewindestangen. Innengewinde nur noch im expliziten Negativ-Modus als Boolean-Cutter.
+- `create_thread_mesh` auf robusten Helix-Ring-Sweep mit planaren Caps vereinfacht.
 - Operator-Parametervalidierung in `__init__.py` über separates Validierungsmodul gekapselt (SRP-orientierte Trennung).
 - Parametervalidierung nutzt nun standardabhängige Kerndurchmesserformeln (`d3`) statt pauschaler Näherung.
 - Zusätzliche Robustheits-Guards in der Eingabevalidierung (`pitch`-Untergrenze, extremes Längen-/Durchmesserverhältnis).

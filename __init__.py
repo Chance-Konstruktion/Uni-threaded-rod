@@ -92,6 +92,12 @@ if HAS_BPY:
             if props.negative_mode and not negative_mode_active:
                 self.report({"INFO"}, "Negativ-Modus deaktiviert: Kein aktives Zielobjekt gefunden, erzeuge stattdessen Gewindestab.")
 
+            if props.starts > 2:
+                self.report(
+                    {"WARNING"},
+                    f"Mehrgängiges Gewinde mit {props.starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
+                )
+
             std_tol = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
             internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
             tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
@@ -157,13 +163,21 @@ if HAS_BPY:
                 else:
                     self.report({"WARNING"}, "Negativ-Modus aktiv, aber Zielobjekt ist ungültig.")
 
+            report_standard = props.standard if standard_key == "_UTG_CUSTOM" else standard_key
+
             if standard_key == "_UTG_CUSTOM":
                 THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
 
             if negative_mode_active:
-                self.report({"INFO"}, f"Bohrungs-Cutter M{diameter:g}x{props.length:g} erfolgreich angewendet.")
+                self.report(
+                    {"INFO"},
+                    f"Bohrungs-Cutter M{diameter:g}x{props.length:g} ({report_standard}) erfolgreich angewendet.",
+                )
             else:
-                self.report({"INFO"}, f"Massive Gewindestange M{diameter:g}x{props.length:g} erfolgreich erzeugt.")
+                self.report(
+                    {"INFO"},
+                    f"Massive M{diameter:g}x{props.length:g} Gewindestange ({report_standard}) erfolgreich erzeugt.",
+                )
 
             return {"FINISHED"}
 
