@@ -8,7 +8,7 @@ UI_TEXT = {
     "de": {
         "standard": "Norm",
         "diameter": "Durchmesser",
-        "length": "Länge",
+        "length": "Gewindestangenlänge",
         "handedness": "Drehrichtung",
         "starts": "Gängigkeit",
         "preset": "Preset",
@@ -25,7 +25,7 @@ UI_TEXT = {
     "en": {
         "standard": "Standard",
         "diameter": "Diameter",
-        "length": "Length",
+        "length": "Threaded rod length",
         "handedness": "Handedness",
         "starts": "Starts",
         "preset": "Preset",

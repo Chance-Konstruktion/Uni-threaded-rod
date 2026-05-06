@@ -1,3 +1,4 @@
+import ast
 import importlib.util
 import pathlib
 import sys
@@ -179,6 +180,25 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
                 self.assertIsInstance(ui_i18n.ui_label(key, "en"), str)
                 self.assertNotEqual(ui_i18n.ui_label(key, "de"), "")
                 self.assertNotEqual(ui_i18n.ui_label(key, "en"), "")
+
+    def test_threaded_rod_length_label_uses_rod_not_thread(self):
+        self.assertEqual(ui_i18n.ui_label("length", "de"), "Gewindestangenlänge")
+        self.assertEqual(ui_i18n.ui_label("length", "en"), "Threaded rod length")
+
+    def test_threaded_rod_length_property_defaults_to_100_mm_without_blender_unit_conversion(self):
+        tree = ast.parse((ROOT / "ui_panel.py").read_text(encoding="utf-8"))
+        length_property = next(
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.target.id == "length"
+        )
+        keywords = {keyword.arg: keyword.value for keyword in length_property.annotation.keywords}
+
+        self.assertEqual(keywords["name"].value, "Gewindestangenlänge (mm)")
+        self.assertEqual(keywords["default"].value, 100.0)
+        self.assertNotIn("unit", keywords)
 
     def test_iso_reference_rows_additional_sizes(self):
         cases = [
