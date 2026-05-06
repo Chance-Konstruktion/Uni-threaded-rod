@@ -277,10 +277,18 @@ def create_thread_mesh(
 
     non_manifold_edges = [edge for edge in bm.edges if not edge.is_manifold]
     if non_manifold_edges:
-        # Das Mesh ist konstruktiv geschlossen; ein Restbefund ist deshalb ein
-        # harter Fehler statt stiller Innengewinde-/Hüllen-Kaschierung.
-        bm.free()
-        raise ValueError(f"Gewindestange ist nicht manifold ({len(non_manifold_edges)} offene Kanten)")
+        # Produktiv-Robustheit: Der Körper wird konstruktiv geschlossen gebaut,
+        # aber Blender kann bei extremen Parametern numerische Restlöcher melden.
+        # Deshalb gibt es genau einen Reparaturversuch. Erst wenn danach noch
+        # offene Kanten existieren, wird laut fehlgeschlagen.
+        bmesh.ops.holes_fill(bm, edges=non_manifold_edges, sides=0)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        _enforce_external_normals(bm, length)
+
+        non_manifold_edges = [edge for edge in bm.edges if not edge.is_manifold]
+        if non_manifold_edges:
+            bm.free()
+            raise ValueError(f"Gewindestange ist nicht manifold ({len(non_manifold_edges)} offene Kanten)")
 
     return bm
 

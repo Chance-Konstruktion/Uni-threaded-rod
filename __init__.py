@@ -112,29 +112,35 @@ if HAS_BPY:
             # temporärer Boolean-Difference-Cutter erlaubt, niemals als Default.
             profile_internal = bool(negative_mode_active)
 
-            profile = generate_profile(
-                standard_key,
-                diameter,
-                pitch,
-                tolerance_class=props.tolerance_class,
-                internal=profile_internal,
-                clearance=props.clearance,
-            )
-            _report_ratio_warnings(self)
+            try:
+                profile = generate_profile(
+                    standard_key,
+                    diameter,
+                    pitch,
+                    tolerance_class=props.tolerance_class,
+                    internal=profile_internal,
+                    clearance=props.clearance,
+                )
+                _report_ratio_warnings(self)
 
-            bm = create_thread_mesh(
-                name="Gewinde",
-                profile_points=profile,
-                diameter=diameter,
-                pitch=pitch,
-                length=props.length,
-                starts=props.starts,
-                handedness=props.handedness,
-                end_type=props.end_type,
-                taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
-                lod_level=props.lod_level,
-                segment_override=props.segment_override,
-            )
+                bm = create_thread_mesh(
+                    name="Gewinde",
+                    profile_points=profile,
+                    diameter=diameter,
+                    pitch=pitch,
+                    length=props.length,
+                    starts=props.starts,
+                    handedness=props.handedness,
+                    end_type=props.end_type,
+                    taper_ratio=THREAD_STANDARDS.get(standard_key, {}).get("special_params", {}).get("taper_ratio", 0.0),
+                    lod_level=props.lod_level,
+                    segment_override=props.segment_override,
+                )
+            except ValueError as exc:
+                if standard_key == "_UTG_CUSTOM":
+                    THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
+                self.report({"ERROR"}, str(exc))
+                return {"CANCELLED"}
 
             mesh = bpy.data.meshes.new("UTG_Thread")
             bm.to_mesh(mesh)
