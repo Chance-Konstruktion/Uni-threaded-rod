@@ -160,6 +160,11 @@ if HAS_BPY:
             if standard_key == "_UTG_CUSTOM":
                 THREAD_STANDARDS.pop("_UTG_CUSTOM", None)
 
+            if negative_mode_active:
+                self.report({"INFO"}, f"Bohrungs-Cutter M{diameter:g}x{props.length:g} erfolgreich angewendet.")
+            else:
+                self.report({"INFO"}, f"Massive Gewindestange M{diameter:g}x{props.length:g} erfolgreich erzeugt.")
+
             return {"FINISHED"}
 
 
