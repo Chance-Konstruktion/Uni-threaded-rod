@@ -20,17 +20,9 @@ class ProfilePoint:
 
     x: float
     y: float
-_RATIO_WARNINGS = []
 
 
-def consume_ratio_warnings():
-    """Liefert und leert gesammelte Ratio-Parserwarnungen."""
-    warnings = list(_RATIO_WARNINGS)
-    _RATIO_WARNINGS.clear()
-    return warnings
-
-
-def _safe_ratio(value, default):
+def _safe_ratio(value, default, ratio_warnings=None):
     """Akzeptiert numerische Werte oder P-Ausdrücke mit +,-,*,/ (z. B. '0.5*P-0.5')."""
     if value is None:
         return default
@@ -45,7 +37,8 @@ def _safe_ratio(value, default):
     except SyntaxError:
         message = f"Ungültiger Ratio-Ausdruck '{value}'; Default {default} verwendet."
         logging.getLogger(__name__).warning(message)
-        _RATIO_WARNINGS.append(message)
+        if ratio_warnings is not None:
+            ratio_warnings.append(message)
         return default
 
     def _eval(n):
@@ -68,7 +61,8 @@ def _safe_ratio(value, default):
     except Exception:
         message = f"Ratio-Ausdruck '{value}' konnte nicht ausgewertet werden; Default {default} verwendet."
         logging.getLogger(__name__).warning(message)
-        _RATIO_WARNINGS.append(message)
+        if ratio_warnings is not None:
+            ratio_warnings.append(message)
         return default
 
 
@@ -185,11 +179,15 @@ def _validate_external_profile_points(points, major_radius, core_radius, pitch):
         raise ValueError("Außengewindeprofil muss bei y=pitch enden")
 
 
-def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0):
+def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", internal=False, clearance=0.0, return_warnings=False):
     """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
     _validate_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance)
+    ratio_warnings = []
     std = THREAD_STANDARDS[standard_key]
     profile_type = std["profile_type"]
+
+    def ratio(value, default):
+        return _safe_ratio(value, default, ratio_warnings)
 
     d2 = std["d2_formula"](diameter, pitch)
     d3 = std["d3_formula"](diameter, pitch)
@@ -215,25 +213,25 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
         iso_row = resolve_iso_metric_coarse_row(diameter, pitch) if standard_key.startswith("METRIC") else None
 
         if standard_key.startswith("METRIC"):
-            crest_flat = iso_row["crest_flat"] if iso_row else pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
-            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 4.0)
+            crest_flat = iso_row["crest_flat"] if iso_row else pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 4.0)
             root_radius = iso_row["root_radius"] if iso_row else pitch * 0.14434
         elif standard_key in {"UNC", "UNF"}:
-            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
-            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 8.0)
+            crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 8.0)
             root_radius = 0.0
         elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G"}:
             # Vereinfachte Rundungs-Ersatzgeometrie: kürzere Flats bei 55°-Profilen.
-            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 12.0)
-            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 6.0)
+            crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 12.0)
+            root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 6.0)
             root_radius = pitch * 0.137329
         elif standard_key in {"NPT"}:
-            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 1.0 / 8.0)
-            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 1.0 / 8.0)
-            root_radius = pitch * _safe_ratio(sp.get("root_radius"), 0.0714)
+            crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
+            root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 8.0)
+            root_radius = pitch * ratio(sp.get("root_radius"), 0.0714)
         else:
-            crest_flat = pitch * _safe_ratio(sp.get("crest_flat"), 0.05)
-            root_flat = pitch * _safe_ratio(sp.get("root_flat"), 0.10)
+            crest_flat = pitch * ratio(sp.get("crest_flat"), 0.05)
+            root_flat = pitch * ratio(sp.get("root_flat"), 0.10)
             root_radius = 0.0
 
         crest_flat = max(0.0, min(crest_flat, pitch * 0.45))
@@ -308,9 +306,9 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
 
     elif profile_type == "GOTHIC":
         sp = std.get("special_params", {})
-        ball_radius = pitch * _safe_ratio(sp.get("ball_radius_ratio"), 0.60)
+        ball_radius = pitch * ratio(sp.get("ball_radius_ratio"), 0.60)
         contact_angle = math.radians(std.get("special_params", {}).get("contact_angle", 45.0))
-        center_offset = ball_radius * _safe_ratio(sp.get("center_offset_ratio"), math.sin(contact_angle))
+        center_offset = ball_radius * ratio(sp.get("center_offset_ratio"), math.sin(contact_angle))
         steps = 16
         # Auch das KGT-/Gothic-Profil bleibt für den Primärpfad ein
         # Außengewindeprofil: erster und letzter Punkt liegen bewusst auf dem
@@ -337,4 +335,6 @@ def generate_profile(standard_key, diameter, pitch, tolerance_class="6g", intern
     if not internal:
         _validate_external_profile_points(pts, r, r3, pitch)
 
+    if return_warnings:
+        return pts, ratio_warnings
     return pts
