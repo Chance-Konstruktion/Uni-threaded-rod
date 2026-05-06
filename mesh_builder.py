@@ -66,6 +66,98 @@ def _enforce_external_normals(bm, length):
     bm.normal_update()
 
 
+def _prepare_periodic_profile_samples(profile_points, pitch):
+    """Bereitet Profilpunkte für robuste Radius-Abtastung über eine Steigung vor."""
+    if len(profile_points) < 3:
+        raise ValueError("Gewindeprofil benötigt mindestens drei Punkte")
+    if pitch <= 0.0:
+        raise ValueError("Steigung (Pitch) muss > 0 sein")
+
+    samples_by_y = {}
+    for point in profile_points:
+        if not math.isfinite(point.x) or not math.isfinite(point.y):
+            raise ValueError("Gewindeprofil enthält nicht-finite Koordinaten")
+        if point.x <= 0.0:
+            raise ValueError("Gewindeprofil enthält radiale Koordinaten <= 0")
+
+        # Punkte außerhalb [0, pitch] können z. B. bei gerundeten Gothic-Profilen
+        # als Kontrollpunkte existieren. Für die periodische Außenhaut werden sie
+        # auf die Profilperiode projiziert; bei doppelten y-Werten gewinnt der
+        # größere Radius, damit nie versehentlich Material nach innen ausgehöhlt
+        # wird.
+        y = point.y % pitch
+        if abs(y - pitch) <= 1e-9 or abs(y) <= 1e-9:
+            y = 0.0
+        samples_by_y[y] = max(samples_by_y.get(y, point.x), point.x)
+
+    # Die Profilperiode muss am Major-Radius beginnen und enden. Falls numerische
+    # Rundungen den Endpunkt auf y=0 zusammengelegt haben, duplizieren wir ihn als
+    # y=pitch, damit die Interpolation am Periodenrand sauber bleibt.
+    if 0.0 not in samples_by_y:
+        raise ValueError("Gewindeprofil muss einen Außenpunkt bei y=0 besitzen")
+
+    samples = sorted((y, radius) for y, radius in samples_by_y.items() if 0.0 <= y < pitch)
+    samples.append((pitch, samples[0][1]))
+
+    maximum_radius = max(radius for _, radius in samples)
+    minimum_radius = min(radius for _, radius in samples)
+    if minimum_radius >= maximum_radius:
+        raise ValueError("Gewindeprofil ist radial degeneriert")
+
+    return samples, maximum_radius, minimum_radius
+
+
+def _interpolate_profile_radius(samples, local_y):
+    """Liefert den Außenradius des Profils an der periodischen Koordinate local_y."""
+    if local_y <= samples[0][0]:
+        return samples[0][1]
+    for index in range(len(samples) - 1):
+        y0, radius0 = samples[index]
+        y1, radius1 = samples[index + 1]
+        if y0 <= local_y <= y1:
+            span = max(y1 - y0, 1e-12)
+            factor = (local_y - y0) / span
+            return radius0 + (radius1 - radius0) * factor
+    return samples[-1][1]
+
+
+def _thread_radius_at(samples, z, angle, pitch, starts, handedness):
+    """Berechnet die äußerste Materialkontur eines massiven Außengewindes.
+
+    Für Mehrganggewinde werden alle Startphasen ausgewertet und der größte
+    Radius verwendet. Das entspricht einer soliden Materialhülle: Material darf
+    außen stehen bleiben, aber niemals als Innenprofil oder dünne Schale
+    interpretiert werden.
+    """
+    direction = 1.0 if handedness == "RIGHT" else -1.0
+    start_count = max(1, int(starts))
+    best_radius = 0.0
+    for start_index in range(start_count):
+        start_phase = 2.0 * math.pi * start_index / start_count
+        local_y = (z - direction * (angle - start_phase) * pitch / (2.0 * math.pi)) % pitch
+        best_radius = max(best_radius, _interpolate_profile_radius(samples, local_y))
+    return best_radius
+
+
+def _ring_end_shrink(z, length, pitch, end_type):
+    """Optionale Endform ohne Verletzung der planaren Caps bei z=0/z=length."""
+    if end_type == "FLAT" or length <= 0.0:
+        return 1.0
+
+    end_span = min(max(pitch, 1e-6), length * 0.5)
+    distance_to_end = min(z, length - z)
+    if distance_to_end >= end_span:
+        return 1.0
+
+    t = max(0.0, min(1.0, distance_to_end / end_span))
+    if end_type == "CHAMFER":
+        return 0.88 + 0.12 * t
+
+    # RUNOUT: weiche S-Kurve; die Stirnfläche bleibt trotzdem exakt planar.
+    smooth = t * t * (3.0 - 2.0 * t)
+    return 0.84 + 0.16 * smooth
+
+
 def create_thread_mesh(
     name,
     profile_points,
@@ -79,12 +171,28 @@ def create_thread_mesh(
     lod_level="FINAL",
     segment_override=48,
 ):
-    """Erzeugt ein manifoldes BMesh einer Gewindestange."""
-    _ = (name, diameter)
+    """Erzeugt ein manifoldes BMesh einer massiven Außengewindestange.
+
+    Die Geometrie wird als radiale Außenhaut eines Vollkörpers aufgebaut: Jede
+    axiale Station ist ein geschlossener Kreisring mit Profilradius, die
+    Stirnflächen sind echte planare Fans auf exakt z=0 und z=length. Es wird
+    kein Hohlzylinder, keine Innengewinde-Hülle und keine dünnwandige Kontur als
+    Ausgangsobjekt erzeugt.
+    """
+    _ = name
+    if diameter <= 0.0:
+        raise ValueError("Durchmesser muss > 0 sein")
+    if pitch <= 0.0:
+        raise ValueError("Steigung (Pitch) muss > 0 sein")
+    if length <= 0.0:
+        raise ValueError("Länge muss > 0 sein")
+
+    samples, maximum_radius, minimum_radius = _prepare_periodic_profile_samples(profile_points, pitch)
+    if maximum_radius <= 0.0 or minimum_radius <= 0.0:
+        raise ValueError("Gewindeprofil enthält ungültige Radien")
+
     bm = bmesh.new()
 
-    lead = pitch * starts
-    turns = max(length / max(lead, 1e-6), 0.01)
     if lod_level == "PREVIEW":
         lod_factor = 0.70
     elif lod_level == "CUSTOM":
@@ -93,103 +201,88 @@ def create_thread_mesh(
         lod_factor = 1.15
 
     auto_segments = max(24, int((36 * (pitch / 5.0) + diameter * 0.6) * lod_factor))
-    segments_per_turn = max(12, int(segment_override)) if lod_level == "CUSTOM" else auto_segments
+    circumferential_segments = max(12, int(segment_override)) if lod_level == "CUSTOM" else auto_segments
     if length > 250.0:
-        segments_per_turn = max(18, int(segments_per_turn * 0.85))
-    total_segments = int(turns * segments_per_turn) + 1
-    direction = 1.0 if handedness == "RIGHT" else -1.0
+        circumferential_segments = max(18, int(circumferential_segments * 0.85))
 
-    start_loops = []
-    end_loops = []
-    for start_idx in range(starts):
-        prev_loop_verts = []
-        first_loop_verts = []
-        start_phase = (2.0 * math.pi * start_idx / starts) * direction
+    # math.ceil verhindert, dass das letzte Segment vor der Ziellänge endet.
+    # Die Koordinate selbst wird zusätzlich hart auf [0, length] begrenzt.
+    axial_segments = max(1, math.ceil((length / pitch) * circumferential_segments))
 
-        for seg in range(total_segments):
-            t = seg / segments_per_turn
-            angle = t * 2.0 * math.pi * direction + start_phase
-            z = t * lead
+    rings = []
+    for axial_index in range(axial_segments + 1):
+        raw_z = axial_index * length / axial_segments
+        z = min(max(raw_z, 0.0), length)
+        ring = []
+        for radial_index in range(circumferential_segments):
+            angle = 2.0 * math.pi * radial_index / circumferential_segments
+            radius = _thread_radius_at(samples, z, angle, pitch, starts, handedness)
 
-            current_verts = []
-            taper_scale = 1.0
             if taper_ratio > 0.0:
-                # NPT: Durchmesseränderung über Länge mit 1:x-Verhältnis
-                diam_delta = z * taper_ratio
-                taper_scale = max(0.2, 1.0 - diam_delta / max(diameter, 1e-6))
-            for pt in profile_points:
-                radial = pt.x * taper_scale
-                x = radial * math.cos(angle)
-                y = radial * math.sin(angle)
-                z_local = pt.y
-                current_verts.append(bm.verts.new(Vector((x, y, z_local + z))))
+                # NPT: Durchmesseränderung über Länge mit 1:x-Verhältnis. Der
+                # Radius wird skaliert, die Stirnebenen bleiben aber exakt.
+                diameter_delta = z * taper_ratio
+                taper_scale = max(0.2, 1.0 - diameter_delta / max(diameter, 1e-6))
+                radius *= taper_scale
 
-            if seg > 0:
-                n = len(profile_points)
-                for i in range(n):
-                    v1 = prev_loop_verts[i]
-                    v2 = prev_loop_verts[(i + 1) % n]
-                    v3 = current_verts[(i + 1) % n]
-                    v4 = current_verts[i]
-                    # Bei positivem Helixwinkel (Rechtsgewinde) erzeugt die
-                    # alte Wicklung Innen-Normalen (Z x Tangential = -Radial).
-                    # Deshalb wird die Quad-Reihenfolge abhängig von der
-                    # Drehrichtung gewählt, damit die Mantelflächen nach außen zeigen.
-                    if direction > 0.0:
-                        face_verts = (v1, v4, v3, v2)
-                    else:
-                        face_verts = (v1, v2, v3, v4)
-                    try:
-                        bm.faces.new(face_verts)
-                    except ValueError:
-                        pass
+            radius *= _ring_end_shrink(z, length, pitch, end_type)
+            x = radius * math.cos(angle)
+            y = radius * math.sin(angle)
+            ring.append(bm.verts.new(Vector((x, y, z))))
+        rings.append(ring)
 
-            prev_loop_verts = current_verts
-            if seg == 0:
-                first_loop_verts = current_verts
-
-        # Endtyp-Modifikation an den äußersten Querschnitten
-        _apply_end_profile(first_loop_verts, end_type)
-        _apply_end_profile(prev_loop_verts, end_type)
-
-        start_loops.append(first_loop_verts)
-        end_loops.append(prev_loop_verts)
-
-    cap_start_loop = _sort_vertices_radially([v for loop in start_loops for v in loop])
-    cap_end_loop = _sort_vertices_radially([v for loop in end_loops for v in loop])
-
-    if cap_start_loop:
-        center_bottom = bm.verts.new(Vector((0.0, 0.0, 0.0)))
-        for i in range(len(cap_start_loop)):
-            v1 = cap_start_loop[i]
-            v2 = cap_start_loop[(i + 1) % len(cap_start_loop)]
+    # Seitenflächen: Parametrisierung läuft erst in Umfangsrichtung und dann in
+    # +Z. Diese Reihenfolge ergibt bei einem Zylinder direkt radial nach außen
+    # zeigende Normalen; _enforce_external_normals bleibt nur als Sicherheitsnetz.
+    for axial_index in range(axial_segments):
+        lower_ring = rings[axial_index]
+        upper_ring = rings[axial_index + 1]
+        for radial_index in range(circumferential_segments):
+            next_radial_index = (radial_index + 1) % circumferential_segments
+            v00 = lower_ring[radial_index]
+            v01 = lower_ring[next_radial_index]
+            v11 = upper_ring[next_radial_index]
+            v10 = upper_ring[radial_index]
             try:
-                bm.faces.new((center_bottom, v2, v1))
+                bm.faces.new((v00, v01, v11, v10))
             except ValueError:
                 pass
 
-    if cap_end_loop:
-        center_top = bm.verts.new(Vector((0.0, 0.0, length)))
-        for i in range(len(cap_end_loop)):
-            v1 = cap_end_loop[i]
-            v2 = cap_end_loop[(i + 1) % len(cap_end_loop)]
-            try:
-                bm.faces.new((center_top, v1, v2))
-            except ValueError:
-                pass
+    # Planare, saubere Stirnflächen. Alle Vertices der unteren Kappe liegen auf
+    # z=0; alle Vertices der oberen Kappe liegen auf z=length. Damit entsteht ein
+    # echter Vollkörper und kein offener Gewindeschlauch.
+    center_bottom = bm.verts.new(Vector((0.0, 0.0, 0.0)))
+    bottom_ring = rings[0]
+    for radial_index in range(circumferential_segments):
+        v1 = bottom_ring[radial_index]
+        v2 = bottom_ring[(radial_index + 1) % circumferential_segments]
+        try:
+            bm.faces.new((center_bottom, v2, v1))
+        except ValueError:
+            pass
 
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
+    center_top = bm.verts.new(Vector((0.0, 0.0, length)))
+    top_ring = rings[-1]
+    for radial_index in range(circumferential_segments):
+        v1 = top_ring[radial_index]
+        v2 = top_ring[(radial_index + 1) % circumferential_segments]
+        try:
+            bm.faces.new((center_top, v1, v2))
+        except ValueError:
+            pass
+
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.000001)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     _enforce_external_normals(bm, length)
 
-    non_manifold_edges = [e for e in bm.edges if not e.is_manifold]
+    non_manifold_edges = [edge for edge in bm.edges if not edge.is_manifold]
     if non_manifold_edges:
-        bmesh.ops.holes_fill(bm, edges=non_manifold_edges, sides=0)
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-        _enforce_external_normals(bm, length)
+        # Das Mesh ist konstruktiv geschlossen; ein Restbefund ist deshalb ein
+        # harter Fehler statt stiller Innengewinde-/Hüllen-Kaschierung.
+        bm.free()
+        raise ValueError(f"Gewindestange ist nicht manifold ({len(non_manifold_edges)} offene Kanten)")
 
     return bm
-
 
 def apply_material(obj, material_key, surface_key="NONE"):
     """Weist dem Objekt ein Material aus MATERIAL_PRESETS zu."""

@@ -97,6 +97,23 @@ class ReferenceRegressionTests(unittest.TestCase):
                 self.assertGreaterEqual(len(points), 3)
                 self.assertLess(min(p.x for p in points), max(p.x for p in points))
 
+    def test_external_profiles_start_and_end_at_major_radius(self):
+        cases = [
+            ("METRIC_ISO", 10.0, 1.5),
+            ("TRAPEZOIDAL", 20.0, 4.0),
+            ("ROUND", 20.0, 4.0),
+            ("BUTTRESS", 20.0, 5.0),
+            ("BALL_SCREW", 20.0, 5.0),
+        ]
+        for standard, diameter, pitch in cases:
+            with self.subTest(standard=standard):
+                points = geometry_engine.generate_profile(standard, diameter=diameter, pitch=pitch)
+                major_radius = diameter / 2.0 - 0.01
+                self.assertAlmostEqual(points[0].x, major_radius, places=6)
+                self.assertAlmostEqual(points[0].y, 0.0, places=6)
+                self.assertAlmostEqual(points[-1].x, major_radius, places=6)
+                self.assertAlmostEqual(points[-1].y, pitch, places=6)
+
     def test_rejects_non_positive_pitch(self):
         with self.assertRaisesRegex(ValueError, "Steigung"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)
