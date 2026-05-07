@@ -226,13 +226,15 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
             for node in ast.walk(tree)
             if isinstance(node, ast.AnnAssign)
             and isinstance(node.target, ast.Name)
-            and node.target.id in {"length", "clearance", "custom_diameter", "custom_pitch"}
+            and node.target.id in {"diameter_enum", "length", "clearance", "custom_diameter", "custom_pitch"}
         }
 
+        self.assertEqual(properties["diameter_enum"]["default"].value, "8.0")
         self.assertEqual(properties["length"]["name"].value, "Gewindestangenlänge (mm)")
         self.assertEqual(properties["length"]["default"].value, 100.0)
         self.assertEqual(properties["clearance"]["name"].value, "Spiel (mm)")
         self.assertEqual(properties["custom_diameter"]["name"].value, "Durchmesser (mm)")
+        self.assertEqual(properties["custom_diameter"]["default"].value, 8.0)
         self.assertEqual(properties["custom_pitch"]["name"].value, "Steigung (mm)")
         for keywords in properties.values():
             self.assertNotIn("unit", keywords)
