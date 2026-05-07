@@ -8,6 +8,9 @@ from mathutils import Vector
 from .database import MATERIAL_PRESETS
 
 
+MM_TO_BLENDER_UNITS = 0.001
+
+
 def _apply_end_profile(loop_verts, end_type):
     if end_type == "FLAT" or not loop_verts:
         return
@@ -222,6 +225,11 @@ def create_thread_mesh(
         if non_manifold_edges:
             bm.free()
             raise ValueError(f"Gewindestange ist nicht manifold ({len(non_manifold_edges)} offene Kanten)")
+
+    for vert in bm.verts:
+        vert.co.x *= MM_TO_BLENDER_UNITS
+        vert.co.y *= MM_TO_BLENDER_UNITS
+        vert.co.z *= MM_TO_BLENDER_UNITS
 
     return bm
 
