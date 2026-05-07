@@ -189,12 +189,27 @@ class ThreadMeshShapeTests(unittest.TestCase):
         flat = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="FLAT")
         chamfered = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="CHAMFER")
 
-        flat_top_radius = max(math.hypot(vert.co.x, vert.co.y) for vert in flat.verts if abs(vert.co.z - length) < 1e-8)
+        blender_length = length / 1000.0
+        flat_top_radius = max(math.hypot(vert.co.x, vert.co.y) for vert in flat.verts if abs(vert.co.z - blender_length) < 1e-8)
         chamfered_top_radius = max(
-            math.hypot(vert.co.x, vert.co.y) for vert in chamfered.verts if abs(vert.co.z - length) < 1e-8
+            math.hypot(vert.co.x, vert.co.y) for vert in chamfered.verts if abs(vert.co.z - blender_length) < 1e-8
         )
 
         self.assertLess(chamfered_top_radius, flat_top_radius)
+
+
+    def test_mesh_coordinates_convert_mm_inputs_to_blender_meters(self):
+        diameter = 10.0
+        pitch = 1.5
+        length = 30.0
+        profile = self.geometry_engine.generate_profile("METRIC_ISO", diameter, pitch)
+
+        bm = self.mesh_builder.create_thread_mesh(profile, diameter, pitch, length, end_type="FLAT")
+
+        max_diameter = 2.0 * max(math.hypot(vert.co.x, vert.co.y) for vert in bm.verts)
+        max_length = max(vert.co.z for vert in bm.verts)
+        self.assertAlmostEqual(max_diameter, diameter / 1000.0, delta=0.0002)
+        self.assertAlmostEqual(max_length, length / 1000.0, places=9)
 
     def test_m10x15_mesh_is_single_solid_rod(self):
         diameter = 10.0
@@ -202,7 +217,7 @@ class ThreadMeshShapeTests(unittest.TestCase):
         length = 30.0
         profile = self.geometry_engine.generate_profile("METRIC_ISO", diameter, pitch)
         d3 = self.database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter, pitch)
-        expected = math.pi * (d3 / 2.0) ** 2 * length
+        expected = math.pi * (d3 / 2.0) ** 2 * length / 1_000_000_000.0
 
         for starts in (1, 2, 4):
             with self.subTest(starts=starts):

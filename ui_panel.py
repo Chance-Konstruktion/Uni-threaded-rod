@@ -51,7 +51,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
     surface: bpy.props.EnumProperty(name="Oberfläche", items=[("NONE", "Unbehandelt", ""), ("ZINC", "Verzinkt", ""), ("HOT_DIP", "Feuerverzinkt", "")], default="NONE")
 
     tolerance_class: bpy.props.EnumProperty(name="Toleranzklasse", items=get_tolerance_items)
-    clearance: bpy.props.FloatProperty(name="Spiel", default=0.1, min=0.0, max=1.0, step=0.05, unit="LENGTH")
+    clearance: bpy.props.FloatProperty(name="Spiel (mm)", default=0.1, min=0.0, max=1.0, step=0.05)
 
     end_type: bpy.props.EnumProperty(name="Enden", items=[("FLAT", "Flach", ""), ("CHAMFER", "Fase 45°", ""), ("RUNOUT", "Auslauf", "")], default="CHAMFER")
     negative_mode: bpy.props.BoolProperty(name="Negativ-Modus", description="Erzeugt Bohrung statt Stange (Boolesche Differenz)", default=False)
@@ -69,8 +69,8 @@ class UTG_Properties(bpy.types.PropertyGroup):
 
     ui_language: bpy.props.EnumProperty(name="UI Sprache", items=[("de", "Deutsch", ""), ("en", "English", "")], default="de")
 
-    custom_diameter: bpy.props.FloatProperty(name="Durchmesser", default=10.0, min=0.1)
-    custom_pitch: bpy.props.FloatProperty(name="Steigung", default=1.5, min=0.1)
+    custom_diameter: bpy.props.FloatProperty(name="Durchmesser (mm)", default=10.0, min=0.1)
+    custom_pitch: bpy.props.FloatProperty(name="Steigung (mm)", default=1.5, min=0.1)
     custom_flank_angle: bpy.props.FloatProperty(name="Flankenwinkel", default=60.0, min=0.0, max=120.0)
     custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", "")], default="V")
 

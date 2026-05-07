@@ -185,20 +185,23 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
         self.assertEqual(ui_i18n.ui_label("length", "de"), "Gewindestangenlänge")
         self.assertEqual(ui_i18n.ui_label("length", "en"), "Threaded rod length")
 
-    def test_threaded_rod_length_property_defaults_to_100_mm_without_blender_unit_conversion(self):
+    def test_mm_input_properties_do_not_use_blender_length_unit_conversion(self):
         tree = ast.parse((ROOT / "ui_panel.py").read_text(encoding="utf-8"))
-        length_property = next(
-            node
+        properties = {
+            node.target.id: {keyword.arg: keyword.value for keyword in node.annotation.keywords}
             for node in ast.walk(tree)
             if isinstance(node, ast.AnnAssign)
             and isinstance(node.target, ast.Name)
-            and node.target.id == "length"
-        )
-        keywords = {keyword.arg: keyword.value for keyword in length_property.annotation.keywords}
+            and node.target.id in {"length", "clearance", "custom_diameter", "custom_pitch"}
+        }
 
-        self.assertEqual(keywords["name"].value, "Gewindestangenlänge (mm)")
-        self.assertEqual(keywords["default"].value, 100.0)
-        self.assertNotIn("unit", keywords)
+        self.assertEqual(properties["length"]["name"].value, "Gewindestangenlänge (mm)")
+        self.assertEqual(properties["length"]["default"].value, 100.0)
+        self.assertEqual(properties["clearance"]["name"].value, "Spiel (mm)")
+        self.assertEqual(properties["custom_diameter"]["name"].value, "Durchmesser (mm)")
+        self.assertEqual(properties["custom_pitch"]["name"].value, "Steigung (mm)")
+        for keywords in properties.values():
+            self.assertNotIn("unit", keywords)
 
     def test_iso_reference_rows_additional_sizes(self):
         cases = [
