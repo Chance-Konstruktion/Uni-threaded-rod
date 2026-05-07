@@ -253,7 +253,7 @@ def generate_profile(
             crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
             root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 8.0)
             root_radius = 0.0
-        elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G"}:
+        elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G", "PIPE_R"}:
             # Vereinfachte Rundungs-Ersatzgeometrie: kürzere Flats bei 55°-Profilen.
             crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 12.0)
             root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 6.0)
