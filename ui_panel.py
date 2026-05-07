@@ -42,7 +42,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
         default="METRIC_ISO",
     )
 
-    diameter_enum: bpy.props.EnumProperty(name="Durchmesser", items=get_diameter_items)
+    diameter_enum: bpy.props.EnumProperty(name="Durchmesser", items=get_diameter_items, default="8.0")
     length: bpy.props.FloatProperty(name="Gewindestangenlänge (mm)", default=100.0, min=0.1, max=1000.0)
     handedness: bpy.props.EnumProperty(name="Drehrichtung", items=[("RIGHT", "Rechtsgewinde", ""), ("LEFT", "Linksgewinde", "")], default="RIGHT")
     starts: bpy.props.IntProperty(name="Gängigkeit", default=1, min=1, max=8)
@@ -69,7 +69,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
 
     ui_language: bpy.props.EnumProperty(name="UI Sprache", items=[("de", "Deutsch", ""), ("en", "English", "")], default="de")
 
-    custom_diameter: bpy.props.FloatProperty(name="Durchmesser (mm)", default=10.0, min=0.1)
+    custom_diameter: bpy.props.FloatProperty(name="Durchmesser (mm)", default=8.0, min=0.1)
     custom_pitch: bpy.props.FloatProperty(name="Steigung (mm)", default=1.5, min=0.1)
     custom_flank_angle: bpy.props.FloatProperty(name="Flankenwinkel", default=60.0, min=0.0, max=120.0)
     custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", "")], default="V")
