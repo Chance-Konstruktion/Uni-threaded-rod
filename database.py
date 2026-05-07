@@ -12,6 +12,14 @@ ISO_METRIC_COARSE_PITCH_SERIES = {
     52.0: 5.0, 56.0: 5.5, 60.0: 5.5, 64.0: 6.0,
 }
 
+ISO_METRIC_FINE_PITCH_SERIES = {
+    1.0: 0.2, 1.2: 0.2, 1.4: 0.2, 1.6: 0.2, 1.8: 0.2,
+    2.0: 0.25, 2.5: 0.35, 3.0: 0.35, 3.5: 0.35, 4.0: 0.5,
+    5.0: 0.5, 6.0: 0.75, 7.0: 0.75, 8.0: 1.00, 10.0: 1.25,
+    12.0: 1.50, 16.0: 1.50, 20.0: 1.50, 24.0: 2.00, 30.0: 2.00,
+    36.0: 3.00, 42.0: 3.00, 48.0: 3.00, 56.0: 4.00, 64.0: 4.00,
+}
+
 ISO_METRIC_COARSE_TABLE = {
     f"M{diameter:g}": {
         "diameter": diameter,
@@ -59,7 +67,9 @@ THREAD_STANDARDS = {
         "unit": "mm",
         "flank_angle": 60.0,
         "profile_type": "V",
-        "diam_pitch_map": {8.0: 1.00, 10.0: 1.25, 12.0: 1.50, 16.0: 1.50, 20.0: 1.50, 24.0: 2.00, 30.0: 2.00, 36.0: 3.00, 42.0: 3.00, 48.0: 3.00, 56.0: 4.00, 64.0: 4.00},
+        "diam_pitch_map": {
+            **ISO_METRIC_FINE_PITCH_SERIES,
+        },
         "d2_formula": lambda d, p: d - 0.649519 * p,
         "d3_formula": lambda d, p: d - 1.226869 * p,
         "tensile_stress_area_formula": lambda d, p: d - 0.9382 * p,
