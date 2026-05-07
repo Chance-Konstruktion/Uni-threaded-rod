@@ -38,6 +38,17 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertAlmostEqual(diameter_mm, 20.955, places=6)
         self.assertAlmostEqual(pitch_mm, 25.4 / 14.0, places=6)
 
+    def test_symbolic_tapered_sealing_pipe_resolution_r_half(self):
+        diameter_mm, pitch_mm = database.resolve_thread_parameters("PIPE_R", "R1/2")
+        self.assertAlmostEqual(diameter_mm, 20.955, places=6)
+        self.assertAlmostEqual(pitch_mm, 25.4 / 14.0, places=6)
+
+    def test_tapered_sealing_pipe_thread_metadata(self):
+        pipe_r = database.THREAD_STANDARDS["PIPE_R"]
+        self.assertEqual(pipe_r["standard"], "DIN EN 10226 / ISO 7-1")
+        self.assertEqual(pipe_r["flank_angle"], 55.0)
+        self.assertEqual(pipe_r["special_params"]["taper_ratio"], 1 / 16)
+
     def test_npt_resolution_one_half(self):
         diameter_mm, pitch_mm = database.resolve_thread_parameters("NPT", "1 1/2")
         self.assertAlmostEqual(diameter_mm, 48.3, places=6)
@@ -70,6 +81,7 @@ class ReferenceRegressionTests(unittest.TestCase):
             ("UNC", 10.0, 1.5),
             ("UNF", 10.0, 1.0),
             ("PIPE_G", 20.0, 1.814285714),
+            ("PIPE_R", 20.0, 1.814285714),
             ("TRAPEZOIDAL", 20.0, 4.0),
             ("BUTTRESS", 20.0, 5.0),
             ("ROUND", 20.0, 4.0),
@@ -240,7 +252,7 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
                 self.assertAlmostEqual(row["d3_basic"], diameter - 1.226869 * pitch, places=6)
 
     def test_tensile_stress_area_formula_available_for_v_families(self):
-        for standard in ["METRIC_ISO", "METRIC_FINE", "WHITWORTH_BSW", "UNC", "UNF", "PIPE_G"]:
+        for standard in ["METRIC_ISO", "METRIC_FINE", "WHITWORTH_BSW", "UNC", "UNF", "PIPE_G", "PIPE_R"]:
             with self.subTest(standard=standard):
                 formula = database.THREAD_STANDARDS[standard].get("tensile_stress_area_formula")
                 self.assertIsNotNone(formula)
