@@ -161,6 +161,28 @@ class HighEndDataCoverageTests(unittest.TestCase):
         expected_tokens = {"M1", "M1.2", "M1.4", "M1.6", "M2", "M2.5", "M3", "M4", "M5", "M6", "M8", "M10", "M12", "M16", "M20", "M24", "M30", "M36", "M42", "M48", "M56", "M64"}
         self.assertTrue(expected_tokens.issubset(set(database.ISO_METRIC_COARSE_TABLE.keys())))
 
+    def test_metric_fine_series_contains_nominal_sizes_below_m8(self):
+        expected = {
+            1.0: 0.2,
+            1.2: 0.2,
+            1.4: 0.2,
+            1.6: 0.2,
+            1.8: 0.2,
+            2.0: 0.25,
+            2.5: 0.35,
+            3.0: 0.35,
+            3.5: 0.35,
+            4.0: 0.5,
+            5.0: 0.5,
+            6.0: 0.75,
+            7.0: 0.75,
+        }
+        fine_map = database.THREAD_STANDARDS["METRIC_FINE"]["diam_pitch_map"]
+        for diameter, pitch in expected.items():
+            with self.subTest(diameter=diameter):
+                self.assertIn(diameter, fine_map)
+                self.assertEqual(fine_map[diameter], pitch)
+
     def test_metric_iso_row_contains_crest_and_root_radius(self):
         row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
         self.assertIsNotNone(row)
