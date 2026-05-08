@@ -309,6 +309,26 @@ def generate_profile(
             ProfilePoint(r, pitch),
         ]
 
+    elif profile_type == "EDISON":
+        # IEC 60061-1: weiche Sinuskontur zwischen Außenradius r und Kernradius r3.
+        # Eine volle Welle pro Steigung; keine Flachstellen an Krone/Talsohle.
+        sp = std.get("special_params", {})
+        radius_ratio = ratio(sp.get("radius_ratio"), 1.0 / 3.0)
+        amplitude = (r - r3) / 2.0
+        center = (r + r3) / 2.0
+        steps = max(16, int(round(pitch / max(radius_ratio * pitch, 1e-3) * 8)))
+        pts = []
+        for i in range(steps + 1):
+            y = pitch * i / steps
+            x = center + amplitude * math.cos(2.0 * math.pi * y / pitch)
+            pts.append(ProfilePoint(x, y))
+
+    elif profile_type == "BAYONET":
+        raise NotImplementedError(
+            f"{standard_key}: Bajonett-/Knaggenkupplung kann nicht über die Gewindeprofil-"
+            "Pipeline erzeugt werden. Eine eigene Kupplungsgeometrie-Stufe ist erforderlich."
+        )
+
     elif profile_type == "ROUND":
         radius = pitch / 4.0
         steps = 14
