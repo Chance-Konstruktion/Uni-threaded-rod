@@ -53,6 +53,12 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `METRIC_TRAPEZOIDAL_FINE` | Metrisches Feintrapezgewinde | DIN 380 | mm | Trapez |
 | `STUB_ACME` | Stub-ACME-Gewinde | ASME B1.8 | inch | Trapez |
 | `KNUCKLE` | Knuckle-Gewinde (Rund, US) | ASME B1.9 | inch | Rund |
+| `SPARK_PLUG` | Zündkerzengewinde | ISO 28741 | mm | V |
+| `STORZ` | Storz-Festkupplung (Feuerwehr) | DIN 14318 | mm | Sonderprofil |
+| `CABLE_GLAND_M` | Kabelverschraubung, metrisch | DIN EN 60423 / IEC 60423 | mm | V |
+| `CONDUIT_PG` | Panzergewinde Elektroinstallation | DIN 40430 | mm | V |
+| `LAMP_E` | Edison-Lampensockel (E14/E27/E40) | IEC 60061-1 | mm | Rund |
+| `LAMP_B` | Bajonett-/Stiftsockel-Gewinde | IEC 60061-1 | mm | Rund |
 
 ## Lizenz
 
