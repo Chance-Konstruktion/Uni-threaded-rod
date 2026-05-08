@@ -44,7 +44,7 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `ACME` | ACME-Gewinde | ASME B1.5 | inch | Trapez |
 | `NPT` | National Pipe Taper | ANSI B1.20.1 | inch | V, konisch |
 | `PG` | Panzergewinde | DIN 40430 | mm | V |
-| `EDISON` | Edison-Gewinde | IEC 60061 | mm | Rund |
+| `EDISON` | Edison-Lampensockel-Gewinde (E10/E14/E27/E40) | IEC 60061-1 | mm | Edison (Sinus) |
 | `UNEF` | Unified National Extra Fine | ANSI/ASME B1.1 | inch | V |
 | `UNS` | Unified National Special | ANSI/ASME B1.1 | inch | V |
 | `PIPE_R` | Rohrgewinde, kegelig | DIN EN 10226 | inch | V, konisch |
@@ -54,10 +54,9 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `STUB_ACME` | Stub-ACME-Gewinde | ASME B1.8 | inch | Trapez |
 | `KNUCKLE` | Knuckle-Gewinde (Rund, US) | ASME B1.9 | inch | Rund |
 | `SPARK_PLUG` | Zündkerzengewinde | ISO 28741 | mm | V |
-| `STORZ` | Storz-Festkupplung (Feuerwehr) | DIN 14318 | mm | Sonderprofil |
+| `STORZ` | Storz-Festkupplung (Feuerwehr) | DIN 14318 | mm | Bajonett (kein Gewinde) |
 | `CABLE_GLAND_M` | Kabelverschraubung, metrisch | DIN EN 60423 / IEC 60423 | mm | V |
 | `CONDUIT_PG` | Panzergewinde Elektroinstallation | DIN 40430 | mm | V |
-| `LAMP_E` | Edison-Lampensockel (E14/E27/E40) | IEC 60061-1 | mm | Rund |
 | `LAMP_B` | Bajonett-/Stiftsockel-Gewinde | IEC 60061-1 | mm | Rund |
 
 ## Lizenz

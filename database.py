@@ -214,17 +214,29 @@ THREAD_STANDARDS = {
         "d3_formula": lambda d, p: d - 1.2 * p,
     },
     "EDISON": {
-        "name": "Edison-Gewinde (Lampenfassung)",
-        "standard": "IEC 60061",
+        "name": "Edison-Lampensockel-Gewinde (E10/E14/E27/E40)",
+        "standard": "IEC 60061-1",
         "unit": "mm",
         "flank_angle": 0.0,
-        "profile_type": "ROUND",
+        "profile_type": "EDISON",
         "diam_pitch_map": {"E10": 1.5, "E14": 2.5, "E27": 3.5, "E40": 6.0},
         "diam_nominal_map": {"E10": 10.0, "E14": 14.0, "E27": 27.0, "E40": 40.0},
         "d2_formula": lambda d, p: d - 0.5 * p,
         "d3_formula": lambda d, p: d - p,
-        "special_params": {"radius": "P/3"},
-    }
+        "special_params": {"radius_ratio": 1.0 / 3.0},
+    },
+    "STORZ": {
+        "name": "Storz-Festkupplung (Feuerwehr, Bajonett)",
+        "standard": "DIN 14318",
+        "unit": "mm",
+        "flank_angle": 0.0,
+        "profile_type": "BAYONET",
+        "diam_pitch_map": {"A-110": 0.0, "B-75": 0.0, "C-52": 0.0, "D-25": 0.0, "F-150": 0.0},
+        "diam_nominal_map": {"A-110": 133.0, "B-75": 89.0, "C-52": 66.0, "D-25": 31.0, "F-150": 160.0},
+        "d2_formula": lambda d, p: d,
+        "d3_formula": lambda d, p: d,
+        "special_params": {"note": "Bajonett-Knaggenkupplung — kein Gewinde, separate Pipeline erforderlich"},
+    },
 }
 
 # ------------------------------------------------------------------------------
