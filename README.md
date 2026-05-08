@@ -45,7 +45,15 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `NPT` | National Pipe Taper | ANSI B1.20.1 | inch | V, konisch |
 | `PG` | Panzergewinde | DIN 40430 | mm | V |
 | `EDISON` | Edison-Gewinde | IEC 60061 | mm | Rund |
+| `UNEF` | Unified National Extra Fine | ANSI/ASME B1.1 | inch | V |
+| `UNS` | Unified National Special | ANSI/ASME B1.1 | inch | V |
+| `PIPE_R` | Rohrgewinde, kegelig | DIN EN 10226 | inch | V, konisch |
+| `BSPT` | British Standard Pipe Taper | BS 21 / ISO 7-1 | inch | V, konisch |
+| `BSF` | British Standard Fine | BS 84 | inch | V |
+| `METRIC_TRAPEZOIDAL_FINE` | Metrisches Feintrapezgewinde | DIN 380 | mm | Trapez |
+| `STUB_ACME` | Stub-ACME-Gewinde | ASME B1.8 | inch | Trapez |
+| `KNUCKLE` | Knuckle-Gewinde (Rund, US) | ASME B1.9 | inch | Rund |
 
 ## Lizenz
 
-Dieses Repository enthält derzeit keine Lizenzdatei. Ohne Lizenz bleiben alle Rechte beim Rechteinhaber; vor Nutzung, Weitergabe oder Änderung ist eine passende Lizenzklärung erforderlich.
+Dieses Projekt steht unter der GNU General Public License v3.0 (GPL-3.0). Der vollständige Lizenztext befindet sich in der Datei [`LICENSE`](LICENSE).
