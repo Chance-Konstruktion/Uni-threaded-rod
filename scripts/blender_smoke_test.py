@@ -84,12 +84,5 @@ try:
     assert not non_manifold, f"Non-manifold edges found: {len(non_manifold)}"
     assert_solid_external_rod(created, expected_length_mm=props.length, nominal_diameter_mm=10.0)
 
-    bpy.ops.mesh.primitive_cube_add(size=0.02, location=(0.0, 0.0, 0.01))
-    target = bpy.context.active_object
-    props.negative_mode = True
-    result = bpy.ops.utg.create_thread()
-    assert "FINISHED" in result
-
-    assert target is not None and target.type == "MESH"
 finally:
     addon.unregister()

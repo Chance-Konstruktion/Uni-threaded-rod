@@ -22,13 +22,6 @@ def get_tolerance_items(self, context):
     tol = std.get("tolerance_classes", {})
     ext = tol.get("external", [])
     inner = tol.get("internal", [])
-    # Für normale Gewindestangen nur Außengewinde-Klassen anzeigen.
-    # Innenklassen (z. B. 6H) erscheinen nur im Negativ-Modus.
-    if props.negative_mode:
-        if inner:
-            return [(v, v, "Toleranz") for v in inner]
-        return [("N_A", "N/A", "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert")]
-
     all_items = ext or (ext + inner)
     if not all_items:
         all_items = ["6g"]
@@ -54,7 +47,6 @@ class UTG_Properties(bpy.types.PropertyGroup):
     clearance: bpy.props.FloatProperty(name="Spiel (mm)", default=0.1, min=0.0, max=1.0, step=0.05)
 
     end_type: bpy.props.EnumProperty(name="Enden", items=[("FLAT", "Flach", ""), ("CHAMFER", "Fase 45°", ""), ("RUNOUT", "Auslauf", "")], default="CHAMFER")
-    negative_mode: bpy.props.BoolProperty(name="Negativ-Modus", description="Erzeugt Bohrung statt Stange (Boolesche Differenz)", default=False)
     lod_level: bpy.props.EnumProperty(
         name="LOD",
         items=[("PREVIEW", "Preview", "Schnelle Vorschau"), ("FINAL", "Final", "Höhere Qualität"), ("CUSTOM", "Benutzerdefiniert", "Eigene Segmentanzahl")],
@@ -118,7 +110,6 @@ class THREADFORGE_PT_main(bpy.types.Panel):
             layout.prop(props, "tolerance_class", text=ui_label("tolerance", props.ui_language))
         layout.prop(props, "clearance", text=ui_label("clearance", props.ui_language))
         layout.prop(props, "end_type", text=ui_label("end_type", props.ui_language))
-        layout.prop(props, "negative_mode", text=ui_label("negative_mode", props.ui_language))
         layout.prop(props, "lod_level", text=ui_label("lod", props.ui_language))
         if props.lod_level == "CUSTOM":
             layout.prop(props, "segment_override", text=ui_label("segment_override", props.ui_language))

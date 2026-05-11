@@ -75,8 +75,6 @@ if HAS_BPY:
 
         def execute(self, context):
             props = context.scene.utg_props
-            target_for_boolean = context.active_object if props.negative_mode else None
-
             if props.standard == "CUSTOM":
                 diameter = props.custom_diameter
                 pitch = props.custom_pitch
@@ -103,10 +101,6 @@ if HAS_BPY:
                 self.report({"ERROR"}, validation_error)
                 return {"CANCELLED"}
 
-            negative_mode_active = bool(props.negative_mode and target_for_boolean)
-            if props.negative_mode and not negative_mode_active:
-                self.report({"INFO"}, "Negativ-Modus deaktiviert: Kein aktives Zielobjekt gefunden, erzeuge stattdessen Gewindestab.")
-
             if props.starts > 2:
                 self.report(
                     {"WARNING"},
@@ -114,25 +108,10 @@ if HAS_BPY:
                 )
 
             standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
-            std_tol = standard.get("tolerance_classes", {})
-            internal_classes = {str(v).upper() for v in std_tol.get("internal", [])}
-            tolerance_is_internal = str(props.tolerance_class).upper() in internal_classes
 
             if props.tolerance_class == "N_A":
                 self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
                 return {"CANCELLED"}
-
-            if tolerance_is_internal and not negative_mode_active:
-                self.report(
-                    {"ERROR"},
-                    "Innengewinde-Toleranzen sind nur im aktiven Negativ-Modus als Bohrungs-Cutter erlaubt.",
-                )
-                return {"CANCELLED"}
-
-            # Harte Kernregel: Das Primärobjekt ist immer eine massive
-            # Außengewindestange. Ein internes/aufgeweitetes Profil ist nur als
-            # temporärer Boolean-Difference-Cutter erlaubt, niemals als Default.
-            profile_internal = bool(negative_mode_active)
 
             try:
                 profile, ratio_warnings = generate_profile(
@@ -140,7 +119,7 @@ if HAS_BPY:
                     diameter,
                     pitch,
                     tolerance_class=props.tolerance_class,
-                    internal=profile_internal,
+                    internal=False,
                     clearance=props.clearance,
                     return_warnings=True,
                     standard=custom_std,
@@ -172,24 +151,11 @@ if HAS_BPY:
 
             apply_material(obj, props.material, props.surface)
 
-            if negative_mode_active:
-                if target_for_boolean != obj:
-                    apply_boolean_cutter(context, obj, target_for_boolean)
-                else:
-                    self.report({"WARNING"}, "Negativ-Modus aktiv, aber Zielobjekt ist ungültig.")
-
             report_standard = props.standard if custom_std is not None else standard_key
-
-            if negative_mode_active:
-                self.report(
-                    {"INFO"},
-                    f"Bohrungs-Cutter M{diameter:g}x{props.length:g} ({report_standard}) erfolgreich angewendet.",
-                )
-            else:
-                self.report(
-                    {"INFO"},
-                    f"Massive M{diameter:g}x{props.length:g} Gewindestange ({report_standard}) erfolgreich erzeugt.",
-                )
+            self.report(
+                {"INFO"},
+                f"Massive M{diameter:g}x{props.length:g} Gewindestange ({report_standard}) erfolgreich erzeugt.",
+            )
 
             return {"FINISHED"}
 
