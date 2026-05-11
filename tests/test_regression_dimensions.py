@@ -229,7 +229,7 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
             and node.target.id in {"diameter_enum", "length", "clearance", "custom_diameter", "custom_pitch"}
         }
 
-        self.assertEqual(properties["diameter_enum"]["default"].value, "8.0")
+        self.assertNotIn("default", properties["diameter_enum"])
         self.assertEqual(properties["length"]["name"].value, "Gewindestangenlänge (mm)")
         self.assertEqual(properties["length"]["default"].value, 100.0)
         self.assertEqual(properties["clearance"]["name"].value, "Spiel (mm)")

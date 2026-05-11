@@ -42,7 +42,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
         default="METRIC_ISO",
     )
 
-    diameter_enum: bpy.props.EnumProperty(name="Durchmesser", items=get_diameter_items, default="8.0")
+    diameter_enum: bpy.props.EnumProperty(name="Durchmesser", items=get_diameter_items)
     length: bpy.props.FloatProperty(name="Gewindestangenlänge (mm)", default=100.0, min=0.1, max=1000.0)
     handedness: bpy.props.EnumProperty(name="Drehrichtung", items=[("RIGHT", "Rechtsgewinde", ""), ("LEFT", "Linksgewinde", "")], default="RIGHT")
     starts: bpy.props.IntProperty(name="Gängigkeit", default=1, min=1, max=8)
