@@ -125,7 +125,6 @@ class CodeAuditTests(unittest.TestCase):
             module.apply_material = lambda *args, **kwargs: None
 
             props = types.SimpleNamespace(
-                negative_mode=False,
                 standard="METRIC_ISO",
                 diameter_enum="10",
                 length=20.0,
