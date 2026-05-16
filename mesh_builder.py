@@ -260,7 +260,9 @@ def apply_material(obj, material_key, surface_key="NONE"):
 
 
 def apply_boolean_cutter(context, cutter_obj, target_obj):
-    """Führt Boolesche Differenz aus und löscht Cutter.
+    """Deprecated public helper für nachgelagerte Add-ons wie Uni-threaded-sleeve.
+
+    Führt Boolesche Differenz aus und löscht Cutter.
 
     Sichert und restauriert den Objekt-/Selektionszustand, damit der Workflow
     auch in komplexeren Szenen stabil bleibt.

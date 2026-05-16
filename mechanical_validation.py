@@ -59,8 +59,8 @@ def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standa
         return ValidationResult(False, "Ungültig: Länge muss > 0 sein.")
     if starts < 1:
         return ValidationResult(False, "Ungültig: Gängigkeit muss mindestens 1 sein.")
-    if starts > 16:
-        return ValidationResult(False, "Ungültig: Gängigkeit ist zu hoch (maximal 16).")
+    if starts > 8:
+        return ValidationResult(False, "Ungültig: Gängigkeit ist zu hoch (maximal 8).")
     if clearance < 0.0:
         return ValidationResult(False, "Ungültig: Spiel (Clearance) muss >= 0 sein.")
     if pitch > diameter:

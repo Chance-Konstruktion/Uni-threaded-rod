@@ -64,7 +64,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
     custom_diameter: bpy.props.FloatProperty(name="Durchmesser (mm)", default=8.0, min=0.1)
     custom_pitch: bpy.props.FloatProperty(name="Steigung (mm)", default=1.5, min=0.1)
     custom_flank_angle: bpy.props.FloatProperty(name="Flankenwinkel", default=60.0, min=0.0, max=120.0)
-    custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", "")], default="V")
+    custom_profile_type: bpy.props.EnumProperty(name="Profil", items=[("V", "Spitz", ""), ("TRAPEZOID", "Trapez", ""), ("ROUND", "Rund", ""), ("BUTTRESS", "Säge", ""), ("EDISON", "Edison", "")], default="V")
 
 
 class THREADFORGE_PT_main(bpy.types.Panel):

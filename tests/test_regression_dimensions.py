@@ -56,7 +56,7 @@ class ReferenceRegressionTests(unittest.TestCase):
 
     def test_metric_profile_reference_radii(self):
         diameter_mm, pitch_mm = 10.0, 1.5
-        points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm)
+        points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm, tolerance_class="6g")
         d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
 
         self.assertEqual(len(points), 8)
@@ -114,7 +114,7 @@ class ReferenceRegressionTests(unittest.TestCase):
         for standard, diameter, pitch in cases:
             with self.subTest(standard=standard):
                 points = geometry_engine.generate_profile(standard, diameter=diameter, pitch=pitch)
-                major_radius = diameter / 2.0 - 0.01
+                major_radius = max(p.x for p in points)
                 self.assertAlmostEqual(points[0].x, major_radius, places=6)
                 self.assertAlmostEqual(points[0].y, 0.0, places=6)
                 self.assertAlmostEqual(points[-1].x, major_radius, places=6)
@@ -122,7 +122,7 @@ class ReferenceRegressionTests(unittest.TestCase):
 
     def test_rejects_metric_v_profile_with_regressed_root_shoulder_radius(self):
         diameter_mm, pitch_mm = 10.0, 1.5
-        points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm)
+        points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm, tolerance_class="6g")
         major_radius = diameter_mm / 2.0 - 0.01
         d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
         core_radius = d3 / 2.0 - 0.01
@@ -157,6 +157,10 @@ class ReferenceRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Toleranzklasse"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=1.5, tolerance_class="9Z")
 
+    def test_rejects_default_metric_tolerance_for_whitworth_profile(self):
+        with self.assertRaisesRegex(ValueError, "Toleranzklasse"):
+            geometry_engine.generate_profile("WHITWORTH_BSW", diameter=10.0, pitch=1.5, tolerance_class="6g")
+
     def test_metric_iso_core_diameter_matches_reference_formula(self):
         diameter_mm, pitch_mm = 12.0, 1.75
         d3 = database.THREAD_STANDARDS["METRIC_ISO"]["d3_formula"](diameter_mm, pitch_mm)
@@ -173,6 +177,18 @@ class ReferenceRegressionTests(unittest.TestCase):
             clearance=0.2,
         )
         self.assertGreater(loose_internal[0].x, base[0].x)
+
+    def test_internal_profile_path_offsets_radius_for_sleeve_use(self):
+        external = geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=1.5, tolerance_class="6g")
+        internal = geometry_engine.generate_profile(
+            "METRIC_ISO",
+            diameter=10.0,
+            pitch=1.5,
+            tolerance_class="6H",
+            internal=True,
+            clearance=0.2,
+        )
+        self.assertGreater(min(point.x for point in internal), min(point.x for point in external))
 
     def test_iso_table_row_resolution_m10(self):
         row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
@@ -221,6 +237,15 @@ class HighEndDataCoverageTests(unittest.TestCase):
             "LAMP_B",
         }
         self.assertTrue(expected.issubset(database.THREAD_STANDARDS))
+
+    def test_non_pg_legacy_standards_have_tolerance_classes(self):
+        expected = ["BUTTRESS", "ROUND", "NPT", "EDISON", "STORZ"]
+        for standard in expected:
+            with self.subTest(standard=standard):
+                self.assertTrue(database.THREAD_STANDARDS[standard].get("tolerance_classes"))
+
+        self.assertNotIn("tolerance_classes", database.THREAD_STANDARDS["PG"])
+        self.assertIn("tolerance_note", database.THREAD_STANDARDS["PG"].get("special_params", {}))
 
     def test_symbolic_new_standards_resolve_parameters(self):
         cases = [

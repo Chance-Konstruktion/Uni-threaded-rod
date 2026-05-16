@@ -259,7 +259,12 @@ class CodeAuditTests(unittest.TestCase):
         constants = {node.value for node in ast.walk(tree) if isinstance(node, ast.Constant)}
         self.assertNotIn("N_A", constants)
 
-    def test_standards_without_tolerance_classes_do_not_draw_tolerance_selector(self):
+    def test_custom_profile_type_includes_edison(self):
+        tree = ast.parse((ROOT / "ui_panel.py").read_text(encoding="utf-8"))
+        constants = {node.value for node in ast.walk(tree) if isinstance(node, ast.Constant)}
+        self.assertIn("EDISON", constants)
+
+    def test_pg_standards_without_tolerance_classes_do_not_draw_tolerance_selector(self):
         original_modules = {
             name: sys.modules[name]
             for name in list(sys.modules)
@@ -308,7 +313,7 @@ class CodeAuditTests(unittest.TestCase):
 
         try:
             ui_panel = _load_utg_module("ui_panel")
-            for standard in ["BUTTRESS", "ROUND", "NPT", "PG", "EDISON", "STORZ"]:
+            for standard in ["PG", "CONDUIT_PG"]:
                 with self.subTest(standard=standard):
                     calls = []
                     panel = ui_panel.THREADFORGE_PT_main()
