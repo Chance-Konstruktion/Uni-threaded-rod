@@ -89,6 +89,14 @@ class ReferenceRegressionTests(unittest.TestCase):
             ("NPT", 20.0, 1.8),
             ("PG", 20.4, 1.41),
             ("EDISON", 27.0, 3.5),
+            ("BSF", 12.7, 1.5875),
+            ("UNS", 25.4, 1.5875),
+            ("METRIC_TRAPEZOIDAL_FINE", 20.0, 2.0),
+            ("STUB_ACME", 25.4, 5.08),
+            ("KNUCKLE", 25.4, 4.233333333),
+            ("SPARK_PLUG", 14.0, 1.25),
+            ("CABLE_GLAND_M", 20.0, 1.5),
+            ("CONDUIT_PG", 20.4, 1.41),
         ]
         for standard, diameter, pitch in cases:
             with self.subTest(standard=standard):
@@ -199,6 +207,47 @@ class HighEndDataCoverageTests(unittest.TestCase):
                 self.assertIn(diameter, fine_map)
                 self.assertEqual(fine_map[diameter], pitch)
 
+
+    def test_new_readme_standards_are_in_database(self):
+        expected = {
+            "BSF",
+            "UNS",
+            "METRIC_TRAPEZOIDAL_FINE",
+            "STUB_ACME",
+            "KNUCKLE",
+            "SPARK_PLUG",
+            "CABLE_GLAND_M",
+            "CONDUIT_PG",
+            "LAMP_B",
+        }
+        self.assertTrue(expected.issubset(database.THREAD_STANDARDS))
+
+    def test_symbolic_new_standards_resolve_parameters(self):
+        cases = [
+            ("SPARK_PLUG", "M14x1.25", 14.0, 1.25),
+            ("CABLE_GLAND_M", "M20x1.5", 20.0, 1.5),
+            ("CONDUIT_PG", "Pg13.5", 20.4, 1.41),
+            ("LAMP_B", "B22d", 22.0, 0.0),
+        ]
+        for standard, token, diameter, pitch in cases:
+            with self.subTest(standard=standard):
+                diameter_mm, pitch_mm = database.resolve_thread_parameters(standard, token)
+                self.assertAlmostEqual(diameter_mm, diameter, places=6)
+                self.assertAlmostEqual(pitch_mm, pitch, places=6)
+
+    def test_lamp_b_raises_not_implemented_with_clear_message(self):
+        with self.assertRaisesRegex(NotImplementedError, "LAMP_B: Bajonett-/Knaggenkupplung"):
+            geometry_engine.generate_profile("LAMP_B", diameter=22.0, pitch=0.0)
+
+    def test_stub_acme_height_factor_reduces_profile_depth(self):
+        diameter = 25.4
+        pitch = 5.08
+        acme = geometry_engine.generate_profile("ACME", diameter=diameter, pitch=pitch)
+        stub = geometry_engine.generate_profile("STUB_ACME", diameter=diameter, pitch=pitch)
+        acme_depth = max(p.x for p in acme) - min(p.x for p in acme)
+        stub_depth = max(p.x for p in stub) - min(p.x for p in stub)
+        self.assertLess(stub_depth, acme_depth)
+
     def test_metric_iso_row_contains_crest_and_root_radius(self):
         row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
         self.assertIsNotNone(row)
@@ -258,7 +307,13 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
                 self.assertAlmostEqual(row["d3_basic"], diameter - 1.226869 * pitch, places=6)
 
     def test_tensile_stress_area_formula_available_for_v_families(self):
-        for standard in ["METRIC_ISO", "METRIC_FINE", "WHITWORTH_BSW", "UNC", "UNF", "PIPE_G", "PIPE_R"]:
+        for standard in [
+            "METRIC_ISO", "METRIC_FINE", "WHITWORTH_BSW", "BSF", "UNC", "UNF",
+            "UNEF", "UNS", "PIPE_G", "PIPE_R", "METRIC_TRAPEZOIDAL_FINE",
+            "TRAPEZOIDAL", "BUTTRESS", "ROUND", "ACME", "NPT", "PG",
+            "EDISON", "STUB_ACME", "KNUCKLE", "SPARK_PLUG", "CABLE_GLAND_M",
+            "CONDUIT_PG",
+        ]:
             with self.subTest(standard=standard):
                 formula = database.THREAD_STANDARDS[standard].get("tensile_stress_area_formula")
                 self.assertIsNotNone(formula)

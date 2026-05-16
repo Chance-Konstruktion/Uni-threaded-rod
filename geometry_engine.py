@@ -258,11 +258,11 @@ def generate_profile(
             crest_flat = iso_row["crest_flat"] if iso_row else pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
             root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 4.0)
             root_radius = iso_row["root_radius"] if iso_row else pitch * 0.14434
-        elif standard_key in {"UNC", "UNF"}:
+        elif standard_key in {"UNC", "UNF", "UNEF", "UNS"}:
             crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 8.0)
             root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 8.0)
             root_radius = 0.0
-        elif standard_key.startswith("WHITWORTH") or standard_key in {"PIPE_G", "PIPE_R"}:
+        elif standard_key.startswith("WHITWORTH") or standard_key == "BSF" or standard_key in {"PIPE_G", "PIPE_R"}:
             # Vereinfachte Rundungs-Ersatzgeometrie: kürzere Flats bei 55°-Profilen.
             crest_flat = pitch * ratio(sp.get("crest_flat"), 1.0 / 12.0)
             root_flat = pitch * ratio(sp.get("root_flat"), 1.0 / 6.0)
@@ -305,8 +305,11 @@ def generate_profile(
             ]
 
     elif profile_type == "TRAPEZOID":
-        crest_width = 0.5 * pitch
-        root_width = max(0.25, 0.5 * pitch - 0.25)
+        sp = std.get("special_params", {})
+        height_factor = max(0.0, ratio(sp.get("height_factor"), 1.0))
+        r3 = r - (r - r3) * height_factor
+        crest_width = pitch * ratio(sp.get("crest_width"), 0.5)
+        root_width = max(0.25, pitch * ratio(sp.get("root_width"), 0.5) if "root_width" in sp else 0.5 * pitch - 0.25)
         y_crest = crest_width / 2.0
         y_root = pitch / 2.0 - root_width / 2.0
         pts = [
