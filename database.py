@@ -350,6 +350,8 @@ def _resolve_diameter_mm(std, diameter_token):
 
 
 def resolve_thread_parameters(standard_key, diameter_token):
+    if standard_key not in THREAD_STANDARDS:
+        raise ValueError(f"Unbekannter Standard: {standard_key}")
     std = THREAD_STANDARDS[standard_key]
     diameter_mm, raw_key = _resolve_diameter_mm(std, diameter_token)
 
