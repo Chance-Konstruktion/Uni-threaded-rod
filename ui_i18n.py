@@ -20,6 +20,13 @@ UI_TEXT = {
         "lod": "Mesh-Detail",
         "segment_override": "Segmente/Umdr.",
         "create_thread": "Gewinde erstellen",
+        "error_exception": "{message}",
+        "error_invalid_bayonet_dimensions": "Bajonett-Geometrie benötigt Durchmesser und Länge > 0.",
+        "error_preset_not_found": "Preset nicht gefunden.",
+        "info_created": "Massive M{diameter:g}x{length:g} Gewindestange ({standard}) erfolgreich erzeugt.",
+        "info_no_preset": "Kein Preset ausgewählt.",
+        "info_preset_applied": "Preset '{name}' angewendet.",
+        "warning_multi_start": "Mehrgängiges Gewinde mit {starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
     },
     "en": {
         "standard": "Standard",
@@ -36,6 +43,13 @@ UI_TEXT = {
         "lod": "Mesh detail",
         "segment_override": "Segments/turn",
         "create_thread": "Create thread",
+        "error_exception": "{message}",
+        "error_invalid_bayonet_dimensions": "Bayonet geometry needs diameter and length > 0.",
+        "error_preset_not_found": "Preset not found.",
+        "info_created": "Solid M{diameter:g}x{length:g} threaded rod ({standard}) created successfully.",
+        "info_no_preset": "No preset selected.",
+        "info_preset_applied": "Preset '{name}' applied.",
+        "warning_multi_start": "Multi-start thread with {starts} starts created. Check manifold quality for very high start counts.",
     },
 }
 

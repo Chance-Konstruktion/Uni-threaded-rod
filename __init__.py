@@ -28,6 +28,8 @@ if HAS_BPY:
     geometry_engine = _runtime_module("geometry_engine")
     mechanical_validation = _runtime_module("mechanical_validation")
     mesh_builder = _runtime_module("mesh_builder")
+    bayonet_builder = _runtime_module("bayonet_builder")
+    ui_i18n = _runtime_module("ui_i18n")
     ui_panel = _runtime_module("ui_panel")
 
     THREAD_PRESETS = database.THREAD_PRESETS
@@ -39,6 +41,8 @@ if HAS_BPY:
     apply_boolean_cutter = mesh_builder.apply_boolean_cutter
     apply_material = mesh_builder.apply_material
     create_thread_mesh = mesh_builder.create_thread_mesh
+    create_bayonet_mesh = bayonet_builder.create_bayonet_mesh
+    ui_label = ui_i18n.ui_label
     THREADFORGE_PT_main = ui_panel.THREADFORGE_PT_main
     UTG_Properties = ui_panel.UTG_Properties
     register_properties = ui_panel.register_properties
@@ -97,28 +101,31 @@ if HAS_BPY:
                 try:
                     diameter, pitch = resolve_thread_parameters(standard_key, props.diameter_enum)
                 except Exception as exc:
-                    self.report({"ERROR"}, str(exc))
+                    self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
                     return {"CANCELLED"}
 
             standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
             tolerance_class = props.tolerance_class if custom_std is not None else _resolve_tolerance_class(props, standard_key)
 
             if standard.get("profile_type") == "BAYONET":
-                try:
-                    generate_profile(
-                        standard_key,
-                        diameter,
-                        pitch,
-                        tolerance_class=tolerance_class,
-                        internal=False,
-                        clearance=props.clearance,
-                        standard=custom_std,
-                    )
-                except NotImplementedError as exc:
-                    self.report({"ERROR"}, str(exc))
+                if diameter <= 0.0 or props.length <= 0.0:
+                    self.report({"ERROR"}, ui_label("error_invalid_bayonet_dimensions", getattr(props, "ui_language", "de")))
                     return {"CANCELLED"}
+                try:
+                    bm = create_bayonet_mesh(
+                        standard_key=standard_key,
+                        diameter=diameter,
+                        length=props.length,
+                        lod_level=props.lod_level,
+                        segment_override=props.segment_override,
+                    )
+                except ValueError as exc:
+                    self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
+                    return {"CANCELLED"}
+            else:
+                bm = None
 
-            validation_error = _validate_parameters(
+            validation_error = None if bm is not None else _validate_parameters(
                 diameter,
                 pitch,
                 props.length,
@@ -133,11 +140,15 @@ if HAS_BPY:
             if props.starts > 2:
                 self.report(
                     {"WARNING"},
-                    f"Mehrgängiges Gewinde mit {props.starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
+                    ui_label("warning_multi_start", getattr(props, "ui_language", "de")).format(starts=props.starts),
                 )
 
             try:
-                profile, ratio_warnings = generate_profile(
+                if bm is not None:
+                    profile = []
+                    ratio_warnings = []
+                else:
+                    profile, ratio_warnings = generate_profile(
                     standard_key,
                     diameter,
                     pitch,
@@ -146,23 +157,24 @@ if HAS_BPY:
                     clearance=props.clearance,
                     return_warnings=True,
                     standard=custom_std,
-                )
+                    )
                 _report_ratio_warnings(self, ratio_warnings)
 
-                bm = create_thread_mesh(
-                    profile_points=profile,
-                    diameter=diameter,
-                    pitch=pitch,
-                    length=props.length,
-                    starts=props.starts,
-                    handedness=props.handedness,
-                    end_type=props.end_type,
-                    taper_ratio=standard.get("special_params", {}).get("taper_ratio", 0.0),
-                    lod_level=props.lod_level,
-                    segment_override=props.segment_override,
-                )
+                if bm is None:
+                    bm = create_thread_mesh(
+                        profile_points=profile,
+                        diameter=diameter,
+                        pitch=pitch,
+                        length=props.length,
+                        starts=props.starts,
+                        handedness=props.handedness,
+                        end_type=props.end_type,
+                        taper_ratio=standard.get("special_params", {}).get("taper_ratio", 0.0),
+                        lod_level=props.lod_level,
+                        segment_override=props.segment_override,
+                    )
             except (ValueError, NotImplementedError) as exc:
-                self.report({"ERROR"}, str(exc))
+                self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
                 return {"CANCELLED"}
 
             mesh = bpy.data.meshes.new("UTG_Thread")
@@ -177,7 +189,11 @@ if HAS_BPY:
             report_standard = props.standard if custom_std is not None else standard_key
             self.report(
                 {"INFO"},
-                f"Massive M{diameter:g}x{props.length:g} Gewindestange ({report_standard}) erfolgreich erzeugt.",
+                ui_label("info_created", getattr(props, "ui_language", "de")).format(
+                    diameter=diameter,
+                    length=props.length,
+                    standard=report_standard,
+                ),
             )
 
             return {"FINISHED"}
@@ -191,12 +207,12 @@ if HAS_BPY:
         def execute(self, context):
             props = context.scene.utg_props
             if props.preset_key == "NONE":
-                self.report({"INFO"}, "Kein Preset ausgewählt.")
+                self.report({"INFO"}, ui_label("info_no_preset", getattr(props, "ui_language", "de")))
                 return {"CANCELLED"}
 
             preset = THREAD_PRESETS.get(props.preset_key)
             if not preset:
-                self.report({"ERROR"}, "Preset nicht gefunden.")
+                self.report({"ERROR"}, ui_label("error_preset_not_found", getattr(props, "ui_language", "de")))
                 return {"CANCELLED"}
 
             props.standard = preset["standard"]
@@ -206,7 +222,7 @@ if HAS_BPY:
             props.tolerance_class = preset["tolerance_class"]
             props.clearance = preset["clearance"]
             props.starts = preset["starts"]
-            self.report({"INFO"}, f"Preset '{preset['name']}' angewendet.")
+            self.report({"INFO"}, ui_label("info_preset_applied", getattr(props, "ui_language", "de")).format(name=preset["name"]))
             return {"FINISHED"}
 
 

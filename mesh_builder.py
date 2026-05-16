@@ -162,9 +162,7 @@ def create_thread_mesh(
             radius = radius_at_profile_y(helical_y)
 
             if taper_ratio > 0.0:
-                diameter_delta = z * taper_ratio
-                taper_scale = max(0.2, 1.0 - diameter_delta / max(diameter, 1e-6))
-                radius *= taper_scale
+                radius += 0.5 * taper_ratio * max(length - z, 0.0)
 
             x = radius * math.cos(angle)
             y = radius * math.sin(angle)

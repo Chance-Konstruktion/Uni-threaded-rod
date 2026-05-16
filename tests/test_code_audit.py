@@ -158,7 +158,7 @@ class CodeAuditTests(unittest.TestCase):
                     sys.modules.pop(name, None)
             sys.modules.update(original_modules)
 
-    def test_operator_reports_clear_storz_bayonet_error(self):
+    def test_operator_creates_storz_bayonet_mesh(self):
         original_modules = {
             name: sys.modules[name]
             for name in list(sys.modules)
@@ -239,9 +239,14 @@ class CodeAuditTests(unittest.TestCase):
                 collection=types.SimpleNamespace(objects=types.SimpleNamespace(link=lambda obj: None)),
             )
 
-            self.assertEqual({"CANCELLED"}, module.UTG_OT_create_thread().execute(context))
-            self.assertEqual({"ERROR"}, reports[-1][0])
-            self.assertIn("STORZ: Bajonett-/Knaggenkupplung", reports[-1][1])
+            module.create_bayonet_mesh = lambda **kwargs: types.SimpleNamespace(
+                to_mesh=lambda mesh: None, free=lambda: None
+            )
+            module.apply_material = lambda *args, **kwargs: None
+
+            self.assertEqual({"FINISHED"}, module.UTG_OT_create_thread().execute(context))
+            self.assertEqual({"INFO"}, reports[-1][0])
+            self.assertIn("STORZ", reports[-1][1])
         finally:
             for name in list(sys.modules):
                 if (

@@ -107,6 +107,16 @@ class MechanicalValidationTests(unittest.TestCase):
         )
         self.assertNotAlmostEqual(metric["tensile"].stress_mpa, bsw["tensile"].stress_mpa, places=6)
 
+    def test_tensile_stress_area_requires_standard_formula(self):
+        database = _load_utg_module("database")
+        original = database.THREAD_STANDARDS["METRIC_ISO"]["tensile_stress_area_formula"]
+        try:
+            del database.THREAD_STANDARDS["METRIC_ISO"]["tensile_stress_area_formula"]
+            with self.assertRaisesRegex(ValueError, "Spannungsquerschnitt.*METRIC_ISO.*ISO 68-1"):
+                mech.estimate_tensile_stress_area(10.0, 1.5, standard_key="METRIC_ISO")
+        finally:
+            database.THREAD_STANDARDS["METRIC_ISO"]["tensile_stress_area_formula"] = original
+
     def test_validate_thread_input_uses_standard_core_formula(self):
         result = mech.validate_thread_input(
             diameter=10.0,
