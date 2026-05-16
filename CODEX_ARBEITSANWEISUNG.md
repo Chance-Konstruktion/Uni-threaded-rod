@@ -54,7 +54,7 @@ Alles grün, aber Coverage ist lückenhaft (siehe Task P1.1).
 
 ### P0 — Kritische Bugs (vor allem anderen fixen)
 
-#### P0.1 STORZ-Pipeline-Bug
+#### ✅ P0.1 STORZ-Pipeline-Bug
 **Problem:** `STORZ`-Einträge haben `pitch=0` im `diam_pitch_map`. Beim Aufruf von
 `generate_profile("STORZ", …)` schlägt `_check_profile_inputs` mit
 `"Steigung (Pitch) muss > 0 sein"` fehl, **bevor** der `BAYONET`-NotImplementedError
@@ -70,7 +70,7 @@ greifen kann. Dadurch ist STORZ in API + UI komplett tot, obwohl es im UI-Enum a
 - Neuer Test in `tests/test_regression_dimensions.py`:
   `test_storz_raises_not_implemented_with_clear_message`.
 
-#### P0.2 Toter `N_A`-Branch in `__init__.py:112`
+#### ✅ P0.2 Toter `N_A`-Branch in `__init__.py:112`
 **Problem:** `__init__.py` prüft `props.tolerance_class == "N_A"`, aber `N_A` ist
 in `ui_panel.py` nirgends als gültiger Enum-Wert definiert. Der Branch ist unerreichbar.
 

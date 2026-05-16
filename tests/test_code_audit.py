@@ -254,6 +254,80 @@ class CodeAuditTests(unittest.TestCase):
                     sys.modules.pop(name, None)
             sys.modules.update(original_modules)
 
+    def test_operator_has_no_unreachable_na_tolerance_branch(self):
+        tree = ast.parse((ROOT / "__init__.py").read_text(encoding="utf-8"))
+        constants = {node.value for node in ast.walk(tree) if isinstance(node, ast.Constant)}
+        self.assertNotIn("N_A", constants)
+
+    def test_standards_without_tolerance_classes_do_not_draw_tolerance_selector(self):
+        original_modules = {
+            name: sys.modules[name]
+            for name in list(sys.modules)
+            if name == "bpy" or name == "utg" or name.startswith("utg.")
+        }
+        for name in original_modules:
+            sys.modules.pop(name, None)
+
+        bpy = types.ModuleType("bpy")
+        bpy.__spec__ = importlib.machinery.ModuleSpec("bpy", loader=None)
+
+        def property_stub(**kwargs):
+            return None
+
+        bpy.types = types.SimpleNamespace(
+            Operator=type("Operator", (), {}),
+            PropertyGroup=type("PropertyGroup", (), {}),
+            Panel=type("Panel", (), {}),
+            Scene=type("Scene", (), {}),
+        )
+        bpy.props = types.SimpleNamespace(
+            EnumProperty=property_stub,
+            FloatProperty=property_stub,
+            IntProperty=property_stub,
+            BoolProperty=property_stub,
+            PointerProperty=property_stub,
+        )
+        sys.modules["bpy"] = bpy
+
+        class RowRecorder:
+            def __init__(self, calls):
+                self.calls = calls
+
+            def prop(self, props, name, **kwargs):
+                self.calls.append(("prop", name))
+
+            def operator(self, operator_id, **kwargs):
+                self.calls.append(("operator", operator_id))
+
+        class LayoutRecorder(RowRecorder):
+            def row(self, **kwargs):
+                return RowRecorder(self.calls)
+
+            def separator(self):
+                self.calls.append(("separator", None))
+
+        try:
+            ui_panel = _load_utg_module("ui_panel")
+            for standard in ["BUTTRESS", "ROUND", "NPT", "PG", "EDISON", "STORZ"]:
+                with self.subTest(standard=standard):
+                    calls = []
+                    panel = ui_panel.THREADFORGE_PT_main()
+                    panel.layout = LayoutRecorder(calls)
+                    props = types.SimpleNamespace(
+                        standard=standard,
+                        ui_language="de",
+                        lod_level="PREVIEW",
+                    )
+                    context = types.SimpleNamespace(scene=types.SimpleNamespace(utg_props=props))
+
+                    panel.draw(context)
+
+                    self.assertNotIn(("prop", "tolerance_class"), calls)
+        finally:
+            for name in list(sys.modules):
+                if name == "bpy" or name == "utg" or name.startswith("utg."):
+                    sys.modules.pop(name, None)
+            sys.modules.update(original_modules)
 
     def test_ratio_warnings_are_returned_without_module_global_state(self):
         tree = ast.parse((ROOT / "geometry_engine.py").read_text())
