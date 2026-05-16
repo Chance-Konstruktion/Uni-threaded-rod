@@ -238,6 +238,37 @@ class HighEndDataCoverageTests(unittest.TestCase):
         }
         self.assertTrue(expected.issubset(database.THREAD_STANDARDS))
 
+    def test_database_contains_all_promised_standards(self):
+        expected = {
+            "ACME",
+            "BSF",
+            "BSPT",
+            "BUTTRESS",
+            "CABLE_GLAND_M",
+            "CONDUIT_PG",
+            "EDISON",
+            "KNUCKLE",
+            "LAMP_B",
+            "METRIC_FINE",
+            "METRIC_ISO",
+            "METRIC_TRAPEZOIDAL_FINE",
+            "NPT",
+            "PG",
+            "PIPE_G",
+            "PIPE_R",
+            "ROUND",
+            "SPARK_PLUG",
+            "STORZ",
+            "STUB_ACME",
+            "TRAPEZOIDAL",
+            "UNC",
+            "UNEF",
+            "UNF",
+            "UNS",
+            "WHITWORTH_BSW",
+        }
+        self.assertEqual(expected, set(database.THREAD_STANDARDS))
+
     def test_non_pg_legacy_standards_have_tolerance_classes(self):
         expected = ["BUTTRESS", "ROUND", "NPT", "EDISON", "STORZ"]
         for standard in expected:

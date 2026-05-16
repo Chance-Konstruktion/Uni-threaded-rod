@@ -22,20 +22,22 @@ Bearbeite die Tasks in der angegebenen Reihenfolge (P0 → P3). Nach jedem Task:
 
 ---
 
-## 1. Ist-Stand nach Review (16.05.2026)
+## 1. Ist-Stand nach Abschluss (16.05.2026)
 
 ### Test-Lauf
 ```
-Ran 54 tests in 2.834s — OK
+Ran 74 tests — OK
 ruff check . — All checks passed!
 ```
-Alles grün, aber Coverage ist lückenhaft (siehe Task P1.1).
+Alles grün; die Coverage-Lücken aus P1.1 sind mit Regressionstests geschlossen.
 
-### Implementierte Normen (17 von 26 versprochenen)
-`METRIC_ISO`, `METRIC_FINE`, `WHITWORTH_BSW`, `UNC`, `UNF`, `UNEF`, `BSPT`, `PIPE_G`,
-`PIPE_R`, `TRAPEZOIDAL`, `BUTTRESS`, `ROUND`, `ACME`, `NPT`, `PG`, `EDISON`, `STORZ`.
+### ✅ Implementierte Normen (26 von 26 versprochenen)
+`ACME`, `BSF`, `BSPT`, `BUTTRESS`, `CABLE_GLAND_M`, `CONDUIT_PG`, `EDISON`,
+`KNUCKLE`, `LAMP_B`, `METRIC_FINE`, `METRIC_ISO`, `METRIC_TRAPEZOIDAL_FINE`,
+`NPT`, `PG`, `PIPE_G`, `PIPE_R`, `ROUND`, `SPARK_PLUG`, `STORZ`,
+`STUB_ACME`, `TRAPEZOIDAL`, `UNC`, `UNEF`, `UNF`, `UNS`, `WHITWORTH_BSW`.
 
-### Fehlende Normen laut README (9 Stück, MUSS-Auftrag)
+### ✅ Ehemals fehlende README-Normen (9 von 9 erledigt)
 | Key | Name | Norm | Einheit | Profil |
 | --- | --- | --- | --- | --- |
 | `BSF` | British Standard Fine | BS 84 | inch | V (55°) |
@@ -230,7 +232,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 
 ---
 
-### P2 — Code-Qualität / Konsistenz
+### ✅ P2 — Code-Qualität / Konsistenz
 
 #### ✅ P2.1 `starts`-Obergrenzen vereinheitlichen
 UI: `max=8`. `mechanical_validation.validate_thread_input`: `max=16`.
