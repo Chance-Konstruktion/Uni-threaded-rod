@@ -137,6 +137,10 @@ class ReferenceRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Steigung"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)
 
+    def test_storz_raises_not_implemented_with_clear_message(self):
+        with self.assertRaisesRegex(NotImplementedError, "STORZ: Bajonett-/Knaggenkupplung"):
+            geometry_engine.generate_profile("STORZ", diameter=133.0, pitch=0.0)
+
     def test_rejects_unknown_standard(self):
         with self.assertRaisesRegex(ValueError, "Unbekannter Standard"):
             geometry_engine.generate_profile("NOT_A_STANDARD", diameter=10.0, pitch=1.5)

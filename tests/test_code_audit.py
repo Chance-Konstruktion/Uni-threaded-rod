@@ -158,6 +158,103 @@ class CodeAuditTests(unittest.TestCase):
                     sys.modules.pop(name, None)
             sys.modules.update(original_modules)
 
+    def test_operator_reports_clear_storz_bayonet_error(self):
+        original_modules = {
+            name: sys.modules[name]
+            for name in list(sys.modules)
+            if (
+                name == "bpy"
+                or name == "bmesh"
+                or name == "mathutils"
+                or name == "utg"
+                or name.startswith("utg.")
+            )
+        }
+        for name in original_modules:
+            sys.modules.pop(name, None)
+
+        bpy = types.ModuleType("bpy")
+        bpy.__spec__ = importlib.machinery.ModuleSpec("bpy", loader=None)
+
+        reports = []
+
+        class Operator:
+            def report(self, level, message):
+                reports.append((level, message))
+
+        def property_stub(**kwargs):
+            return None
+
+        bpy.types = types.SimpleNamespace(
+            Operator=Operator,
+            PropertyGroup=type("PropertyGroup", (), {}),
+            Panel=type("Panel", (), {}),
+            Scene=type("Scene", (), {}),
+        )
+        bpy.props = types.SimpleNamespace(
+            EnumProperty=property_stub,
+            FloatProperty=property_stub,
+            IntProperty=property_stub,
+            BoolProperty=property_stub,
+            PointerProperty=property_stub,
+        )
+        bpy.utils = types.SimpleNamespace(
+            register_class=lambda cls: None, unregister_class=lambda cls: None
+        )
+        bpy.data = types.SimpleNamespace(
+            meshes=types.SimpleNamespace(new=lambda name: types.SimpleNamespace(name=name)),
+            objects=types.SimpleNamespace(new=lambda name, mesh: types.SimpleNamespace(name=name, mesh=mesh)),
+        )
+        sys.modules["bpy"] = bpy
+        sys.modules["bmesh"] = types.ModuleType("bmesh")
+        mathutils = types.ModuleType("mathutils")
+        mathutils.Vector = lambda value: value
+        sys.modules["mathutils"] = mathutils
+
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "utg", ROOT / "__init__.py", submodule_search_locations=[str(ROOT)]
+            )
+            module = importlib.util.module_from_spec(spec)
+            sys.modules["utg"] = module
+            spec.loader.exec_module(module)
+
+            props = types.SimpleNamespace(
+                standard="STORZ",
+                diameter_enum="A-110",
+                length=20.0,
+                starts=1,
+                clearance=0.0,
+                tolerance_class="6g",
+                handedness="RIGHT",
+                end_type="FLAT",
+                lod_level="PREVIEW",
+                segment_override=0,
+                material="STEEL_8.8",
+                surface="NONE",
+            )
+            context = types.SimpleNamespace(
+                scene=types.SimpleNamespace(utg_props=props),
+                active_object=None,
+                collection=types.SimpleNamespace(objects=types.SimpleNamespace(link=lambda obj: None)),
+            )
+
+            self.assertEqual({"CANCELLED"}, module.UTG_OT_create_thread().execute(context))
+            self.assertEqual({"ERROR"}, reports[-1][0])
+            self.assertIn("STORZ: Bajonett-/Knaggenkupplung", reports[-1][1])
+        finally:
+            for name in list(sys.modules):
+                if (
+                    name == "bpy"
+                    or name == "bmesh"
+                    or name == "mathutils"
+                    or name == "utg"
+                    or name.startswith("utg.")
+                ):
+                    sys.modules.pop(name, None)
+            sys.modules.update(original_modules)
+
+
     def test_ratio_warnings_are_returned_without_module_global_state(self):
         tree = ast.parse((ROOT / "geometry_engine.py").read_text())
         assigned_names = {
