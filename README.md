@@ -1,8 +1,14 @@
 # Uni-threaded-rod for Blender
 
-Blender add-on for parametric generation of external threads, internal-thread cutters, and multi-start threads.
+Blender add-on for parametric generation of external solid threaded rods, bayonet couplings, and multi-start threads.
 
-Blender-Add-on zur parametrischen Erzeugung von Außengewinden, Innengewinde-Cuttern und mehrgängigen Gewinden.
+Blender-Add-on zur parametrischen Erzeugung massiver Außengewinde-Stangen, Bajonettkupplungen und mehrgängiger Gewinde.
+
+## Release 0.2 status / Release-0.2-Status
+
+Release 0.2 is ready for tagging when the repository test suite and `ruff check .` pass. It includes external threads for all 26 advertised standards, the STORZ/LAMP_B bayonet mesh path, unified material preset handling in the high-level API, and the removed internal-thread-cutter UI remains out of scope for this rod add-on.
+
+Release 0.2 ist bereit zum Taggen, sobald die Test-Suite und `ruff check .` grün sind. Enthalten sind alle 26 angekündigten Normen, der STORZ/LAMP_B-Bajonett-Meshpfad, vereinheitlichte Material-Presets in der High-Level-API; die entfernte Innengewinde-Cutter-UI bleibt außerhalb des Scopes dieses Stangen-Add-ons.
 
 ## Related project / Verwandtes Projekt
 

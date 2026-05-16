@@ -31,6 +31,12 @@ ruff check . — All checks passed!
 ```
 Alles grün; die Coverage-Lücken aus P1.1 sind mit Regressionstests geschlossen.
 
+### ✅ Release 0.2 Vorbereitung (16.05.2026)
+- `bl_info["version"]` ist auf `(0, 2, 0)` gesetzt.
+- README beschreibt den aktuellen Scope ohne entfernte Innengewinde-Cutter-UI.
+- `validate_thread_input(..., standard_key="NOT_A_STANDARD")` liefert einen sprechenden Validierungsfehler statt einer stillen metrischen Ersatzformel.
+
+
 ### ✅ Implementierte Normen (26 von 26 versprochenen)
 `ACME`, `BSF`, `BSPT`, `BUTTRESS`, `CABLE_GLAND_M`, `CONDUIT_PG`, `EDISON`,
 `KNUCKLE`, `LAMP_B`, `METRIC_FINE`, `METRIC_ISO`, `METRIC_TRAPEZOIDAL_FINE`,

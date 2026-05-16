@@ -42,11 +42,9 @@ ISO_898_ALLOWABLE_FACTORS = {
 
 
 def _resolve_core_diameter(standard_key, diameter, pitch):
-    std = THREAD_STANDARDS.get(standard_key)
-    if std:
-        return std["d3_formula"](diameter, pitch)
-    # Fallback: konservative V-Gewinde-Näherung.
-    return diameter - 1.226869 * pitch
+    if standard_key not in THREAD_STANDARDS:
+        raise ValueError(f"Unbekannter Standard: {standard_key}")
+    return THREAD_STANDARDS[standard_key]["d3_formula"](diameter, pitch)
 
 
 def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standard_key="METRIC_ISO"):
@@ -70,6 +68,8 @@ def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standa
     if pitch < 1e-4:
         return ValidationResult(False, "Ungültig: Steigung ist numerisch zu klein.")
 
+    if standard_key not in THREAD_STANDARDS:
+        return ValidationResult(False, f"Unbekannter Standard: {standard_key}")
     d3 = _resolve_core_diameter(standard_key, diameter, pitch)
     if d3 <= 0.0 or d3 < 0.2 * diameter:
         return ValidationResult(False, "Ungültig: Kerndurchmesser wäre kritisch klein (Self-Intersection-Risiko).")
