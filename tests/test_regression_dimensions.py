@@ -284,7 +284,8 @@ class LocalizationAndReferenceExpansionTests(unittest.TestCase):
     def test_ui_i18n_has_de_and_en_labels_for_core_keys(self):
         keys = [
             "standard", "diameter", "length", "handedness", "starts",
-            "tolerance", "create_thread",
+            "tolerance", "create_thread", "error_exception", "info_created",
+            "warning_multi_start",
         ]
         for key in keys:
             with self.subTest(key=key):

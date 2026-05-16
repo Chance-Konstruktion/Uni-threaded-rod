@@ -157,10 +157,15 @@ def calculate_safety_factor(allowable_stress_mpa, actual_stress_mpa):
 
 
 def estimate_tensile_stress_area(diameter, pitch, standard_key="METRIC_ISO"):
-    """Näherung für Spannungsquerschnitt As in mm² (standardabhängig, metrischer Fallback)."""
-    std = THREAD_STANDARDS.get(standard_key, {})
+    """Näherung für Spannungsquerschnitt As in mm² über die Normformel."""
+    if standard_key not in THREAD_STANDARDS:
+        raise ValueError(f"Unbekannter Standard: {standard_key}")
+    std = THREAD_STANDARDS[standard_key]
     tensile_formula = std.get("tensile_stress_area_formula")
-    d_eff = tensile_formula(diameter, pitch) if callable(tensile_formula) else (diameter - 0.9382 * pitch)
+    if not callable(tensile_formula):
+        norm_ref = std.get("standard", "n/a")
+        raise ValueError(f"Spannungsquerschnitt für {standard_key} ist nicht definiert (Norm {norm_ref}).")
+    d_eff = tensile_formula(diameter, pitch)
     if d_eff <= 0:
         raise ValueError("Effektivdurchmesser <= 0")
     return math.pi * 0.25 * d_eff * d_eff

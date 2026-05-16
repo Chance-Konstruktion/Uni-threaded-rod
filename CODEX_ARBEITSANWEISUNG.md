@@ -268,27 +268,27 @@ PG → keine Klassen, dokumentieren).
 
 ---
 
-### P3 — Erweiterungen (nicht blockierend für „README-Erfüllung")
+### ✅ P3 — Erweiterungen (nicht blockierend für „README-Erfüllung")
 
-#### P3.1 Echte Bayonet-/Knaggenkupplungs-Pipeline (STORZ, LAMP_B)
+#### ✅ P3.1 Echte Bayonet-/Knaggenkupplungs-Pipeline (STORZ, LAMP_B)
 Mesh-Generierung für STORZ und LAMP_B: kein helikales Profil, sondern
 2–3 radiale Knaggen mit umlaufender Nut. **Eigener Builder** in einem neuen
 Modul `bayonet_builder.py`. Operator entscheidet nach `profile_type`, welcher
 Builder läuft. Beachte: für STORZ existieren festgelegte Knaggen-Geometrien
 (DIN 14318), für LAMP_B B15/B22 (IEC 60061-1, Sheet 7004-11).
 
-#### P3.2 Konsistenter Konus für NPT/PIPE_R/BSPT
+#### ✅ P3.2 Konsistenter Konus für NPT/PIPE_R/BSPT
 `taper_ratio` ist im `mesh_builder` als simple Radiusskalierung pro Z. Korrekt
 wäre eine kegelige Erweiterung mit Anfangs-Major-Diameter laut Norm
 (`pitch_diameter + taper * length`). Quelle: ISO 7-1 / ANSI B1.20.1.
 Headless-Smoke-Test ergänzen.
 
-#### P3.3 Spannungsquerschnitt für alle Profilfamilien
+#### ✅ P3.3 Spannungsquerschnitt für alle Profilfamilien
 Aktuell nutzt `mechanical_validation` einen metrischen Fallback `d - 0.9382*p`,
 wenn die Norm keine eigene Formel hat. Nach P1.1 ist das obsolet — entferne
 den Fallback und werfe einen `ValueError` mit klarer Norm-Referenz.
 
-#### P3.4 i18n für Operator-Reports
+#### ✅ P3.4 i18n für Operator-Reports
 Die `self.report(…)`-Strings im Operator sind hart deutsch. Ziehe sie über
 `ui_i18n.ui_label(...)` und ergänze entsprechende Keys (`error_*`, `warning_*`)
 in `ui_i18n.UI_TEXT`.

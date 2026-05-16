@@ -84,5 +84,34 @@ try:
     assert not non_manifold, f"Non-manifold edges found: {len(non_manifold)}"
     assert_solid_external_rod(created, expected_length_mm=props.length, nominal_diameter_mm=10.0)
 
+    npt_diameter = 21.3
+    npt_pitch = 1.814
+    npt_length = 32.0
+    npt_profile = addon.generate_profile("NPT", npt_diameter, npt_pitch, tolerance_class="L1")
+    npt_bm = addon.create_thread_mesh(
+        npt_profile,
+        npt_diameter,
+        npt_pitch,
+        npt_length,
+        end_type="FLAT",
+        taper_ratio=1 / 16,
+        lod_level="PREVIEW",
+    )
+    try:
+        start_radius = max(math.hypot(v.co.x, v.co.y) for v in npt_bm.verts if abs(v.co.z) <= 1e-8)
+        end_z = npt_length / 1000.0
+        end_radius = max(math.hypot(v.co.x, v.co.y) for v in npt_bm.verts if abs(v.co.z - end_z) <= 1e-8)
+        assert start_radius > end_radius, "NPT-Konus startet nicht am größeren Ende"
+    finally:
+        npt_bm.free()
+
+    storz_bm = addon.create_bayonet_mesh("STORZ", diameter=66.0, length=35.0, lod_level="PREVIEW")
+    try:
+        storz_radii = [math.hypot(v.co.x, v.co.y) for v in storz_bm.verts if math.hypot(v.co.x, v.co.y) > 1e-8]
+        assert max(storz_radii) > 66.0 / 2000.0, "STORZ-Knaggen fehlen"
+        assert min(storz_radii) < 66.0 / 2000.0, "STORZ-Nut fehlt"
+    finally:
+        storz_bm.free()
+
 finally:
     addon.unregister()
