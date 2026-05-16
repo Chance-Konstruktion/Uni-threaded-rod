@@ -117,6 +117,19 @@ class MechanicalValidationTests(unittest.TestCase):
         finally:
             database.THREAD_STANDARDS["METRIC_ISO"]["tensile_stress_area_formula"] = original
 
+    def test_validate_thread_input_rejects_unknown_standard(self):
+        result = mech.validate_thread_input(
+            diameter=10.0,
+            pitch=1.5,
+            length=20.0,
+            starts=1,
+            clearance=0.0,
+            standard_key="NOT_A_STANDARD",
+        )
+
+        self.assertFalse(result.ok)
+        self.assertIn("Unbekannter Standard: NOT_A_STANDARD", result.message)
+
     def test_validate_thread_input_uses_standard_core_formula(self):
         result = mech.validate_thread_input(
             diameter=10.0,

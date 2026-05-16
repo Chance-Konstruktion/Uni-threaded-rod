@@ -5,6 +5,7 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 INIT_FILE = ROOT / "__init__.py"
+README_FILE = ROOT / "README.md"
 
 
 class AddonMetadataTests(unittest.TestCase):
@@ -18,7 +19,7 @@ class AddonMetadataTests(unittest.TestCase):
         spec.loader.exec_module(module)
 
         self.assertEqual(module.bl_info["name"], "Uni-threaded-rod")
-        self.assertIn("version", module.bl_info)
+        self.assertEqual(module.bl_info["version"], (0, 2, 0))
         self.assertIn("blender", module.bl_info)
 
     def test_bl_info_is_a_top_level_assignment_for_blender_scanner(self):
@@ -32,6 +33,14 @@ class AddonMetadataTests(unittest.TestCase):
         }
 
         self.assertIn("bl_info", top_level_assignments)
+
+    def test_readme_describes_release_scope_without_removed_cutter_ui(self):
+        text = README_FILE.read_text(encoding="utf-8").lower()
+
+        self.assertIn("release 0.2", text)
+        self.assertIn("external threads", text)
+        self.assertNotIn("internal-thread cutters", text)
+        self.assertNotIn("innengewinde-cuttern", text)
 
 
 if __name__ == "__main__":
