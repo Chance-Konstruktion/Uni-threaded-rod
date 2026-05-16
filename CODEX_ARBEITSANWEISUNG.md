@@ -109,7 +109,7 @@ nackten `KeyError`, statt wie `geometry_engine` einen sprechenden `ValueError`.
 
 ---
 
-### P1 — Fehlende Gewindearten (Hauptauftrag laut User)
+### ✅ P1 — Fehlende Gewindearten (Hauptauftrag laut User)
 
 Implementiere alle 9 fehlenden Normen in `database.py::THREAD_STANDARDS`. Halte dich
 strikt an die in der bestehenden Tabelle genutzte Struktur. Jeder Eintrag braucht
@@ -117,7 +117,7 @@ mindestens: `name`, `standard`, `unit`, `flank_angle`, `profile_type`,
 `diam_pitch_map`, `d2_formula`, `d3_formula`, `tensile_stress_area_formula`,
 `tolerance_classes` (sofern Norm vorsieht), ggf. `diam_nominal_map`, `special_params`.
 
-#### P1.1 Coverage-Lücken vorhandener Normen mitbeheben
+#### ✅ P1.1 Coverage-Lücken vorhandener Normen mitbeheben
 Bevor neue Normen kommen, schließe diese Lücken in den bestehenden Einträgen
 (`tensile_stress_area_formula` fehlt komplett):
 
@@ -129,7 +129,7 @@ Für die anderen: konservative Näherung über Kerndurchmesser `d3`:
 — effektiv `d - k*p` mit profilabhängigem `k`. Werte aus Normliteratur belegen
 und als Kommentar (eine kurze Zeile) hinterlegen.
 
-#### P1.2 Neue Normen einzeln
+#### ✅ P1.2 Neue Normen einzeln
 
 **Bei jeder neuen Norm:**
 - mindestens 6 typische Nennweiten in `diam_pitch_map`
@@ -140,7 +140,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
   der mindestens einen typischen Nenndurchmesser und die zugehörige Steigung prüft.
 - README-Tabelle ist bereits up-to-date; nur prüfen, ob Norm/Bezeichnung passt.
 
-##### a) `BSF` — British Standard Fine
+##### ✅ a) `BSF` — British Standard Fine
 - `flank_angle: 55.0`, `profile_type: "V"`, `unit: "inch"`
 - `diam_pitch_map` (TPI) — typisch: `{3/16: 32, 7/32: 28, 1/4: 26, 5/16: 22, 3/8: 20, 7/16: 18, 1/2: 16, 9/16: 16, 5/8: 14, 11/16: 14, 3/4: 12, 7/8: 11, 1.0: 10, 1.125: 9, 1.25: 9, 1.5: 8, 1.75: 7, 2.0: 7}`
 - Formeln wie `WHITWORTH_BSW` (`d2 = d - 0.640327*p`, `d3 = d - 1.280654*p`,
@@ -148,7 +148,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["Close", "Medium", "Free"]}`
 - `special_params: {"rounded_radius": "0.137329*P", "crest_flat": "P/12", "root_flat": "P/6"}`
 
-##### b) `UNS` — Unified National Special
+##### ✅ b) `UNS` — Unified National Special
 - `flank_angle: 60.0`, `profile_type: "V"`, `unit: "inch"`
 - `diam_pitch_map`: sonderkombinierte TPI, z. B.
   `{1/2: 12, 5/8: 16, 3/4: 14, 7/8: 18, 1.0: 16, 1.125: 16, 1.25: 16, 1.5: 14}`
@@ -158,7 +158,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["2A", "3A"], "internal": ["2B", "3B"]}`
 - `special_params: {"flat_root": True}`
 
-##### c) `METRIC_TRAPEZOIDAL_FINE` — DIN 380
+##### ✅ c) `METRIC_TRAPEZOIDAL_FINE` — DIN 380
 - `flank_angle: 30.0`, `profile_type: "TRAPEZOID"`, `unit: "mm"`
 - `diam_pitch_map` (Auswahl aus DIN 380-2 Reihe 1):
   `{10: 1.5, 12: 2, 16: 2, 20: 2, 24: 3, 30: 3, 36: 3, 42: 4, 48: 4, 60: 5, 70: 5}`
@@ -170,7 +170,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["7e", "8e", "9e"], "internal": ["7H", "8H"]}`
 - `special_params: {"crest_width": "0.5*P", "root_width": "0.5*P - 0.15"}`
 
-##### d) `STUB_ACME` — ASME B1.8 (halbe Trapez-Höhe)
+##### ✅ d) `STUB_ACME` — ASME B1.8 (halbe Trapez-Höhe)
 - `flank_angle: 29.0`, `profile_type: "TRAPEZOID"`, `unit: "inch"`
 - `diam_pitch_map`: z. B. `{1/4: 16, 5/16: 14, 3/8: 12, 1/2: 10, 5/8: 8, 3/4: 6, 1.0: 5, 1.25: 5, 1.5: 4, 2.0: 4}`
 - Profilhöhe ist **0,5·H** vom Standard-ACME → vermerke das im `special_params`
@@ -183,7 +183,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
   einen `height_factor` aus `special_params` lesen, der die Verjüngungstiefe
   steuert. Default 1.0 (bisheriges Verhalten bleibt für `TRAPEZOIDAL`, `ACME` erhalten).
 
-##### e) `KNUCKLE` — ASME B1.9, Round
+##### ✅ e) `KNUCKLE` — ASME B1.9, Round
 - `flank_angle: 30.0`, `profile_type: "ROUND"`, `unit: "inch"`
 - `diam_pitch_map` (auszugsweise): `{1/4: 20, 3/8: 16, 1/2: 12, 5/8: 10, 3/4: 8, 1.0: 6, 1.25: 5, 1.5: 4, 2.0: 3}`
 - `d2_formula: lambda d, p: d - 0.5 * p`
@@ -192,7 +192,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["2A"], "internal": ["2B"]}` (Standardklassen)
 - `special_params: {"radius": "P/4"}`
 
-##### f) `SPARK_PLUG` — ISO 28741
+##### ✅ f) `SPARK_PLUG` — ISO 28741
 - `flank_angle: 60.0`, `profile_type: "V"`, `unit: "mm"`
 - `diam_pitch_map`: `{"M8x1": 1.0, "M10x1": 1.0, "M12x1.25": 1.25, "M14x1.25": 1.25, "M18x1.5": 1.5}`
 - `diam_nominal_map`: `{"M8x1": 8.0, "M10x1": 10.0, "M12x1.25": 12.0, "M14x1.25": 14.0, "M18x1.5": 18.0}`
@@ -201,7 +201,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["6g"], "internal": ["6H"]}`
 - `special_params: {"crest_flat": "P/8", "root_flat": "P/4"}`
 
-##### g) `CABLE_GLAND_M` — DIN EN 60423
+##### ✅ g) `CABLE_GLAND_M` — DIN EN 60423
 - `flank_angle: 60.0`, `profile_type: "V"`, `unit: "mm"`
 - Standardgrößen: `{"M12x1.5": 1.5, "M16x1.5": 1.5, "M20x1.5": 1.5, "M25x1.5": 1.5, "M32x1.5": 1.5, "M40x1.5": 1.5, "M50x1.5": 1.5, "M63x1.5": 1.5}`
 - `diam_nominal_map`: passend (12, 16, 20, 25, 32, 40, 50, 63).
@@ -209,7 +209,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - `tolerance_classes: {"external": ["6g"], "internal": ["6H"]}`
 - `special_params: {"crest_flat": "P/8", "root_flat": "P/4"}`
 
-##### h) `CONDUIT_PG` — DIN 40430 (Erweiterung, NICHT Duplikat von `PG`)
+##### ✅ h) `CONDUIT_PG` — DIN 40430 (Erweiterung, NICHT Duplikat von `PG`)
 - Vorhandener `PG`-Eintrag bleibt (Werkstattbezeichnung). `CONDUIT_PG` ergänzt
   die elektroinstallationsspezifischen Größen:
   `{"Pg7": 1.27, "Pg9": 1.41, "Pg11": 1.41, "Pg13.5": 1.41, "Pg16": 1.41, "Pg21": 1.588, "Pg29": 1.588, "Pg36": 1.814, "Pg42": 1.814, "Pg48": 1.814}`
@@ -219,7 +219,7 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 - Empfehlung: **vereinige zu `PG` und lösche `CONDUIT_PG` aus der README**, weil
   es keine semantische Differenz gibt. Setze die README-Änderung in den Commit.
 
-##### i) `LAMP_B` — IEC 60061-1, Bajonett-Lampensockel
+##### ✅ i) `LAMP_B` — IEC 60061-1, Bajonett-Lampensockel
 - `profile_type: "BAYONET"` (gleiche Sackgasse wie STORZ!).
 - Erst implementierbar, wenn entweder eine echte Bayonet-Geometrie-Pipeline
   existiert (Task P3.1) oder klargestellt ist, dass das nur ein Datenbankeintrag
