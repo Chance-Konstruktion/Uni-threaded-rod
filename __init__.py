@@ -124,10 +124,6 @@ if HAS_BPY:
                     f"Mehrgängiges Gewinde mit {props.starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
                 )
 
-            if props.tolerance_class == "N_A":
-                self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
-                return {"CANCELLED"}
-
             try:
                 profile, ratio_warnings = generate_profile(
                     standard_key,
