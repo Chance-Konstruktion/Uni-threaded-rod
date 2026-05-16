@@ -32,6 +32,7 @@ if HAS_BPY:
 
     THREAD_PRESETS = database.THREAD_PRESETS
     THREAD_STANDARDS = database.THREAD_STANDARDS
+    get_default_tolerance_class = database.get_default_tolerance_class
     resolve_thread_parameters = database.resolve_thread_parameters
     generate_profile = geometry_engine.generate_profile
     validate_thread_input = mechanical_validation.validate_thread_input
@@ -68,6 +69,16 @@ if HAS_BPY:
         return None if result.ok else result.message
 
 
+    def _resolve_tolerance_class(props, standard_key, internal=False):
+        tolerance_class = str(getattr(props, "tolerance_class", "6g") or "6g")
+        classes = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
+        key = "internal" if internal else "external"
+        allowed = {str(value).upper() for value in classes.get(key, [])}
+        if allowed and tolerance_class.upper() not in allowed:
+            return get_default_tolerance_class(standard_key, internal=internal)
+        return tolerance_class
+
+
     class UTG_OT_create_thread(bpy.types.Operator):
         bl_idname = "utg.create_thread"
         bl_label = "Gewinde erstellen"
@@ -90,6 +101,7 @@ if HAS_BPY:
                     return {"CANCELLED"}
 
             standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
+            tolerance_class = props.tolerance_class if custom_std is not None else _resolve_tolerance_class(props, standard_key)
 
             if standard.get("profile_type") == "BAYONET":
                 try:
@@ -97,7 +109,7 @@ if HAS_BPY:
                         standard_key,
                         diameter,
                         pitch,
-                        tolerance_class=props.tolerance_class,
+                        tolerance_class=tolerance_class,
                         internal=False,
                         clearance=props.clearance,
                         standard=custom_std,
@@ -129,7 +141,7 @@ if HAS_BPY:
                     standard_key,
                     diameter,
                     pitch,
-                    tolerance_class=props.tolerance_class,
+                    tolerance_class=tolerance_class,
                     internal=False,
                     clearance=props.clearance,
                     return_warnings=True,

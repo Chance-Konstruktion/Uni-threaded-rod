@@ -1,4 +1,4 @@
-from .database import MATERIAL_PRESETS, resolve_thread_parameters
+from .database import MATERIAL_PRESETS, THREAD_STANDARDS, get_default_tolerance_class, resolve_thread_parameters
 from .geometry_engine import generate_profile
 from .mechanical_validation import (
     ISO_898_PROPERTY_CLASS_RM_MPA,
@@ -29,6 +29,17 @@ def _resolve_property_class(material_or_preset):
     raise ValueError(f"Unbekannte Festigkeitsklasse oder Materialvorgabe: {token}. Erlaubt: {', '.join(allowed)}")
 
 
+def _resolve_tolerance_class(standard_key, fit, internal):
+    tolerance_class = _split_fit(fit, internal=internal)
+    if fit == "6g/6H":
+        classes = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
+        key = "internal" if internal else "external"
+        allowed = {str(value).upper() for value in classes.get(key, [])}
+        if allowed and tolerance_class.upper() not in allowed:
+            return get_default_tolerance_class(standard_key, internal=internal)
+    return tolerance_class
+
+
 def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO", internal=False, starts=1):
     """High-level API ähnlich CAD-Aufruf.
 
@@ -38,7 +49,7 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
     token = str(spec).upper().strip()
     diameter_token = token[1:] if token.startswith("M") else token
     diameter, pitch = resolve_thread_parameters(standard, diameter_token)
-    tolerance_class = _split_fit(fit, internal=internal)
+    tolerance_class = _resolve_tolerance_class(standard, fit, internal=internal)
 
     profile, ratio_warnings = generate_profile(
         standard,

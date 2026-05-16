@@ -241,6 +241,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.75 * p,
         "d3_formula": lambda d, p: d - 1.5 * p - 0.5,
         "tensile_stress_area_formula": lambda d, p: d - 1.25 * p,
+        "tolerance_classes": {"external": ["7e", "8e", "9e"], "internal": ["7H", "8H"]},
         "special_params": {"pressure_flank": 30.0, "clearance_flank": 3.0},
     },
     "ROUND": {
@@ -253,6 +254,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.5 * p,
         "d3_formula": lambda d, p: d - p - 1.0,
         "tensile_stress_area_formula": lambda d, p: d - 0.75 * p,
+        "tolerance_classes": {"external": ["7e", "8e", "9e"], "internal": ["7H", "8H"]},
         "special_params": {"radius": "P/4"},
     },
     "KNUCKLE": {
@@ -305,6 +307,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.8 * p,
         "d3_formula": lambda d, p: d - 1.6 * p,
         "tensile_stress_area_formula": lambda d, p: d - 1.2 * p,
+        "tolerance_classes": {"external": ["L1", "L2"], "internal": ["L1", "L2"]},
         "special_params": {"taper_ratio": 1 / 16},
     },
     "PG": {
@@ -318,6 +321,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.6 * p,
         "d3_formula": lambda d, p: d - 1.2 * p,
         "tensile_stress_area_formula": lambda d, p: d - 0.9 * p,
+        "special_params": {"tolerance_note": "DIN 40430/Pg: keine separaten Add-on-Toleranzklassen hinterlegt"},
     },
     "EDISON": {
         "name": "Edison-Lampensockel-Gewinde (E10/E14/E27/E40)",
@@ -330,6 +334,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.5 * p,
         "d3_formula": lambda d, p: d - p,
         "tensile_stress_area_formula": lambda d, p: d - 0.75 * p,
+        "tolerance_classes": {"external": ["IEC"], "internal": ["IEC"]},
         "special_params": {"radius_ratio": 1.0 / 3.0},
     },
     "SPARK_PLUG": {
@@ -371,6 +376,7 @@ THREAD_STANDARDS = {
         "d2_formula": lambda d, p: d - 0.6 * p,
         "d3_formula": lambda d, p: d - 1.2 * p,
         "tensile_stress_area_formula": lambda d, p: d - 0.9 * p,
+        "special_params": {"tolerance_note": "Alias zu Pg-Größen: keine separaten Add-on-Toleranzklassen hinterlegt"},
     },
     "LAMP_B": {
         "name": "Bajonett-Lampensockel (B15/B22)",
@@ -394,6 +400,7 @@ THREAD_STANDARDS = {
         "diam_nominal_map": {"A-110": 133.0, "B-75": 89.0, "C-52": 66.0, "D-25": 31.0, "F-150": 160.0},
         "d2_formula": lambda d, p: d,
         "d3_formula": lambda d, p: d,
+        "tolerance_classes": {"external": ["DIN 14318"]},
         "special_params": {"note": "Bajonett-Knaggenkupplung — kein Gewinde, separate Pipeline erforderlich"},
     },
 }
@@ -457,6 +464,16 @@ def get_diameter_items_for_standard(standard_key):
             label = str(raw_key)
         items.append((token, label, f"{std['name']} {label}"))
     return items
+
+
+def get_default_tolerance_class(standard_key, internal=False):
+    std = THREAD_STANDARDS.get(standard_key)
+    if not std:
+        return "6g"
+    classes = std.get("tolerance_classes", {})
+    key = "internal" if internal else "external"
+    values = classes.get(key, []) or classes.get("external", []) or classes.get("internal", [])
+    return str(values[0]) if values else "6g"
 
 
 def _resolve_diameter_mm(std, diameter_token):

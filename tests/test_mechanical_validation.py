@@ -118,6 +118,18 @@ class MechanicalValidationTests(unittest.TestCase):
         )
         self.assertTrue(result.ok)
 
+    def test_validate_thread_input_rejects_more_than_eight_starts(self):
+        result = mech.validate_thread_input(
+            diameter=10.0,
+            pitch=1.5,
+            length=20.0,
+            starts=9,
+            clearance=0.0,
+            standard_key="METRIC_ISO",
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("maximal 8", result.message)
+
     def test_property_class_tensile_check(self):
         result = mech.validate_property_class_tensile(
             force_n=10000.0,
@@ -281,6 +293,10 @@ class HighEndMechanicsTests(unittest.TestCase):
     def test_high_level_thread_api_accepts_ui_material_keys(self):
         payload = api.thread("M10", fit="6g/6H", material="STEEL_8.8", length=50)
         self.assertEqual(payload["property_class"], "8.8")
+
+    def test_high_level_thread_api_uses_standard_default_tolerance(self):
+        payload = api.thread('0.5', material="8.8", length=50, standard="WHITWORTH_BSW")
+        self.assertEqual(payload["tolerance_class"], "Close")
 
     def test_high_level_thread_api_rejects_unknown_standard_with_value_error(self):
         with self.assertRaisesRegex(ValueError, "Unbekannter Standard: NOT_A_STANDARD"):

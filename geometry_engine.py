@@ -134,9 +134,7 @@ def _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, cleara
         allowed = set()
         for values in tolerance_def.values():
             allowed.update(str(v).upper() for v in values)
-        # Rückwärtskompatibel: viele Aufrufer verlassen sich auf den Default "6g",
-        # auch bei Normfamilien ohne 6g-Klasse in dieser vereinfachten Datenbank.
-        if tc.upper() not in allowed and tc.upper() != "6G":
+        if tc.upper() not in allowed:
             raise ValueError(
                 f"Toleranzklasse {tolerance_class} ist für {standard_key} nicht definiert"
             )
@@ -216,13 +214,16 @@ def generate_profile(
     standard_key,
     diameter,
     pitch,
-    tolerance_class="6g",
+    tolerance_class=None,
     internal=False,
     clearance=0.0,
     return_warnings=False,
     standard=None,
 ):
-    """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial)."""
+    """Erzeugt 2D-Profilpunkte eines Gewindegangs (x=radial, y=axial).
+
+    internal=True bleibt für das Schwesterprojekt Uni-threaded-sleeve erhalten.
+    """
     _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance, standard=standard)
     ratio_warnings = []
     std = standard if standard is not None else THREAD_STANDARDS[standard_key]

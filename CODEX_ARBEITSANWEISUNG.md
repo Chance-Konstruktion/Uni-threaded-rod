@@ -232,35 +232,35 @@ und als Kommentar (eine kurze Zeile) hinterlegen.
 
 ### P2 — Code-Qualität / Konsistenz
 
-#### P2.1 `starts`-Obergrenzen vereinheitlichen
+#### ✅ P2.1 `starts`-Obergrenzen vereinheitlichen
 UI: `max=8`. `mechanical_validation.validate_thread_input`: `max=16`.
 Operator warnt ab `>2`. Wähle **eine** Obergrenze (Empfehlung: `8`) und
 trage sie überall ein. Operator-Warnung beibehalten — sie ist berechtigt.
 
-#### P2.2 `custom_profile_type` im UI um `EDISON` erweitern
+#### ✅ P2.2 `custom_profile_type` im UI um `EDISON` erweitern
 `ui_panel.py::UTG_Properties.custom_profile_type` muss auch `EDISON` enthalten,
 sonst sind eigene Edison-ähnliche Profile nicht baubar. Add: `("EDISON", "Edison", "")`.
 
-#### P2.3 Backwards-Compat-Klausel in `_check_profile_inputs`
+#### ✅ P2.3 Backwards-Compat-Klausel in `_check_profile_inputs`
 Die Stelle „auch bei Normfamilien ohne 6g-Klasse" ist ein Tech-Debt-Workaround.
 Klären, ob das noch nötig ist; wenn ja, kommentieren mit Referenz auf den Aufrufer.
 Wenn nicht, entfernen. Wenn entfernt: `api.thread()` muss vorher die richtige
 Default-Klasse pro Norm bestimmen, statt blind `6g` durchzureichen.
 
-#### P2.4 `apply_boolean_cutter` als toter API-Pfad
+#### ✅ P2.4 `apply_boolean_cutter` als toter API-Pfad
 Funktion ist exportiert, aber kein Operator nutzt sie mehr. Entscheide:
 - entfernen (sauberer), oder
 - mit einem Deprecation-Kommentar (max. 1 Zeile) als „public helper for downstream
   add-ons (Uni-threaded-sleeve)" markieren.
 
-#### P2.5 `internal=True`-Pfad in `generate_profile`
+#### ✅ P2.5 `internal=True`-Pfad in `generate_profile`
 Wird außer in Tests nicht mehr aufgerufen. `Uni-threaded-sleeve` ist ein eigenes
 Repo, der Pfad muss erhalten bleiben. **Markiere** im Docstring von
 `generate_profile`, dass `internal=True` ausschließlich vom Sleeve-Repo genutzt
 wird, und schließe einen End-to-End-Test in `tests/test_regression_dimensions.py`
 ab, der `internal=True` mindestens einmal mit assert auf Radius-Offset prüft.
 
-#### P2.6 `tolerance_classes` fehlen für 6 Normen
+#### ✅ P2.6 `tolerance_classes` fehlen für 6 Normen
 `BUTTRESS`, `ROUND`, `NPT`, `PG`, `EDISON`, `STORZ` haben keine
 `tolerance_classes`. Trage zumindest die Werkstoff-üblichen Klassen ein
 (BUTTRESS DIN 513 → 7e/8e/9e; ROUND DIN 405 → analog Trapezoidal; NPT → L1/L2;
