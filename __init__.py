@@ -89,6 +89,23 @@ if HAS_BPY:
                     self.report({"ERROR"}, str(exc))
                     return {"CANCELLED"}
 
+            standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
+
+            if standard.get("profile_type") == "BAYONET":
+                try:
+                    generate_profile(
+                        standard_key,
+                        diameter,
+                        pitch,
+                        tolerance_class=props.tolerance_class,
+                        internal=False,
+                        clearance=props.clearance,
+                        standard=custom_std,
+                    )
+                except NotImplementedError as exc:
+                    self.report({"ERROR"}, str(exc))
+                    return {"CANCELLED"}
+
             validation_error = _validate_parameters(
                 diameter,
                 pitch,
@@ -106,8 +123,6 @@ if HAS_BPY:
                     {"WARNING"},
                     f"Mehrgängiges Gewinde mit {props.starts} Gängen erzeugt. Bei sehr hohen Gängigkeiten Manifold prüfen.",
                 )
-
-            standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
 
             if props.tolerance_class == "N_A":
                 self.report({"ERROR"}, "Für diese Norm sind keine Innengewinde-Toleranzklassen definiert.")
@@ -138,7 +153,7 @@ if HAS_BPY:
                     lod_level=props.lod_level,
                     segment_override=props.segment_override,
                 )
-            except ValueError as exc:
+            except (ValueError, NotImplementedError) as exc:
                 self.report({"ERROR"}, str(exc))
                 return {"CANCELLED"}
 
