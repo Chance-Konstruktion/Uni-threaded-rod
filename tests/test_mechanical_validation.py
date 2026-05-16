@@ -278,6 +278,14 @@ class HighEndMechanicsTests(unittest.TestCase):
         self.assertEqual(payload["tolerance_class"], "6g")
         self.assertIn("mechanics", payload)
 
+    def test_high_level_thread_api_accepts_ui_material_keys(self):
+        payload = api.thread("M10", fit="6g/6H", material="STEEL_8.8", length=50)
+        self.assertEqual(payload["property_class"], "8.8")
+
+    def test_high_level_thread_api_rejects_unknown_standard_with_value_error(self):
+        with self.assertRaisesRegex(ValueError, "Unbekannter Standard: NOT_A_STANDARD"):
+            api.thread("M10", standard="NOT_A_STANDARD")
+
 
 if __name__ == "__main__":
     unittest.main()

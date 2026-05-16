@@ -1,6 +1,7 @@
-from .database import resolve_thread_parameters
+from .database import MATERIAL_PRESETS, resolve_thread_parameters
 from .geometry_engine import generate_profile
 from .mechanical_validation import (
+    ISO_898_PROPERTY_CLASS_RM_MPA,
     allowables_from_property_class,
     validate_combined_load_case,
 )
@@ -11,6 +12,21 @@ def _split_fit(fit: str, internal: bool) -> str:
         ext, intl = fit.split("/", 1)
         return intl.strip() if internal else ext.strip()
     return fit.strip()
+
+
+def _resolve_property_class(material_or_preset):
+    token = str(material_or_preset).strip()
+    if token in ISO_898_PROPERTY_CLASS_RM_MPA:
+        return token
+
+    if token in MATERIAL_PRESETS:
+        _, _, suffix = token.partition("_")
+        if suffix in ISO_898_PROPERTY_CLASS_RM_MPA:
+            return suffix
+
+    allowed = sorted(ISO_898_PROPERTY_CLASS_RM_MPA)
+    allowed.extend(sorted(key for key in MATERIAL_PRESETS if key.partition("_")[2] in ISO_898_PROPERTY_CLASS_RM_MPA))
+    raise ValueError(f"Unbekannte Festigkeitsklasse oder Materialvorgabe: {token}. Erlaubt: {', '.join(allowed)}")
 
 
 def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO", internal=False, starts=1):
@@ -34,7 +50,8 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
         return_warnings=True,
     )
 
-    allowables = allowables_from_property_class(material)
+    property_class = _resolve_property_class(material)
+    allowables = allowables_from_property_class(property_class)
     mechanics = validate_combined_load_case(
         axial_force_n=0.0,
         transverse_force_n=0.0,
@@ -52,6 +69,7 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
         "spec": token,
         "fit": fit,
         "material": material,
+        "property_class": property_class,
         "length_mm": float(length),
         "starts": int(starts),
         "diameter_mm": diameter,

@@ -83,7 +83,7 @@ in `ui_panel.py` nirgends als gültiger Enum-Wert definiert. Der Branch ist uner
   (`BUTTRESS`, `ROUND`, `NPT`, `PG`, `EDISON`, `STORZ`) im UI keine Tolerance-Selektion
   zeigen oder eine sinnvolle Default-Option bekommen.
 
-#### P0.3 `api.thread(material=…)` widersprüchlich zur UI
+#### ✅ P0.3 `api.thread(material=…)` widersprüchlich zur UI
 **Problem:** `api.thread()` erwartet eine **ISO-898-Festigkeitsklasse** als String
 (`"4.6"`, `"8.8"`, …), aber `ui_panel.UTG_Properties.material` verwendet die
 **MATERIAL_PRESETS-Keys** (`"STEEL_8.8"`, `"STAINLESS_A2"`, …). Wer die API mit
@@ -98,7 +98,7 @@ einem UI-Wert füttert, bekommt `ValueError: Unbekannte Festigkeitsklasse: STEEL
 - Erweitere `tests/test_mechanical_validation.py::HighEndMechanicsTests` um
   `test_high_level_thread_api_accepts_ui_material_keys`.
 
-#### P0.4 Unbekannter Standard → KeyError
+#### ✅ P0.4 Unbekannter Standard → KeyError
 **Problem:** `api.thread(spec="M10", standard="NOT_A_STANDARD")` wirft einen
 nackten `KeyError`, statt wie `geometry_engine` einen sprechenden `ValueError`.
 
