@@ -26,7 +26,7 @@ Bearbeite die Tasks in der angegebenen Reihenfolge (P0 → P3). Nach jedem Task:
 
 ### Test-Lauf
 ```
-Ran 74 tests — OK
+Ran 76 tests — OK
 ruff check . — All checks passed!
 ```
 Alles grün; die Coverage-Lücken aus P1.1 sind mit Regressionstests geschlossen.
