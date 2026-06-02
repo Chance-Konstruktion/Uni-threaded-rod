@@ -477,15 +477,18 @@ def get_default_tolerance_class(standard_key, internal=False):
 
 
 def _resolve_diameter_mm(std, diameter_token):
+    # Symbolische Nennwerte zuerst auflösen: rein numerisch aussehende String-Keys
+    # wie NPT "1"/"2" dürfen nicht über float() als Zoll-Durchmesser fehlinterpretiert
+    # werden, sonst ist ihre Steigung im diam_pitch_map nicht mehr auffindbar.
+    nom_map = std.get("diam_nominal_map", {})
+    if diameter_token in nom_map:
+        return float(nom_map[diameter_token]), diameter_token
     try:
         raw_numeric = float(diameter_token)
         if std["unit"] == "inch":
             return raw_numeric * MM_PER_INCH, raw_numeric
         return raw_numeric, raw_numeric
     except ValueError:
-        nom_map = std.get("diam_nominal_map", {})
-        if diameter_token in nom_map:
-            return float(nom_map[diameter_token]), diameter_token
         raise ValueError(f"Durchmesserwert {diameter_token} in {std['name']} nicht auflösbar")
 
 

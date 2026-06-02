@@ -54,6 +54,22 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertAlmostEqual(diameter_mm, 48.3, places=6)
         self.assertAlmostEqual(pitch_mm, 25.4 / 11.5, places=6)
 
+    def test_npt_integer_inch_tokens_resolve(self):
+        # Regression: rein numerische String-Keys ("1", "2") wurden über float()
+        # als Zoll-Durchmesser fehlinterpretiert und fanden ihre Steigung nicht,
+        # obwohl get_diameter_items_for_standard sie als UI-Tokens anbietet.
+        ui_tokens = {token for token, _, _ in database.get_diameter_items_for_standard("NPT")}
+        self.assertIn("1", ui_tokens)
+        self.assertIn("2", ui_tokens)
+
+        diameter_one, pitch_one = database.resolve_thread_parameters("NPT", "1")
+        self.assertAlmostEqual(diameter_one, 33.4, places=6)
+        self.assertAlmostEqual(pitch_one, 25.4 / 11.5, places=6)
+
+        diameter_two, pitch_two = database.resolve_thread_parameters("NPT", "2")
+        self.assertAlmostEqual(diameter_two, 60.3, places=6)
+        self.assertAlmostEqual(pitch_two, 25.4 / 11.5, places=6)
+
     def test_metric_profile_reference_radii(self):
         diameter_mm, pitch_mm = 10.0, 1.5
         points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm, tolerance_class="6g")
