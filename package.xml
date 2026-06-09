@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<package format="1">
+  <name>Uni-threaded-rod</name>
+  <description>FreeCAD workbench frontend for the shared Uni-threaded-rod thread geometry core.</description>
+  <version>0.2.0</version>
+  <date>2026-06-09</date>
+  <maintainer email="maintainer@example.invalid">Uni-threaded-rod maintainers</maintainer>
+  <license file="LICENSE">MIT</license>
+  <url type="repository" branch="main">https://github.com/Chance-Konstruktion/Uni-threaded-rod</url>
+  <content>
+    <workbench>
+      <classname>UniThreadedRodWorkbench</classname>
+      <subdirectory>./</subdirectory>
+    </workbench>
+  </content>
+  <freecadmin>1.0</freecadmin>
+  <tag>threads</tag>
+  <tag>workbench</tag>
+  <tag>mechanical</tag>
+</package>
