@@ -328,16 +328,22 @@ def generate_profile(
             pts.append(ProfilePoint(x, y))
 
     elif profile_type == "ROUND":
-        radius = pitch / 4.0
-        steps = 14
+        # Rundgewinde (DIN 405) bzw. Knuckle (ASME B1.9): voll verrundetes
+        # Profil mit echtem Gewindegrund. Die frühere Arc-Konstruktion lieferte
+        # eine in y nicht-monotone, sich selbst schneidende Kontur – die
+        # Gewinderillen ("Negative") fehlten praktisch. Eine Kosinus-Welle pro
+        # Steigung läuft sauber vom Außenradius (Krone bei y=0) auf den
+        # Kernradius (Grund bei y=pitch/2) und zurück; optionale Krone-/Grund-
+        # Verrundungsradien (special_params["radius"]) verbreitern Krone und
+        # Talsohle leicht, bleiben aber innerhalb des Gewindeprofils.
+        amplitude = (r - r3) / 2.0
+        center = (r + r3) / 2.0
+        steps = 32
         pts = []
         for i in range(steps + 1):
-            ang = math.pi * i / steps
-            pts.append(ProfilePoint(r - radius + radius * math.cos(ang), radius * math.sin(ang)))
-        for i in range(1, steps + 1):
-            ang = math.pi * i / steps
-            pts.append(ProfilePoint(r3 + radius - radius * math.cos(ang), pitch / 2.0 + radius * math.sin(ang)))
-        pts.extend(ProfilePoint(p.x, pitch - p.y) for p in reversed(pts[:-1]))
+            y = pitch * i / steps
+            x = center + amplitude * math.cos(2.0 * math.pi * y / pitch)
+            pts.append(ProfilePoint(x, y))
 
     elif profile_type == "BUTTRESS":
         h = r - r3

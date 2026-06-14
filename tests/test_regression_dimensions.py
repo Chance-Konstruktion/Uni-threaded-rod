@@ -308,6 +308,26 @@ class HighEndDataCoverageTests(unittest.TestCase):
         stub_depth = max(p.x for p in stub) - min(p.x for p in stub)
         self.assertLess(stub_depth, acme_depth)
 
+    def test_round_profile_is_axially_monotonic_with_real_groove(self):
+        # Regression: das alte Rundgewinde-Profil (ROUND/KNUCKLE) war in y nicht
+        # monoton und schnitt sich selbst, wodurch die Gewinderillen fehlten.
+        for standard, token in (("KNUCKLE", "0.5"), ("ROUND", "12")):
+            with self.subTest(standard=standard):
+                diameter, pitch = database.resolve_thread_parameters(standard, token)
+                tolerance = "2A" if standard == "KNUCKLE" else "7e"
+                points = geometry_engine.generate_profile(
+                    standard, diameter, pitch, tolerance_class=tolerance
+                )
+                ys = [p.y for p in points]
+                self.assertEqual(ys, sorted(ys), "Profil ist axial nicht monoton")
+                self.assertAlmostEqual(ys[0], 0.0, places=6)
+                self.assertAlmostEqual(ys[-1], pitch, places=6)
+                core_radius = database.THREAD_STANDARDS[standard]["d3_formula"](diameter, pitch) / 2.0
+                major_radius = diameter / 2.0
+                depth = max(p.x for p in points) - min(p.x for p in points)
+                # Echte Rille: Tiefe nahe (Major - Core), nicht nur ein Punkt.
+                self.assertGreater(depth, 0.8 * (major_radius - core_radius))
+
     def test_metric_iso_row_contains_crest_and_root_radius(self):
         row = database.resolve_iso_metric_coarse_row(10.0, 1.5)
         self.assertIsNotNone(row)

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] — Blender 4.0+
+
+### Changed
+- `bl_info` now carries the real maintainer (`Chance-Konstruktion`) instead of
+  the `Ihr Name` placeholder, and the add-on version was bumped to `0.3.0`.
+
 ### Removed
 - Non-thread bayonet couplings have been dropped: the `STORZ` (DIN 14318 fire
   hose coupling) and `LAMP_B` (IEC 60061-1 bayonet lamp socket) standards, the
@@ -25,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   only as a convenience fallback for metric sizes like `M10`. This also unblocks
   the same standards in the sister project **Uni-threaded-sleeve**, which calls
   this API.
+- Round-thread profile (`ROUND` profile type — DIN 405 round threads and the
+  ASME B1.9 `KNUCKLE` standard) was geometrically broken: the old arc
+  construction produced an axially non-monotonic, self-intersecting contour, so
+  the thread grooves ("negatives") were effectively missing. It is now a clean
+  fully-rounded contour (one cosine wave per pitch) that runs from the major
+  radius at the crest down to the core radius at the root and back.
 
 ## [0.2.0] — Blender 4.0+
 
