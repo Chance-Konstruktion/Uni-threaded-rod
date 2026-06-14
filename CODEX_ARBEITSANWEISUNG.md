@@ -6,6 +6,13 @@ Bearbeite die Tasks in der angegebenen Reihenfolge (P0 → P3). Nach jedem Task:
 `python -m unittest discover -s tests -p "test_*.py"` muss grün bleiben und
 `ruff check .` darf keine neuen Findings melden.
 
+> **Scope-Update (Bajonett entfernt):** Dieses Add-on ist ausschließlich für
+> echte Gewinde. Die Nicht-Gewinde-Bajonettkupplungen `STORZ` und `LAMP_B`,
+> der `BAYONET`-Profiltyp und `bayonet_builder.py` wurden entfernt. Die
+> Normen-Datenbank umfasst dadurch **24 statt 26** Normen. Alle weiter unten
+> stehenden Abschnitte zu STORZ/LAMP_B/Bajonett (P0.1, P3.1, etc.) sind nur
+> noch historisch und nicht mehr umzusetzen.
+
 ---
 
 ## 0. Projekt-Kontext (Pflichtlektüre vor Start)

@@ -161,10 +161,6 @@ class ReferenceRegressionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Steigung"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)
 
-    def test_storz_raises_not_implemented_with_clear_message(self):
-        with self.assertRaisesRegex(NotImplementedError, "STORZ: Bajonett-/Knaggenkupplung"):
-            geometry_engine.generate_profile("STORZ", diameter=133.0, pitch=0.0)
-
     def test_rejects_unknown_standard(self):
         with self.assertRaisesRegex(ValueError, "Unbekannter Standard"):
             geometry_engine.generate_profile("NOT_A_STANDARD", diameter=10.0, pitch=1.5)
@@ -250,7 +246,6 @@ class HighEndDataCoverageTests(unittest.TestCase):
             "SPARK_PLUG",
             "CABLE_GLAND_M",
             "CONDUIT_PG",
-            "LAMP_B",
         }
         self.assertTrue(expected.issubset(database.THREAD_STANDARDS))
 
@@ -264,7 +259,6 @@ class HighEndDataCoverageTests(unittest.TestCase):
             "CONDUIT_PG",
             "EDISON",
             "KNUCKLE",
-            "LAMP_B",
             "METRIC_FINE",
             "METRIC_ISO",
             "METRIC_TRAPEZOIDAL_FINE",
@@ -274,7 +268,6 @@ class HighEndDataCoverageTests(unittest.TestCase):
             "PIPE_R",
             "ROUND",
             "SPARK_PLUG",
-            "STORZ",
             "STUB_ACME",
             "TRAPEZOIDAL",
             "UNC",
@@ -286,7 +279,7 @@ class HighEndDataCoverageTests(unittest.TestCase):
         self.assertEqual(expected, set(database.THREAD_STANDARDS))
 
     def test_non_pg_legacy_standards_have_tolerance_classes(self):
-        expected = ["BUTTRESS", "ROUND", "NPT", "EDISON", "STORZ"]
+        expected = ["BUTTRESS", "ROUND", "NPT", "EDISON"]
         for standard in expected:
             with self.subTest(standard=standard):
                 self.assertTrue(database.THREAD_STANDARDS[standard].get("tolerance_classes"))
@@ -299,17 +292,12 @@ class HighEndDataCoverageTests(unittest.TestCase):
             ("SPARK_PLUG", "M14x1.25", 14.0, 1.25),
             ("CABLE_GLAND_M", "M20x1.5", 20.0, 1.5),
             ("CONDUIT_PG", "Pg13.5", 20.4, 1.41),
-            ("LAMP_B", "B22d", 22.0, 0.0),
         ]
         for standard, token, diameter, pitch in cases:
             with self.subTest(standard=standard):
                 diameter_mm, pitch_mm = database.resolve_thread_parameters(standard, token)
                 self.assertAlmostEqual(diameter_mm, diameter, places=6)
                 self.assertAlmostEqual(pitch_mm, pitch, places=6)
-
-    def test_lamp_b_raises_not_implemented_with_clear_message(self):
-        with self.assertRaisesRegex(NotImplementedError, "LAMP_B: Bajonett-/Knaggenkupplung"):
-            geometry_engine.generate_profile("LAMP_B", diameter=22.0, pitch=0.0)
 
     def test_stub_acme_height_factor_reduces_profile_depth(self):
         diameter = 25.4

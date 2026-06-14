@@ -28,7 +28,6 @@ if HAS_BPY:
     geometry_engine = _runtime_module("geometry_engine")
     mechanical_validation = _runtime_module("mechanical_validation")
     mesh_builder = _runtime_module("mesh_builder")
-    bayonet_builder = _runtime_module("bayonet_builder")
     ui_i18n = _runtime_module("ui_i18n")
     ui_panel = _runtime_module("ui_panel")
 
@@ -41,7 +40,6 @@ if HAS_BPY:
     apply_boolean_cutter = mesh_builder.apply_boolean_cutter
     apply_material = mesh_builder.apply_material
     create_thread_mesh = mesh_builder.create_thread_mesh
-    create_bayonet_mesh = bayonet_builder.create_bayonet_mesh
     ui_label = ui_i18n.ui_label
     THREADFORGE_PT_main = ui_panel.THREADFORGE_PT_main
     UTG_Properties = ui_panel.UTG_Properties
@@ -107,25 +105,7 @@ if HAS_BPY:
             standard = custom_std if custom_std is not None else THREAD_STANDARDS.get(standard_key, {})
             tolerance_class = props.tolerance_class if custom_std is not None else _resolve_tolerance_class(props, standard_key)
 
-            if standard.get("profile_type") == "BAYONET":
-                if diameter <= 0.0 or props.length <= 0.0:
-                    self.report({"ERROR"}, ui_label("error_invalid_bayonet_dimensions", getattr(props, "ui_language", "de")))
-                    return {"CANCELLED"}
-                try:
-                    bm = create_bayonet_mesh(
-                        standard_key=standard_key,
-                        diameter=diameter,
-                        length=props.length,
-                        lod_level=props.lod_level,
-                        segment_override=props.segment_override,
-                    )
-                except ValueError as exc:
-                    self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
-                    return {"CANCELLED"}
-            else:
-                bm = None
-
-            validation_error = None if bm is not None else _validate_parameters(
+            validation_error = _validate_parameters(
                 diameter,
                 pitch,
                 props.length,
@@ -144,11 +124,7 @@ if HAS_BPY:
                 )
 
             try:
-                if bm is not None:
-                    profile = []
-                    ratio_warnings = []
-                else:
-                    profile, ratio_warnings = generate_profile(
+                profile, ratio_warnings = generate_profile(
                     standard_key,
                     diameter,
                     pitch,
@@ -157,22 +133,21 @@ if HAS_BPY:
                     clearance=props.clearance,
                     return_warnings=True,
                     standard=custom_std,
-                    )
+                )
                 _report_ratio_warnings(self, ratio_warnings)
 
-                if bm is None:
-                    bm = create_thread_mesh(
-                        profile_points=profile,
-                        diameter=diameter,
-                        pitch=pitch,
-                        length=props.length,
-                        starts=props.starts,
-                        handedness=props.handedness,
-                        end_type=props.end_type,
-                        taper_ratio=standard.get("special_params", {}).get("taper_ratio", 0.0),
-                        lod_level=props.lod_level,
-                        segment_override=props.segment_override,
-                    )
+                bm = create_thread_mesh(
+                    profile_points=profile,
+                    diameter=diameter,
+                    pitch=pitch,
+                    length=props.length,
+                    starts=props.starts,
+                    handedness=props.handedness,
+                    end_type=props.end_type,
+                    taper_ratio=standard.get("special_params", {}).get("taper_ratio", 0.0),
+                    lod_level=props.lod_level,
+                    segment_override=props.segment_override,
+                )
             except (ValueError, NotImplementedError) as exc:
                 self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
                 return {"CANCELLED"}

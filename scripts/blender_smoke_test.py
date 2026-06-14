@@ -105,13 +105,5 @@ try:
     finally:
         npt_bm.free()
 
-    storz_bm = addon.create_bayonet_mesh("STORZ", diameter=66.0, length=35.0, lod_level="PREVIEW")
-    try:
-        storz_radii = [math.hypot(v.co.x, v.co.y) for v in storz_bm.verts if math.hypot(v.co.x, v.co.y) > 1e-8]
-        assert max(storz_radii) > 66.0 / 2000.0, "STORZ-Knaggen fehlen"
-        assert min(storz_radii) < 66.0 / 2000.0, "STORZ-Nut fehlt"
-    finally:
-        storz_bm.free()
-
 finally:
     addon.unregister()

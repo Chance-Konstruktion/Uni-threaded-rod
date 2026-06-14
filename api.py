@@ -32,12 +32,42 @@ def _resolve_property_class(material_or_preset):
 def _resolve_tolerance_class(standard_key, fit, internal):
     tolerance_class = _split_fit(fit, internal=internal)
     if fit == "6g/6H":
+        # Default-Fit: an die tatsächlich für die Norm definierten Klassen
+        # anpassen. Viele Nicht-ISO-Normen (TRAPEZOIDAL, ACME, STUB_ACME,
+        # WHITWORTH_BSW, BSF, PIPE_G) führen nur externe Toleranzklassen; für
+        # die interne Sleeve-Nutzung muss dann auf eine definierte Klasse
+        # zurückgefallen werden, statt "6H" durchzureichen und an der
+        # Profil-Validierung zu scheitern.
         classes = THREAD_STANDARDS.get(standard_key, {}).get("tolerance_classes", {})
         key = "internal" if internal else "external"
         allowed = {str(value).upper() for value in classes.get(key, [])}
-        if allowed and tolerance_class.upper() not in allowed:
+        if tolerance_class.upper() not in allowed:
             return get_default_tolerance_class(standard_key, internal=internal)
     return tolerance_class
+
+
+def _resolve_spec(standard, spec):
+    """Löst eine Nenngrößen-Eingabe robust gegen Norm-Tokens auf.
+
+    Die Tokens der Normen-Datenbank sind case-sensitiv und teils mit ``M``/``Pg``
+    o.ä. präfigiert (z. B. ``"Pg7"``, ``"M8x1"``, ``"M12x1.5"``). Frühere Versionen
+    haben den Spec pauschal großgeschrieben und ein führendes ``M`` abgeschnitten;
+    dadurch waren genau diese Normen über die High-Level-API (und damit im
+    Schwesterprojekt Uni-threaded-sleeve) nicht auflösbar. Wir probieren deshalb
+    den Token unverändert und – nur als Komfort-Fallback für metrische
+    Nenngrößen wie ``"M10"`` – zusätzlich ohne führendes ``M``.
+    """
+    token = str(spec).strip()
+    candidates = [token]
+    if token[:1] in ("M", "m") and len(token) > 1:
+        candidates.append(token[1:])
+    last_error = None
+    for candidate in candidates:
+        try:
+            return resolve_thread_parameters(standard, candidate)
+        except ValueError as exc:
+            last_error = exc
+    raise last_error
 
 
 def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO", internal=False, starts=1):
@@ -46,9 +76,8 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
     Beispiel:
         thread("M10", fit="6g/6H", material="8.8", length=50)
     """
-    token = str(spec).upper().strip()
-    diameter_token = token[1:] if token.startswith("M") else token
-    diameter, pitch = resolve_thread_parameters(standard, diameter_token)
+    token = str(spec).strip()
+    diameter, pitch = _resolve_spec(standard, token)
     tolerance_class = _resolve_tolerance_class(standard, fit, internal=internal)
 
     profile, ratio_warnings = generate_profile(

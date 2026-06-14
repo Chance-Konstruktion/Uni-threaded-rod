@@ -378,31 +378,6 @@ THREAD_STANDARDS = {
         "tensile_stress_area_formula": lambda d, p: d - 0.9 * p,
         "special_params": {"tolerance_note": "Alias zu Pg-Größen: keine separaten Add-on-Toleranzklassen hinterlegt"},
     },
-    "LAMP_B": {
-        "name": "Bajonett-Lampensockel (B15/B22)",
-        "standard": "IEC 60061-1",
-        "unit": "mm",
-        "flank_angle": 0.0,
-        "profile_type": "BAYONET",
-        "diam_pitch_map": {"B15s": 0.0, "B15d": 0.0, "B22d": 0.0},
-        "diam_nominal_map": {"B15s": 15.0, "B15d": 15.0, "B22d": 22.0},
-        "d2_formula": lambda d, p: d,
-        "d3_formula": lambda d, p: d,
-        "special_params": {"note": "Bajonett-Lampensockel — kein helikales Gewinde, separate Pipeline erforderlich"},
-    },
-    "STORZ": {
-        "name": "Storz-Festkupplung (Feuerwehr, Bajonett)",
-        "standard": "DIN 14318",
-        "unit": "mm",
-        "flank_angle": 0.0,
-        "profile_type": "BAYONET",
-        "diam_pitch_map": {"A-110": 0.0, "B-75": 0.0, "C-52": 0.0, "D-25": 0.0, "F-150": 0.0},
-        "diam_nominal_map": {"A-110": 133.0, "B-75": 89.0, "C-52": 66.0, "D-25": 31.0, "F-150": 160.0},
-        "d2_formula": lambda d, p: d,
-        "d3_formula": lambda d, p: d,
-        "tolerance_classes": {"external": ["DIN 14318"]},
-        "special_params": {"note": "Bajonett-Knaggenkupplung — kein Gewinde, separate Pipeline erforderlich"},
-    },
 }
 
 # ------------------------------------------------------------------------------
