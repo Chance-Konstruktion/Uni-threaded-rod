@@ -19,7 +19,7 @@ class AddonMetadataTests(unittest.TestCase):
         spec.loader.exec_module(module)
 
         self.assertEqual(module.bl_info["name"], "Uni-threaded-rod")
-        self.assertEqual(module.bl_info["version"], (0, 2, 0))
+        self.assertEqual(module.bl_info["version"], (0, 3, 0))
         self.assertIn("blender", module.bl_info)
 
     def test_bl_info_is_a_top_level_assignment_for_blender_scanner(self):

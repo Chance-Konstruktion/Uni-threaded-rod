@@ -4,8 +4,8 @@ import sys
 
 bl_info = {
     "name": "Uni-threaded-rod",
-    "author": "Ihr Name",
-    "version": (0, 2, 0),
+    "author": "Chance-Konstruktion",
+    "version": (0, 3, 0),
     "blender": (4, 0, 0),
     "location": "View3D > Sidebar > Uni-threaded-rod",
     "description": "Erzeugt normgerechte und benutzerdefinierte Gewinde",
