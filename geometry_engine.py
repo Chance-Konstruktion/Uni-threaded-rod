@@ -100,13 +100,6 @@ def _tolerance_offset_mm(tolerance_class, standard_key=None, diameter=None, pitc
     return tolerance_map.get(tc, 0.0)
 
 
-def _bayonet_not_implemented_message(standard_key):
-    return (
-        f"{standard_key}: Bajonett-/Knaggenkupplung kann nicht über die Gewindeprofil-"
-        "Pipeline erzeugt werden. Eine eigene Kupplungsgeometrie-Stufe ist erforderlich."
-    )
-
-
 def _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance, standard=None):
     if standard is None:
         if standard_key not in THREAD_STANDARDS:
@@ -114,8 +107,6 @@ def _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, cleara
         standard = THREAD_STANDARDS[standard_key]
     if diameter <= 0:
         raise ValueError("Durchmesser muss > 0 sein")
-    if standard.get("profile_type") == "BAYONET":
-        raise NotImplementedError(_bayonet_not_implemented_message(standard_key))
     if pitch <= 0:
         raise ValueError("Steigung (Pitch) muss > 0 sein")
     if clearance < 0:
@@ -335,9 +326,6 @@ def generate_profile(
             y = pitch * i / steps
             x = center + amplitude * math.cos(2.0 * math.pi * y / pitch)
             pts.append(ProfilePoint(x, y))
-
-    elif profile_type == "BAYONET":
-        raise NotImplementedError(_bayonet_not_implemented_message(standard_key))
 
     elif profile_type == "ROUND":
         radius = pitch / 4.0

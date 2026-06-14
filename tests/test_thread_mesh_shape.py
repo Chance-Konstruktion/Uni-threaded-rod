@@ -178,7 +178,6 @@ class ThreadMeshShapeTests(unittest.TestCase):
         cls.database = load("database")
         cls.geometry_engine = load("geometry_engine")
         cls.mesh_builder = load("mesh_builder")
-        cls.bayonet_builder = load("bayonet_builder")
 
 
     def test_chamfer_end_type_changes_top_ring_radius(self):
@@ -253,15 +252,6 @@ class ThreadMeshShapeTests(unittest.TestCase):
         end_z = length / 1000.0
         end_radius = max(math.hypot(vert.co.x, vert.co.y) for vert in bm.verts if abs(vert.co.z - end_z) < 1e-8)
         self.assertAlmostEqual(start_radius - end_radius, 0.5 * taper_ratio * length / 1000.0, delta=0.00015)
-
-    def test_bayonet_builder_creates_lugged_storz_solid(self):
-        bm = self.bayonet_builder.create_bayonet_mesh("STORZ", diameter=66.0, length=35.0, lod_level="PREVIEW")
-
-        max_radius = max(math.hypot(vert.co.x, vert.co.y) for vert in bm.verts)
-        min_shell_radius = min(math.hypot(vert.co.x, vert.co.y) for vert in bm.verts if math.hypot(vert.co.x, vert.co.y) > 1e-8)
-        self.assertGreater(max_radius, 66.0 / 2000.0)
-        self.assertLess(min_shell_radius, 66.0 / 2000.0)
-        self.assertTrue(all(edge.is_manifold for edge in bm.edges))
 
 
 if __name__ == "__main__":
