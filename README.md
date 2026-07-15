@@ -1,14 +1,14 @@
 # Uni-threaded-rod for Blender
 
-Blender add-on for parametric generation of external solid threaded rods and multi-start threads.
+Blender add-on for parametric generation of external solid threaded rods and multi-start threads. Also includes PET bottle and closure thread profiles (`BOTTLE_PET`, `BOTTLE_CLOSURE`).
 
 Blender-Add-on zur parametrischen Erzeugung massiver Außengewinde-Stangen und mehrgängiger Gewinde.
 
 ## Release 0.2 status / Release-0.2-Status
 
-Release 0.2 is ready for tagging when the repository test suite and `ruff check .` pass. It includes external threads for all 24 advertised thread standards and unified material preset handling in the high-level API. Non-thread couplings (the former STORZ/LAMP_B bayonet sockets) have been removed — this add-on is now exclusively for actual threads. The internal-thread-cutter UI remains out of scope for this rod add-on.
+Release 0.2 is ready for tagging when the repository test suite and `ruff check .` pass. It includes external threads for all 26 advertised thread standards and unified material preset handling in the high-level API. Non-thread couplings (the former STORZ/LAMP_B bayonet sockets) have been removed — this add-on is now exclusively for actual threads. The internal-thread-cutter UI remains out of scope for this rod add-on.
 
-Release 0.2 ist bereit zum Taggen, sobald die Test-Suite und `ruff check .` grün sind. Enthalten sind alle 24 angekündigten Gewinde-Normen sowie vereinheitlichte Material-Presets in der High-Level-API. Nicht-Gewinde-Kupplungen (die früheren STORZ/LAMP_B-Bajonettsockel) wurden entfernt — dieses Add-on ist jetzt ausschließlich für echte Gewinde. Die entfernte Innengewinde-Cutter-UI bleibt außerhalb des Scopes dieses Stangen-Add-ons.
+Release 0.2 ist bereit zum Taggen, sobald die Test-Suite und `ruff check .` grün sind. Enthalten sind alle 26 angekündigten Gewinde-Normen sowie vereinheitlichte Material-Presets in der High-Level-API. Nicht-Gewinde-Kupplungen (die früheren STORZ/LAMP_B-Bajonettsockel) wurden entfernt — dieses Add-on ist jetzt ausschließlich für echte Gewinde. Die entfernte Innengewinde-Cutter-UI bleibt außerhalb des Scopes dieses Stangen-Add-ons.
 
 ## Related project / Verwandtes Projekt
 
@@ -80,6 +80,12 @@ print(result["diameter_mm"], result["pitch_mm"])
 | `SPARK_PLUG` | Spark plug / Zündkerzengewinde | ISO 28741 | mm | V |
 | `CABLE_GLAND_M` | Cable gland, metric / Kabelverschraubung, metrisch | DIN EN 60423 / IEC 60423 | mm | V |
 | `CONDUIT_PG` | Conduit thread / Panzergewinde Elektroinstallation | DIN 40430 | mm | V |
+| `BOTTLE_PET` | PET bottle neck / PET-Flaschengewinde (Getränkehals) | ISBT / PCO (simplified) | mm | Round |
+| `BOTTLE_CLOSURE` | Closure thread / Verschlussgewinde (GPI/SPI 400/410/415) | GPI / SPI (simplified) | mm | Round |
+
+> Note / Hinweis: bottle and closure finishes (PCO-1810/1881, 24-410, 28-410, …) are proprietary industry standards. The listed T diameters and pitches are simplified nominal values for modelling, not certified reference dimensions. Real necks are usually multi-start (typ. 3 leads).
+>
+> Flaschen- und Verschluss-Finishes (PCO-1810/1881, 24-410, 28-410, …) sind proprietäre Industrienormen. Die angegebenen T-Durchmesser und Steigungen sind vereinfachte Nennwerte zum Modellieren, keine zertifizierten Referenzmaße. Echte Hälse sind meist mehrgängig (typ. 3 Gänge).
 
 ## License / Lizenz
 

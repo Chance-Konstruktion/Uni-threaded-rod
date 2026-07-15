@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Bottle thread standards: `BOTTLE_PET` (PET beverage necks — PCO-1810, PCO-1881,
+  PET-29/25, PET-38) and `BOTTLE_CLOSURE` (GPI/SPI closure finishes — 18-415,
+  24-410, 28-410, 38-400), both using the rounded (`ROUND`) profile. Dimensions
+  are simplified nominal values, since these finishes are proprietary industry
+  standards (ISBT/GPI/SPI); real necks are usually multi-start (typ. 3 leads).
+- Plastic material presets `PET` (transparent) and `HDPE` (closure), plus a
+  `PET_CSD_28` thread preset (PCO-1881 28 mm beverage neck).
+- The advertised standard count rises from 24 to 26.
+
 ## [0.3.0] — Blender 4.0+
 
 ### Changed
