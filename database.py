@@ -378,6 +378,48 @@ THREAD_STANDARDS = {
         "tensile_stress_area_formula": lambda d, p: d - 0.9 * p,
         "special_params": {"tolerance_note": "Alias zu Pg-Größen: keine separaten Add-on-Toleranzklassen hinterlegt"},
     },
+    "BOTTLE_PET": {
+        "name": "PET-Flaschengewinde (Getränkehals)",
+        "standard": "ISBT / PCO (vereinfachte Nennwerte)",
+        "unit": "mm",
+        "flank_angle": 30.0,
+        "profile_type": "ROUND",
+        # Symbolische Halsnorm-Bezeichnungen -> Nenn-Steigung (mm). Die
+        # tatsächlichen Getränkehälse sind meist mehrgängig (typ. 3 Gänge);
+        # die Steigung ist hier der axiale Gangabstand einer einzelnen Windung.
+        "diam_pitch_map": {"PCO-1810": 3.18, "PCO-1881": 2.70, "PET-29/25": 3.00, "PET-38": 4.23},
+        # T-Maß (Außendurchmesser der Gewindekrone) in mm, vereinfachte Nennwerte.
+        "diam_nominal_map": {"PCO-1810": 27.43, "PCO-1881": 27.43, "PET-29/25": 28.58, "PET-38": 37.16},
+        "d2_formula": lambda d, p: d - 0.5 * p,
+        "d3_formula": lambda d, p: d - 1.0 * p,
+        "tensile_stress_area_formula": lambda d, p: d - 0.75 * p,
+        "tolerance_classes": {"external": ["STD"], "internal": ["STD"]},
+        "special_params": {
+            "radius": "P/4",
+            "typical_starts": 3,
+            "tolerance_note": "Flaschenhälse sind proprietär genormt (ISBT/GPI); Werte sind vereinfachte Nennmaße",
+        },
+    },
+    "BOTTLE_CLOSURE": {
+        "name": "Verschlussgewinde (GPI/SPI-Serie 400/410/415)",
+        "standard": "GPI / SPI (vereinfachte Nennwerte)",
+        "unit": "mm",
+        "flank_angle": 30.0,
+        "profile_type": "ROUND",
+        # Bezeichnung "Durchmesser-Finish" -> Nenn-Steigung (mm).
+        "diam_pitch_map": {"18-415": 2.82, "24-410": 3.18, "28-410": 3.18, "38-400": 4.23},
+        # T-Maß (Außendurchmesser der Gewindekrone) in mm, vereinfachte Nennwerte.
+        "diam_nominal_map": {"18-415": 17.65, "24-410": 23.36, "28-410": 27.43, "38-400": 37.16},
+        "d2_formula": lambda d, p: d - 0.5 * p,
+        "d3_formula": lambda d, p: d - 1.0 * p,
+        "tensile_stress_area_formula": lambda d, p: d - 0.75 * p,
+        "tolerance_classes": {"external": ["STD"], "internal": ["STD"]},
+        "special_params": {
+            "radius": "P/4",
+            "typical_starts": 1,
+            "tolerance_note": "GPI/SPI-Finishes sind proprietär genormt; Werte sind vereinfachte Nennmaße",
+        },
+    },
 }
 
 # ------------------------------------------------------------------------------
@@ -392,6 +434,8 @@ MATERIAL_PRESETS = {
     "ZINC": {"name": "Verzinkt", "color": (0.8, 0.8, 0.75, 1.0), "metallic": 0.6, "roughness": 0.5, "ior": 1.45},
     "HOT_DIP": {"name": "Feuerverzinkt", "color": (0.5, 0.5, 0.45, 1.0), "metallic": 0.4, "roughness": 0.7, "ior": 1.45},
     "BRASS": {"name": "Messing", "color": (0.9, 0.7, 0.2, 1.0), "metallic": 0.9, "roughness": 0.3, "ior": 1.45},
+    "PET": {"name": "PET (transparent)", "color": (0.85, 0.92, 0.97, 0.35), "metallic": 0.0, "roughness": 0.08, "ior": 1.57},
+    "HDPE": {"name": "HDPE (Verschluss)", "color": (0.92, 0.92, 0.9, 1.0), "metallic": 0.0, "roughness": 0.5, "ior": 1.51},
 }
 
 THREAD_PRESETS = {
@@ -424,6 +468,16 @@ THREAD_PRESETS = {
         "tolerance_class": "7e",
         "clearance": 0.05,
         "starts": 1,
+    },
+    "PET_CSD_28": {
+        "name": "PCO-1881 28mm PET-Getränkehals",
+        "standard": "BOTTLE_PET",
+        "diameter_token": "PCO-1881",
+        "material": "PET",
+        "surface": "NONE",
+        "tolerance_class": "STD",
+        "clearance": 0.15,
+        "starts": 3,
     },
 }
 

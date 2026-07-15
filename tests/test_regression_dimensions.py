@@ -113,6 +113,8 @@ class ReferenceRegressionTests(unittest.TestCase):
             ("SPARK_PLUG", 14.0, 1.25),
             ("CABLE_GLAND_M", 20.0, 1.5),
             ("CONDUIT_PG", 20.4, 1.41),
+            ("BOTTLE_PET", 27.43, 2.70),
+            ("BOTTLE_CLOSURE", 27.43, 3.18),
         ]
         for standard, diameter, pitch in cases:
             with self.subTest(standard=standard):
@@ -252,6 +254,8 @@ class HighEndDataCoverageTests(unittest.TestCase):
     def test_database_contains_all_promised_standards(self):
         expected = {
             "ACME",
+            "BOTTLE_CLOSURE",
+            "BOTTLE_PET",
             "BSF",
             "BSPT",
             "BUTTRESS",
@@ -295,6 +299,19 @@ class HighEndDataCoverageTests(unittest.TestCase):
         ]
         for standard, token, diameter, pitch in cases:
             with self.subTest(standard=standard):
+                diameter_mm, pitch_mm = database.resolve_thread_parameters(standard, token)
+                self.assertAlmostEqual(diameter_mm, diameter, places=6)
+                self.assertAlmostEqual(pitch_mm, pitch, places=6)
+
+    def test_symbolic_bottle_finishes_resolve_parameters(self):
+        cases = [
+            ("BOTTLE_PET", "PCO-1881", 27.43, 2.70),
+            ("BOTTLE_PET", "PCO-1810", 27.43, 3.18),
+            ("BOTTLE_CLOSURE", "28-410", 27.43, 3.18),
+            ("BOTTLE_CLOSURE", "38-400", 37.16, 4.23),
+        ]
+        for standard, token, diameter, pitch in cases:
+            with self.subTest(standard=standard, token=token):
                 diameter_mm, pitch_mm = database.resolve_thread_parameters(standard, token)
                 self.assertAlmostEqual(diameter_mm, diameter, places=6)
                 self.assertAlmostEqual(pitch_mm, pitch, places=6)
