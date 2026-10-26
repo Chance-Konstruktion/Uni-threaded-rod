@@ -4,13 +4,13 @@ Blender add-on for parametric generation of external solid threaded rods and mul
 
 Blender-Add-on zur parametrischen Erzeugung massiver Außengewinde-Stangen und mehrgängiger Gewinde.
 
-## Current status / Aktueller Stand
+## Release 0.2 status / Release-0.2-Status — current version 0.3.0 / Aktueller Stand
 
-The add-on metadata currently reports version **0.3.0** and supports Blender 4.0+. The supported-standard table below lists the advertised thread families, including simplified PET bottle/closure modelling profiles. These bottle/closure dimensions are not certified reference dimensions.
+Release 0.2 was the initial documented scope milestone. The current add-on metadata reports version **0.3.0** and supports Blender 4.0+. This add-on generates **external threads** on solid rods. The supported-standard table below lists the advertised thread families, including simplified PET bottle/closure modelling profiles. These bottle/closure dimensions are not certified reference dimensions.
 
-Before publishing a release, verify fresh CI results for ruff check ., the unit-test suite, and the headless Blender smoke test. See the [shared Rod + Sleeve roadmap](ROADMAP.md) for the coordinated test and release gates.
+Before publishing a release, verify fresh CI results for ruff check ., the unit-test suite, and the headless Blender smoke test. See the [shared Rod + Sleeve roadmap](ROADMAP.md) for coordinated test and release gates.
 
-Das Add-on meldet in den Metadaten aktuell Version **0.3.0** und unterstützt Blender 4.0+. Die nachfolgende Normtabelle listet die angekündigten Gewindefamilien einschließlich vereinfachter Modellierungsprofile für PET-Flaschen und Verschlüsse. Diese Flaschen-/Verschlussmaße sind keine zertifizierten Referenzmaße.
+Release 0.2 war der erste dokumentierte Umfangs-Meilenstein. Das Add-on meldet in den Metadaten aktuell Version **0.3.0** und unterstützt Blender 4.0+. Dieses Add-on erzeugt **Außengewinde** auf massiven Stangen. Die nachfolgende Normtabelle listet die angekündigten Gewindefamilien einschließlich vereinfachter Modellierungsprofile für PET-Flaschen und Verschlüsse. Diese Flaschen-/Verschlussmaße sind keine zertifizierten Referenzmaße.
 
 Vor einer Veröffentlichung müssen aktuelle CI-Ergebnisse für ruff check ., die Unit-Tests und den Headless-Blender-Smoke-Test geprüft werden. Die gemeinsame [Roadmap für Rod und Sleeve](ROADMAP.md) beschreibt die abgestimmten Prüf- und Release-Kriterien.
 
