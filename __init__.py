@@ -179,7 +179,7 @@ if HAS_BPY:
     class UTG_OT_apply_preset(bpy.types.Operator):
         bl_idname = "utg.apply_preset"
         bl_label = "Preset anwenden"
-        bl_options = {"REGISTER", "UNDO"}
+        bl_options: ClassVar[set[str]] = {"REGISTER", "UNDO"}
 
         def execute(self, context):
             props = context.scene.utg_props
