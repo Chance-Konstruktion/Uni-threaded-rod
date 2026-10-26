@@ -32,7 +32,7 @@ Rod CI currently uses Python 3.11. Sleeve unit tests cover Python 3.10, 3.11, an
 
 ### P0 — Release blockers and geometry correctness
 
-- [ ] **SLEEVE-001 — Flange bore regression.** Fuse flange geometry into one watertight outer body before running the internal-thread Boolean. Test no-flange and both-sided-flange cases in headless Blender; assert an open bore through both flange regions and manifold output.
+- [x] **SLEEVE-001 — Flange bore regression.** Fuse flange geometry into one watertight outer body before running the internal-thread Boolean. Test no-flange and both-sided-flange cases in headless Blender; assert an open bore through both flange regions and manifold output.
 - [ ] **SLEEVE-002 — Validate public API calls.** Reject non-finite or non-positive length, diameter, wall thickness, invalid starts, negative clearance, and non-positive resulting dimensions in the Sleeve API/builders. Do not rely on UI property ranges as the only validation.
 - [ ] **CI-001 — Refresh the test baseline.** Confirm fresh Rod lint, unit, and headless Blender checks plus Sleeve unit, real-Rod integration, and headless Blender checks on the same Rod commit. Do not mark a release ready based on July 2026 results.
 - [ ] **GEOM-001 — No silent degraded mesh.** Ensure failed Boolean operations or invalid profile parameters cancel cleanly, remove temporary cutter/flange objects, and do not leave partially generated scene objects.
