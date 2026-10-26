@@ -1,10 +1,16 @@
-from .database import MATERIAL_PRESETS, THREAD_STANDARDS, get_default_tolerance_class, resolve_thread_parameters
+from .database import (
+    MATERIAL_PRESETS,
+    THREAD_STANDARDS,
+    get_default_tolerance_class,
+    resolve_thread_parameters,
+)
 from .geometry_engine import generate_profile
 from .mechanical_validation import (
     ISO_898_PROPERTY_CLASS_RM_MPA,
     allowables_from_property_class,
     validate_combined_load_case,
 )
+
 
 
 def _split_fit(fit: str, internal: bool) -> str:
