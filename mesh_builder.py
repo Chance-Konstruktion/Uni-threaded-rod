@@ -6,6 +6,7 @@ import bpy
 from mathutils import Vector
 
 from .database import MATERIAL_PRESETS
+
 MM_TO_BLENDER_UNITS = 0.001
 
 
