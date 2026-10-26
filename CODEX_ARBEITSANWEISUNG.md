@@ -1,3 +1,7 @@
+> **Roadmap-Hinweis (Audit 2026-10-26):** Diese Arbeitsanweisung stammt aus älteren Entwicklungsphasen und enthält überholte bzw. widersprüchliche Angaben (unter anderem 24/26 Normen und Aufgaben, die gleichzeitig als erledigt und offen beschrieben sind). Sie ist als historisches Review-Protokoll zu lesen, nicht als aktuelle Backlog-Wahrheit. Die maßgebliche, repo-übergreifende Aufgabenliste ist ROADMAP.md; sie stimmt Rod und Uni-threaded-sleeve ausdrücklich aufeinander ab. Vor Änderungen am öffentlichen API-/Datenbank-/Geometrie-Vertrag sind dort die Integrations- und Testanforderungen zu beachten.
+
+---
+
 # Arbeitsanweisung für ChatGPT Codex — Uni-threaded-rod
 
 Diese Datei ist die zentrale Auftragsliste für alle weiteren ChatGPT-Codex-Sessions
