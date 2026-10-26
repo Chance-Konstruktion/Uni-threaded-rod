@@ -11,8 +11,6 @@ from .mechanical_validation import (
     validate_combined_load_case,
 )
 
-
-
 def _split_fit(fit: str, internal: bool) -> str:
     if "/" in fit:
         ext, intl = fit.split("/", 1)
