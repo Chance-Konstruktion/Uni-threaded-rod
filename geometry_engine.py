@@ -58,7 +58,7 @@ def _safe_ratio(value, default, ratio_warnings=None):
 
     try:
         return float(_eval(node))
-    except Exception:
+    except (ValueError, ZeroDivisionError, OverflowError):
         message = f"Ratio-Ausdruck '{value}' konnte nicht ausgewertet werden; Default {default} verwendet."
         logging.getLogger(__name__).warning(message)
         if ratio_warnings is not None:
@@ -320,7 +320,7 @@ def generate_profile(
         radius_ratio = ratio(sp.get("radius_ratio"), 1.0 / 3.0)
         amplitude = (r - r3) / 2.0
         center = (r + r3) / 2.0
-        steps = max(16, int(round(pitch / max(radius_ratio * pitch, 1e-3) * 8)))
+        steps = max(16, round(pitch / max(radius_ratio * pitch, 1e-3) * 8))
         pts = []
         for i in range(steps + 1):
             y = pitch * i / steps
