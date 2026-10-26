@@ -4,11 +4,15 @@ Blender add-on for parametric generation of external solid threaded rods and mul
 
 Blender-Add-on zur parametrischen Erzeugung massiver Außengewinde-Stangen und mehrgängiger Gewinde.
 
-## Release 0.2 status / Release-0.2-Status
+## Current status / Aktueller Stand
 
-Release 0.2 is ready for tagging when the repository test suite and `ruff check .` pass. It includes external threads for all 26 advertised thread standards and unified material preset handling in the high-level API. Non-thread couplings (the former STORZ/LAMP_B bayonet sockets) have been removed — this add-on is now exclusively for actual threads. The internal-thread-cutter UI remains out of scope for this rod add-on.
+The add-on metadata currently reports version **0.3.0** and supports Blender 4.0+. The supported-standard table below lists the advertised thread families, including simplified PET bottle/closure modelling profiles. These bottle/closure dimensions are not certified reference dimensions.
 
-Release 0.2 ist bereit zum Taggen, sobald die Test-Suite und `ruff check .` grün sind. Enthalten sind alle 26 angekündigten Gewinde-Normen sowie vereinheitlichte Material-Presets in der High-Level-API. Nicht-Gewinde-Kupplungen (die früheren STORZ/LAMP_B-Bajonettsockel) wurden entfernt — dieses Add-on ist jetzt ausschließlich für echte Gewinde. Die entfernte Innengewinde-Cutter-UI bleibt außerhalb des Scopes dieses Stangen-Add-ons.
+Before publishing a release, verify fresh CI results for ruff check ., the unit-test suite, and the headless Blender smoke test. See the [shared Rod + Sleeve roadmap](ROADMAP.md) for the coordinated test and release gates.
+
+Das Add-on meldet in den Metadaten aktuell Version **0.3.0** und unterstützt Blender 4.0+. Die nachfolgende Normtabelle listet die angekündigten Gewindefamilien einschließlich vereinfachter Modellierungsprofile für PET-Flaschen und Verschlüsse. Diese Flaschen-/Verschlussmaße sind keine zertifizierten Referenzmaße.
+
+Vor einer Veröffentlichung müssen aktuelle CI-Ergebnisse für ruff check ., die Unit-Tests und den Headless-Blender-Smoke-Test geprüft werden. Die gemeinsame [Roadmap für Rod und Sleeve](ROADMAP.md) beschreibt die abgestimmten Prüf- und Release-Kriterien.
 
 ## Related project / Verwandtes Projekt
 
