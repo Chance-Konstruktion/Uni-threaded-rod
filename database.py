@@ -485,7 +485,7 @@ THREAD_PRESETS = {
 def get_diameter_items_for_standard(standard_key):
     std = THREAD_STANDARDS[standard_key]
     items = []
-    for raw_key in std["diam_pitch_map"].keys():
+    for raw_key in std["diam_pitch_map"]:
         token = str(raw_key)
         if isinstance(raw_key, (int, float)) and std["unit"] == "inch":
             label = f'{raw_key:.4g}"'
@@ -530,7 +530,7 @@ def resolve_thread_parameters(standard_key, diameter_token):
     if raw_key in std["diam_pitch_map"]:
         pitch_or_tpi = std["diam_pitch_map"][raw_key]
     else:
-        numeric_keys = [k for k in std["diam_pitch_map"].keys() if isinstance(k, (int, float))]
+        numeric_keys = [k for k in std["diam_pitch_map"] if isinstance(k, (int, float))]
         if not numeric_keys:
             raise ValueError(f"Für {standard_key} sind nur symbolische Nennwerte erlaubt")
         closest = min(numeric_keys, key=lambda x: abs(x - float(raw_key)))
@@ -545,14 +545,14 @@ def get_standard_pitch(standard_key, diameter):
     std = THREAD_STANDARDS[standard_key]
     if std["unit"] == "inch":
         raw = diameter / MM_PER_INCH
-        numeric_keys = [k for k in std["diam_pitch_map"].keys() if isinstance(k, (int, float))]
+        numeric_keys = [k for k in std["diam_pitch_map"] if isinstance(k, (int, float))]
         closest = min(numeric_keys, key=lambda x: abs(x - raw))
         return MM_PER_INCH / std["diam_pitch_map"][closest]
 
     if diameter in std["diam_pitch_map"]:
         return std["diam_pitch_map"][diameter]
 
-    numeric_keys = [k for k in std["diam_pitch_map"].keys() if isinstance(k, (int, float))]
+    numeric_keys = [k for k in std["diam_pitch_map"] if isinstance(k, (int, float))]
     closest = min(numeric_keys, key=lambda x: abs(x - diameter))
     return std["diam_pitch_map"][closest]
 
