@@ -168,7 +168,7 @@ def estimate_tensile_stress_area(diameter, pitch, standard_key="METRIC_ISO"):
     tensile_formula = std.get("tensile_stress_area_formula")
     if not callable(tensile_formula):
         norm_ref = std.get("standard", "n/a")
-        raise TypeError(f"Spannungsquerschnitt für {standard_key} ist nicht definiert (Norm {norm_ref}).")
+        raise ValueError(f"Spannungsquerschnitt für {standard_key} ist nicht definiert (Norm {norm_ref}).")  # noqa: TRY004
     d_eff = tensile_formula(diameter, pitch)
     if d_eff <= 0:
         raise ValueError("Effektivdurchmesser <= 0")
