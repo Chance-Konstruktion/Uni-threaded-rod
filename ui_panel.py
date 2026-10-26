@@ -1,10 +1,10 @@
 import bpy
 
 from .database import (
-    get_diameter_items_for_standard,
     MATERIAL_PRESETS,
     THREAD_PRESETS,
     THREAD_STANDARDS,
+    get_diameter_items_for_standard,
 )
 from .ui_i18n import ui_label
 
