@@ -1,7 +1,11 @@
 import math
 from dataclasses import dataclass
 
-from .database import ISO_965_TOLERANCE_RADIAL_OFFSETS, THREAD_STANDARDS, resolve_iso_metric_coarse_row
+from .database import (
+    ISO_965_TOLERANCE_RADIAL_OFFSETS,
+    THREAD_STANDARDS,
+    resolve_iso_metric_coarse_row,
+)
 
 
 @dataclass(frozen=True)
@@ -164,7 +168,7 @@ def estimate_tensile_stress_area(diameter, pitch, standard_key="METRIC_ISO"):
     tensile_formula = std.get("tensile_stress_area_formula")
     if not callable(tensile_formula):
         norm_ref = std.get("standard", "n/a")
-        raise ValueError(f"Spannungsquerschnitt für {standard_key} ist nicht definiert (Norm {norm_ref}).")
+        raise TypeError(f"Spannungsquerschnitt für {standard_key} ist nicht definiert (Norm {norm_ref}).")
     d_eff = tensile_formula(diameter, pitch)
     if d_eff <= 0:
         raise ValueError("Effektivdurchmesser <= 0")
