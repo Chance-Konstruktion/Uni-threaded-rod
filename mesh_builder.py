@@ -1,5 +1,5 @@
-import math
 from bisect import bisect_left
+import math
 
 import bmesh
 import bpy
