@@ -49,6 +49,19 @@ def _resolve_core_diameter(standard_key, diameter, pitch):
 
 def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standard_key="METRIC_ISO"):
     """Basis-Parametervalidierung für Geometrie- und Engineering-Checks."""
+    try:
+        values = {
+            "Durchmesser": float(diameter),
+            "Steigung": float(pitch),
+            "Länge": float(length),
+            "Gängigkeit": float(starts),
+            "Spiel": float(clearance),
+        }
+    except (TypeError, ValueError, OverflowError):
+        return ValidationResult(False, "Ungültig: alle Eingaben müssen numerische Werte sein.")
+    if not all(math.isfinite(value) for value in values.values()):
+        return ValidationResult(False, "Ungültig: alle Eingaben müssen endlich sein.")
+
     if diameter <= 0.0:
         return ValidationResult(False, "Ungültig: Durchmesser muss > 0 sein.")
     if pitch <= 0.0:
