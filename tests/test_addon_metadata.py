@@ -20,7 +20,7 @@ class AddonMetadataTests(unittest.TestCase):
 
         self.assertEqual(module.bl_info["name"], "Uni-threaded-rod")
         self.assertEqual(module.bl_info["version"], (0, 3, 0))
-        self.assertIn("blender", module.bl_info)
+        self.assertEqual(module.bl_info["blender"], (4, 0, 0))
 
     def test_bl_info_is_a_top_level_assignment_for_blender_scanner(self):
         tree = ast.parse(INIT_FILE.read_text(encoding="utf-8"))
