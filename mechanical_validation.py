@@ -61,6 +61,14 @@ def validate_thread_input(diameter, pitch, length, starts, clearance=0.0, standa
         return ValidationResult(False, "Ungültig: alle Eingaben müssen numerische Werte sein.")
     if not all(math.isfinite(value) for value in values.values()):
         return ValidationResult(False, "Ungültig: alle Eingaben müssen endlich sein.")
+    if not values["Gängigkeit"].is_integer():
+        return ValidationResult(False, "Ungültig: Gängigkeit muss eine ganze Zahl sein.")
+
+    diameter = values["Durchmesser"]
+    pitch = values["Steigung"]
+    length = values["Länge"]
+    starts = int(values["Gängigkeit"])
+    clearance = values["Spiel"]
 
     if diameter <= 0.0:
         return ValidationResult(False, "Ungültig: Durchmesser muss > 0 sein.")
