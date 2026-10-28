@@ -76,13 +76,18 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertAlmostEqual(pitch_mm, 1.25, places=6)
 
         standard = database.THREAD_STANDARDS["METRIC_ISO"]
+        d2 = standard["d2_formula"](diameter_mm, pitch_mm)
+        d3 = standard["d3_formula"](diameter_mm, pitch_mm)
+        # ISO 724:2023 Table 1, M8 x 1.25 (rounded to 0.001 mm).
+        self.assertAlmostEqual(d2, 7.188, places=3)
+        self.assertAlmostEqual(d3, 6.466, places=3)
         self.assertAlmostEqual(
-            standard["d2_formula"](diameter_mm, pitch_mm),
+            d2,
             8.0 - 0.649519 * 1.25,
             places=6,
         )
         self.assertAlmostEqual(
-            standard["d3_formula"](diameter_mm, pitch_mm),
+            d3,
             8.0 - 1.226869 * 1.25,
             places=6,
         )
@@ -189,6 +194,10 @@ class ReferenceRegressionTests(unittest.TestCase):
                 geometry_engine.generate_profile(
                     "METRIC_ISO", diameter=diameter, pitch=pitch
                 )
+
+    def test_high_level_api_normalizes_numeric_string_length(self):
+        payload = _load_utg_module("api").thread("M10", length="50")
+        self.assertEqual(payload["length_mm"], 50.0)
 
     def test_rejects_non_positive_pitch(self):
         with self.assertRaisesRegex(ValueError, "Steigung"):
