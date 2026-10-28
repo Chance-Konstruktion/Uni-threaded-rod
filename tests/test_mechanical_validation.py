@@ -34,6 +34,18 @@ class MechanicalValidationTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("Clearance", result.message)
 
+    def test_parameter_validation_rejects_non_finite_and_fractional_inputs(self):
+        cases = (
+            {"diameter": float("nan"), "pitch": 1.5, "length": 25.0, "starts": 1},
+            {"diameter": 10.0, "pitch": float("inf"), "length": 25.0, "starts": 1},
+            {"diameter": 10.0, "pitch": 1.5, "length": float("nan"), "starts": 1},
+            {"diameter": 10.0, "pitch": 1.5, "length": 25.0, "starts": 1.5},
+        )
+        for kwargs in cases:
+            with self.subTest(kwargs=kwargs):
+                result = mech.validate_thread_input(**kwargs)
+                self.assertFalse(result.ok)
+
     def test_nut_fit_positive_case(self):
         result = mech.check_nut_fit(bolt_major_diameter=10.0, nut_minor_diameter=10.3, radial_clearance=0.1)
         self.assertTrue(result["fits"])
