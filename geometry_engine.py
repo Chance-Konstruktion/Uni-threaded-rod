@@ -101,6 +101,18 @@ def _tolerance_offset_mm(tolerance_class, standard_key=None, diameter=None, pitc
 
 
 def _check_profile_inputs(standard_key, diameter, pitch, tolerance_class, clearance, standard=None):
+    for name, value in (
+        ("Durchmesser", diameter),
+        ("Steigung", pitch),
+        ("Spiel", clearance),
+    ):
+        try:
+            numeric_value = float(value)
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise ValueError(f"{name} muss eine endliche Zahl sein") from exc
+        if not math.isfinite(numeric_value):
+            raise ValueError(f"{name} muss eine endliche Zahl sein")
+
     if standard is None:
         if standard_key not in THREAD_STANDARDS:
             raise ValueError(f"Unbekannter Standard: {standard_key}")
