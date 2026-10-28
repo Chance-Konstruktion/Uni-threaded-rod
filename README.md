@@ -1,6 +1,6 @@
-# Uni-threaded-rod for Blender
+# Uni-threaded-rod for Blender 4.0+
 
-Blender add-on for parametric generation of external solid threaded rods and multi-start threads. Also includes PET bottle and closure thread profiles (`BOTTLE_PET`, `BOTTLE_CLOSURE`).
+Blender 4.0+ add-on for parametric generation of external solid threaded rods and multi-start threads. Also includes PET bottle and closure thread profiles (`BOTTLE_PET`, `BOTTLE_CLOSURE`).
 
 Blender-Add-on zur parametrischen Erzeugung massiver Außengewinde-Stangen und mehrgängiger Gewinde.
 
