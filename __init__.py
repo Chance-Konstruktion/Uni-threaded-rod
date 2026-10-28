@@ -1,3 +1,4 @@
+# ruff: noqa: N999
 import importlib
 import importlib.util
 import sys
@@ -84,7 +85,7 @@ if HAS_BPY:
     class UTG_OT_create_thread(bpy.types.Operator):
         bl_idname = "utg.create_thread"
         bl_label = "Gewinde erstellen"
-        bl_options = {"REGISTER", "UNDO"}
+        bl_options = {"REGISTER", "UNDO"}  # noqa: RUF012
 
         def execute(self, context):
             props = context.scene.utg_props
@@ -98,7 +99,7 @@ if HAS_BPY:
                 standard_key = props.standard
                 try:
                     diameter, pitch = resolve_thread_parameters(standard_key, props.diameter_enum)
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     self.report({"ERROR"}, ui_label("error_exception", getattr(props, "ui_language", "de")).format(message=str(exc)))
                     return {"CANCELLED"}
 
