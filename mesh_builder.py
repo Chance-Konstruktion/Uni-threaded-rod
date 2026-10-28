@@ -7,7 +7,6 @@ from mathutils import Vector
 
 from .database import MATERIAL_PRESETS
 
-
 MM_TO_BLENDER_UNITS = 0.001
 
 
@@ -35,9 +34,9 @@ def _flip_caps_to_outside(bm, length):
     """Stellt sicher, dass Stirnflächen unten nach -Z und oben nach +Z zeigen."""
     for face in bm.faces:
         center = face.calc_center_median()
-        if abs(center.z) <= 1e-5 and face.normal.z > 0.0:
-            face.normal_flip()
-        elif abs(center.z - length) <= 1e-5 and face.normal.z < 0.0:
+        if (abs(center.z) <= 1e-5 and face.normal.z > 0.0) or (
+            abs(center.z - length) <= 1e-5 and face.normal.z < 0.0
+        ):
             face.normal_flip()
 
 
