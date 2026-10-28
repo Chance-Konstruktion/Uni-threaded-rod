@@ -85,7 +85,7 @@ if HAS_BPY:
     class UTG_OT_create_thread(bpy.types.Operator):
         bl_idname = "utg.create_thread"
         bl_label = "Gewinde erstellen"
-        bl_options = {"REGISTER", "UNDO"}  # noqa: RUF012
+        bl_options = {"REGISTER", "UNDO"}  # noqa: RUF012  # noqa: RUF012
 
         def execute(self, context):
             props = context.scene.utg_props
@@ -178,7 +178,7 @@ if HAS_BPY:
     class UTG_OT_apply_preset(bpy.types.Operator):
         bl_idname = "utg.apply_preset"
         bl_label = "Preset anwenden"
-        bl_options = {"REGISTER", "UNDO"}
+        bl_options = {"REGISTER", "UNDO"}  # noqa: RUF012
 
         def execute(self, context):
             props = context.scene.utg_props
