@@ -70,6 +70,23 @@ class ReferenceRegressionTests(unittest.TestCase):
         self.assertAlmostEqual(diameter_two, 60.3, places=6)
         self.assertAlmostEqual(pitch_two, 25.4 / 11.5, places=6)
 
+    def test_m8_pitch_and_basic_diameters_match_iso_724(self):
+        diameter_mm, pitch_mm = database.resolve_thread_parameters("METRIC_ISO", "8")
+        self.assertAlmostEqual(diameter_mm, 8.0, places=6)
+        self.assertAlmostEqual(pitch_mm, 1.25, places=6)
+
+        standard = database.THREAD_STANDARDS["METRIC_ISO"]
+        self.assertAlmostEqual(
+            standard["d2_formula"](diameter_mm, pitch_mm),
+            8.0 - 0.649519 * 1.25,
+            places=6,
+        )
+        self.assertAlmostEqual(
+            standard["d3_formula"](diameter_mm, pitch_mm),
+            8.0 - 1.226869 * 1.25,
+            places=6,
+        )
+
     def test_metric_profile_reference_radii(self):
         diameter_mm, pitch_mm = 10.0, 1.5
         points = geometry_engine.generate_profile("METRIC_ISO", diameter_mm, pitch_mm, tolerance_class="6g")
