@@ -4,6 +4,7 @@ from .mechanical_validation import (
     ISO_898_PROPERTY_CLASS_RM_MPA,
     allowables_from_property_class,
     validate_combined_load_case,
+    validate_thread_input,
 )
 
 
@@ -78,6 +79,16 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
     """
     token = str(spec).strip()
     diameter, pitch = _resolve_spec(standard, token)
+    validation = validate_thread_input(
+        diameter=diameter,
+        pitch=pitch,
+        length=length,
+        starts=starts,
+        clearance=0.0,
+        standard_key=standard,
+    )
+    if not validation.ok:
+        raise ValueError(validation.message)
     tolerance_class = _resolve_tolerance_class(standard, fit, internal=internal)
 
     profile, ratio_warnings = generate_profile(
