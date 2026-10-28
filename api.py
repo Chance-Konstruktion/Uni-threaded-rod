@@ -94,6 +94,10 @@ def thread(spec, fit="6g/6H", material="8.8", length=50.0, standard="METRIC_ISO"
     )
     if not validation.ok:
         raise ValueError(validation.message)
+    # Validation accepts numeric strings by coercion; use the normalized values
+    # for downstream calculations as well, so length="50" cannot fail in min().
+    length = float(length)
+    starts = int(starts)
     tolerance_class = _resolve_tolerance_class(standard, fit, internal=internal)
 
     profile, ratio_warnings = generate_profile(
