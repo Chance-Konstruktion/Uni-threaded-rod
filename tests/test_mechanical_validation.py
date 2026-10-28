@@ -321,6 +321,16 @@ class HighEndMechanicsTests(unittest.TestCase):
         payload = api.thread('0.5', material="8.8", length=50, standard="WHITWORTH_BSW")
         self.assertEqual(payload["tolerance_class"], "Close")
 
+    def test_high_level_thread_api_rejects_non_positive_length(self):
+        with self.assertRaisesRegex(ValueError, "Länge muss > 0"):
+            api.thread("M10", length=0.0)
+        with self.assertRaisesRegex(ValueError, "Länge muss > 0"):
+            api.thread("M10", length=-1.0)
+
+    def test_high_level_thread_api_rejects_non_finite_length(self):
+        with self.assertRaisesRegex(ValueError, "endlich"):
+            api.thread("M10", length=float("nan"))
+
     def test_high_level_thread_api_rejects_unknown_standard_with_value_error(self):
         with self.assertRaisesRegex(ValueError, "Unbekannter Standard: NOT_A_STANDARD"):
             api.thread("M10", standard="NOT_A_STANDARD")
