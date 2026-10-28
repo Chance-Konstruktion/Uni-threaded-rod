@@ -176,6 +176,19 @@ class ReferenceRegressionTests(unittest.TestCase):
                 pitch_mm,
             )
 
+    def test_rejects_non_finite_profile_dimensions(self):
+        for diameter, pitch in (
+            (float("nan"), 1.5),
+            (float("inf"), 1.5),
+            (10.0, float("nan")),
+            (10.0, float("inf")),
+        ):
+            with self.subTest(diameter=diameter, pitch=pitch):
+                with self.assertRaisesRegex(ValueError, "endliche Zahl"):
+                    geometry_engine.generate_profile(
+                        "METRIC_ISO", diameter=diameter, pitch=pitch
+                    )
+
     def test_rejects_non_positive_pitch(self):
         with self.assertRaisesRegex(ValueError, "Steigung"):
             geometry_engine.generate_profile("METRIC_ISO", diameter=10.0, pitch=0.0)
