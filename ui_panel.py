@@ -1,6 +1,11 @@
 import bpy
 
-from .database import MATERIAL_PRESETS, THREAD_PRESETS, THREAD_STANDARDS, get_diameter_items_for_standard
+from .database import (
+    MATERIAL_PRESETS,
+    THREAD_PRESETS,
+    THREAD_STANDARDS,
+    get_diameter_items_for_standard,
+)
 from .ui_i18n import ui_label
 
 
@@ -31,7 +36,7 @@ def get_tolerance_items(self, context):
 class UTG_Properties(bpy.types.PropertyGroup):
     standard: bpy.props.EnumProperty(
         name="Norm",
-        items=[(k, THREAD_STANDARDS[k]["name"], THREAD_STANDARDS[k]["standard"]) for k in THREAD_STANDARDS.keys()] + [("CUSTOM", "Benutzerdefiniert", "Freie Parameter")],
+        items=[(k, THREAD_STANDARDS[k]["name"], THREAD_STANDARDS[k]["standard"]) for k in THREAD_STANDARDS] + [("CUSTOM", "Benutzerdefiniert", "Freie Parameter")],
         default="METRIC_ISO",
     )
 
@@ -40,7 +45,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
     handedness: bpy.props.EnumProperty(name="Drehrichtung", items=[("RIGHT", "Rechtsgewinde", ""), ("LEFT", "Linksgewinde", "")], default="RIGHT")
     starts: bpy.props.IntProperty(name="Gängigkeit", default=1, min=1, max=8)
 
-    material: bpy.props.EnumProperty(name="Material", items=[(k, MATERIAL_PRESETS[k]["name"], "") for k in MATERIAL_PRESETS.keys()], default="STEEL_8.8")
+    material: bpy.props.EnumProperty(name="Material", items=[(k, MATERIAL_PRESETS[k]["name"], "") for k in MATERIAL_PRESETS], default="STEEL_8.8")
     surface: bpy.props.EnumProperty(name="Oberfläche", items=[("NONE", "Unbehandelt", ""), ("ZINC", "Verzinkt", ""), ("HOT_DIP", "Feuerverzinkt", "")], default="NONE")
 
     tolerance_class: bpy.props.EnumProperty(name="Toleranzklasse", items=get_tolerance_items)
@@ -55,7 +60,7 @@ class UTG_Properties(bpy.types.PropertyGroup):
     segment_override: bpy.props.IntProperty(name="Segmente/Umdr.", default=48, min=12, max=256)
     preset_key: bpy.props.EnumProperty(
         name="Preset",
-        items=[("NONE", "Kein Preset", "")] + [(k, THREAD_PRESETS[k]["name"], "") for k in THREAD_PRESETS.keys()],
+        items=[("NONE", "Kein Preset", "")] + [(k, THREAD_PRESETS[k]["name"], "") for k in THREAD_PRESETS],
         default="NONE",
     )
 
